@@ -24,12 +24,19 @@ func TestSoldTicketsForeignKeysExist(t *testing.T) {
 	require.Contains(t, foreignKeys, "order_attendee_id")
 }
 
+func TestSoldTicketsOrderAttendeeIndexIsUnique(t *testing.T) {
+	_, sqlDB := ztesting.SetupTestDB(t)
+
+	unique := fetchIndexUnique(t, sqlDB, "sold_tickets", "idx_sold_tickets_order_attendee_id")
+	require.True(t, unique)
+}
+
 func fetchTableColumns(t *testing.T, db *sql.DB, table string) map[string]struct{} {
 	t.Helper()
 
 	rows, err := db.Query("PRAGMA table_info(" + table + ")")
 	require.NoError(t, err)
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 
 	cols := map[string]struct{}{}
 	for rows.Next() {
@@ -48,12 +55,37 @@ func fetchTableColumns(t *testing.T, db *sql.DB, table string) map[string]struct
 	return cols
 }
 
+func fetchIndexUnique(t *testing.T, db *sql.DB, table string, indexName string) bool {
+	t.Helper()
+
+	rows, err := db.Query("PRAGMA index_list(" + table + ")")
+	require.NoError(t, err)
+	defer func() { _ = rows.Close() }()
+
+	for rows.Next() {
+		var (
+			seq     int
+			name    string
+			unique  int
+			origin  sql.NullString
+			partial sql.NullInt64
+		)
+		require.NoError(t, rows.Scan(&seq, &name, &unique, &origin, &partial))
+		if name == indexName {
+			require.NoError(t, rows.Err())
+			return unique == 1
+		}
+	}
+	require.NoError(t, rows.Err())
+	return false
+}
+
 func fetchTableForeignKeys(t *testing.T, db *sql.DB, table string) map[string]struct{} {
 	t.Helper()
 
 	rows, err := db.Query("PRAGMA foreign_key_list(" + table + ")")
 	require.NoError(t, err)
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 
 	cols := map[string]struct{}{}
 	for rows.Next() {

@@ -78,6 +78,13 @@ const (
 	OrderStatusFailed  OrderStatus = "failed"
 )
 
+type TicketIssueStatus string
+
+const (
+	TicketIssueStatusIssued TicketIssueStatus = "issued"
+	TicketIssueStatusFailed TicketIssueStatus = "failed"
+)
+
 func IsValidEventRole(role string) bool {
 	return role == RoleOrganizer || role == RoleGatekeeper || role == RoleParticipant
 }
@@ -176,11 +183,12 @@ type Order struct {
 	ConfirmedAt       *int64
 	InvoiceID         string
 	InvoiceURL        string
-	TicketIssueStatus string
+	TicketIssueStatus TicketIssueStatus
 	TicketIssueError  string
 }
 
 type OrderAttendee struct {
+	ID           string
 	CreatedAt    int64
 	OrderID      string
 	PriceID      string
@@ -291,6 +299,7 @@ type SoldTicket struct {
 	DeletedAt       time.Time
 	CreatedAt       time.Time
 	Ticket          *Ticket
+	EventID         string
 	BuyerID         string
 	UserID          string
 	OrderID         string
@@ -372,16 +381,20 @@ type DB interface {
 	UpdatePrice(paymentAccount *PaymentAccount, price *Price) error
 	CreateOrder(order *Order, attendees []*OrderAttendee) (*Order, error)
 	GetOrder(orderID string) (*Order, error)
+	GetOrderAttendees(orderID string) ([]*OrderAttendee, error)
 	GetOrderPaymentAccount(orderID string) (*PaymentAccount, error)
 	UpdateOrderSetPaymentSession(orderID string, provider string, sessionID string) error
 	UpdateOrderSetStatus(orderID string, status OrderStatus) error
 	UpdateOrderConfirmation(orderID string, status OrderStatus, paymentIntentID string, confirmedAt int64) error
 	UpdateOrderConfirmationOnce(orderID string, status OrderStatus, paymentIntentID string, confirmedAt int64) (bool, error)
+	UpdateOrderTicketIssue(orderID string, status TicketIssueStatus, errMsg string) error
 	CreateTicketHold(hold *TicketHold) (*TicketHold, error)
 	DeleteTicketHoldsByOrderID(orderID string) error
 	DeleteExpiredTicketHolds(eventID string, nowUnix int64) error
 	CountEventSoldTickets(eventID string, priceGroupID string) (uint32, error)
 	CountActiveTicketHolds(eventID string, priceGroupID string, nowUnix int64) (uint32, error)
+	ListOrderAttendeeTicketIDs(orderID string) ([]string, error)
+	CreateSoldTickets(tickets []*SoldTicket) error
 	GetEventCommunity(eventID string) (*Community, error)
 	GetEventUserTicket(eventID string, userID string) (*SoldTicket, error)
 	GetEventUserOrBuyerTickets(eventID string, userID string) ([]*SoldTicket, error)

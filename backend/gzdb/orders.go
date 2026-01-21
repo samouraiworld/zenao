@@ -10,6 +10,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/samouraiworld/zenao/backend/zeni"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type Order struct {
@@ -64,6 +65,7 @@ func dbOrderToZeniOrder(dbOrder *Order) *zeni.Order {
 	if dbOrder == nil {
 		return nil
 	}
+
 	return &zeni.Order{
 		CreatedAt:         dbOrder.CreatedAt,
 		ID:                dbOrder.ID,
@@ -79,7 +81,7 @@ func dbOrderToZeniOrder(dbOrder *Order) *zeni.Order {
 		ConfirmedAt:       dbOrder.ConfirmedAt,
 		InvoiceID:         dbOrder.InvoiceID,
 		InvoiceURL:        dbOrder.InvoiceURL,
-		TicketIssueStatus: dbOrder.TicketIssueStatus,
+		TicketIssueStatus: zeni.TicketIssueStatus(dbOrder.TicketIssueStatus),
 		TicketIssueError:  dbOrder.TicketIssueError,
 	}
 }
@@ -131,7 +133,7 @@ func (g *gormZenaoDB) CreateOrder(order *zeni.Order, attendees []*zeni.OrderAtte
 		ConfirmedAt:       order.ConfirmedAt,
 		InvoiceID:         order.InvoiceID,
 		InvoiceURL:        order.InvoiceURL,
-		TicketIssueStatus: order.TicketIssueStatus,
+		TicketIssueStatus: string(order.TicketIssueStatus),
 		TicketIssueError:  order.TicketIssueError,
 	}
 	if err := g.db.Create(dbOrder).Error; err != nil {
@@ -155,6 +157,11 @@ func (g *gormZenaoDB) createOrderAttendees(orderID string, attendees []*zeni.Ord
 			return errors.New("order attendee is nil")
 		}
 
+		id := strings.TrimSpace(attendee.ID)
+		if id == "" {
+			id = uuid.NewString()
+		}
+
 		userIDInt, err := strconv.ParseUint(attendee.UserID, 10, 64)
 		if err != nil {
 			return fmt.Errorf("parse user id: %w", err)
@@ -171,7 +178,7 @@ func (g *gormZenaoDB) createOrderAttendees(orderID string, attendees []*zeni.Ord
 		}
 
 		dbAttendees = append(dbAttendees, OrderAttendee{
-			ID:           uuid.NewString(),
+			ID:           id,
 			CreatedAt:    attendee.CreatedAt,
 			OrderID:      orderID,
 			PriceID:      uint(priceIDInt),
@@ -198,6 +205,33 @@ func (g *gormZenaoDB) GetOrder(orderID string) (*zeni.Order, error) {
 	}
 
 	return dbOrderToZeniOrder(&order), nil
+}
+
+// GetOrderAttendees implements zeni.DB.
+func (g *gormZenaoDB) GetOrderAttendees(orderID string) ([]*zeni.OrderAttendee, error) {
+	g, span := g.trace("gzdb.GetOrderAttendees")
+	defer span.End()
+
+	var attendees []OrderAttendee
+	if err := g.db.Where("order_id = ?", orderID).Order("created_at ASC, id ASC").Find(&attendees).Error; err != nil {
+		return nil, err
+	}
+
+	result := make([]*zeni.OrderAttendee, 0, len(attendees))
+	for _, attendee := range attendees {
+		result = append(result, &zeni.OrderAttendee{
+			ID:           attendee.ID,
+			CreatedAt:    attendee.CreatedAt,
+			OrderID:      attendee.OrderID,
+			PriceID:      fmt.Sprintf("%d", attendee.PriceID),
+			PriceGroupID: fmt.Sprintf("%d", attendee.PriceGroupID),
+			UserID:       fmt.Sprintf("%d", attendee.UserID),
+			AmountMinor:  attendee.AmountMinor,
+			CurrencyCode: attendee.CurrencyCode,
+		})
+	}
+
+	return result, nil
 }
 
 // GetOrderPaymentAccount implements zeni.DB.
@@ -282,6 +316,26 @@ func (g *gormZenaoDB) UpdateOrderConfirmationOnce(orderID string, status zeni.Or
 		return false, nil
 	}
 	return true, nil
+}
+
+// UpdateOrderTicketIssue implements zeni.DB.
+func (g *gormZenaoDB) UpdateOrderTicketIssue(orderID string, status zeni.TicketIssueStatus, errMsg string) error {
+	g, span := g.trace("gzdb.UpdateOrderTicketIssue")
+	defer span.End()
+
+	updates := map[string]any{
+		"ticket_issue_status": status,
+		"ticket_issue_error":  errMsg,
+	}
+
+	res := g.db.Model(&Order{}).Where("id = ?", orderID).Updates(updates)
+	if res.Error != nil {
+		return res.Error
+	}
+	if res.RowsAffected == 0 {
+		return gorm.ErrRecordNotFound
+	}
+	return nil
 }
 
 // UpdateOrderStatus implements zeni.DB.
@@ -387,4 +441,104 @@ func (g *gormZenaoDB) CountActiveTicketHolds(eventID string, priceGroupID string
 		return 0, err
 	}
 	return uint32(total), nil
+}
+
+// ListOrderAttendeeTicketIDs implements zeni.DB.
+func (g *gormZenaoDB) ListOrderAttendeeTicketIDs(orderID string) ([]string, error) {
+	g, span := g.trace("gzdb.ListOrderAttendeeTicketIDs")
+	defer span.End()
+
+	var orderAttendeeID []string
+	if err := g.db.Model(&SoldTicket{}).
+		Select("order_attendee_id").
+		Where("order_id = ? AND order_attendee_id IS NOT NULL AND order_attendee_id != ''", orderID).
+		Pluck("order_attendee_id", &orderAttendeeID).Error; err != nil {
+		return nil, err
+	}
+
+	return orderAttendeeID, nil
+}
+
+// CreateSoldTickets implements zeni.DB.
+func (g *gormZenaoDB) CreateSoldTickets(tickets []*zeni.SoldTicket) error {
+	if len(tickets) == 0 {
+		return nil
+	}
+
+	dbTickets := make([]*SoldTicket, 0, len(tickets))
+	for _, ticket := range tickets {
+		if ticket == nil {
+			return errors.New("sold ticket is nil")
+		}
+		if ticket.Ticket == nil {
+			return errors.New("ticket data is required")
+		}
+		if strings.TrimSpace(ticket.OrderAttendeeID) == "" {
+			return errors.New("order attendee id is required")
+		}
+
+		eventIDInt, err := strconv.ParseUint(ticket.EventID, 10, 64)
+		if err != nil {
+			return fmt.Errorf("parse event id: %w", err)
+		}
+
+		buyerIDInt, err := strconv.ParseUint(ticket.BuyerID, 10, 64)
+		if err != nil {
+			return fmt.Errorf("parse buyer id: %w", err)
+		}
+
+		userIDInt, err := strconv.ParseUint(ticket.UserID, 10, 64)
+		if err != nil {
+			return fmt.Errorf("parse user id: %w", err)
+		}
+
+		var priceIDInt *uint
+		if strings.TrimSpace(ticket.PriceID) != "" {
+			parsed, err := strconv.ParseUint(ticket.PriceID, 10, 64)
+			if err != nil {
+				return fmt.Errorf("parse price id: %w", err)
+			}
+			val := uint(parsed)
+			priceIDInt = &val
+		}
+
+		var priceGroupIDInt *uint
+		if strings.TrimSpace(ticket.PriceGroupID) != "" {
+			parsed, err := strconv.ParseUint(ticket.PriceGroupID, 10, 64)
+			if err != nil {
+				return fmt.Errorf("parse price group id: %w", err)
+			}
+			val := uint(parsed)
+			priceGroupIDInt = &val
+		}
+
+		orderID := strings.TrimSpace(ticket.OrderID)
+		if orderID == "" {
+			return errors.New("order id is required")
+		}
+
+		orderAttendeeID := strings.TrimSpace(ticket.OrderAttendeeID)
+		secret := ticket.Ticket.Secret()
+		pubkey := ticket.Ticket.Pubkey()
+		if secret == "" || pubkey == "" {
+			return errors.New("ticket secret and pubkey are required")
+		}
+
+		dbTickets = append(dbTickets, &SoldTicket{
+			EventID:         uint(eventIDInt),
+			BuyerID:         uint(buyerIDInt),
+			UserID:          uint(userIDInt),
+			OrderID:         &orderID,
+			PriceID:         priceIDInt,
+			PriceGroupID:    priceGroupIDInt,
+			OrderAttendeeID: &orderAttendeeID,
+			Secret:          secret,
+			Pubkey:          pubkey,
+		})
+	}
+
+	return g.db.Clauses(clause.OnConflict{
+		Columns:   []clause.Column{{Name: "order_attendee_id"}},
+		DoNothing: true,
+	}).Create(&dbTickets).Error
 }

@@ -2676,6 +2676,7 @@ func dbSoldTicketToZeniSoldTicket(dbtick *SoldTicket) (*zeni.SoldTicket, error) 
 	}
 	ticket := &zeni.SoldTicket{
 		Ticket:          tickobj,
+		EventID:         fmt.Sprint(dbtick.EventID),
 		BuyerID:         fmt.Sprint(dbtick.BuyerID),
 		UserID:          fmt.Sprint(dbtick.UserID),
 		OrderID:         stringPtrToString(dbtick.OrderID),

@@ -48,6 +48,7 @@ func (s *ZenaoServer) ConfirmTicketPayment(
 	}
 
 	if order.Status == zeni.OrderStatusSuccess && order.ConfirmedAt != nil && *order.ConfirmedAt > 0 {
+		s.issueTicketsAfterConfirmation(ctx, order)
 		return connect.NewResponse(&zenaov1.ConfirmTicketPaymentResponse{
 			OrderId:          order.ID,
 			Status:           string(order.Status),
@@ -99,6 +100,7 @@ func (s *ZenaoServer) ConfirmTicketPayment(
 				s.Logger.Error("confirm-ticket-payment", zap.Error(err), zap.String("order-id", orderID))
 			}
 		}
+		s.issueTicketsAfterConfirmation(ctx, order)
 	} else if status == zeni.OrderStatusPending && order.Status != zeni.OrderStatusSuccess && order.Status != zeni.OrderStatusPending {
 		if err := s.DB.WithContext(ctx).UpdateOrderSetStatus(order.ID, status); err != nil {
 			s.Logger.Error("confirm-ticket-payment", zap.Error(err), zap.String("order-id", orderID))
@@ -106,6 +108,125 @@ func (s *ZenaoServer) ConfirmTicketPayment(
 	}
 
 	return connect.NewResponse(response), nil
+}
+
+func (s *ZenaoServer) issueTicketsAfterConfirmation(ctx context.Context, order *zeni.Order) {
+	if order == nil || s.DB == nil || s.Logger == nil {
+		return
+	}
+
+	if order.TicketIssueStatus == zeni.TicketIssueStatusIssued {
+		return
+	}
+
+	tracer := otel.Tracer("ticketing")
+	issueCtx, span := tracer.Start(ctx, "tickets.IssueAfterPayment", trace.WithSpanKind(trace.SpanKindInternal))
+	defer span.End()
+
+	issuedCount, err := s.issueOrderTickets(issueCtx, order)
+	if err != nil {
+		s.Logger.Error("ticket-issuance-failed", zap.Error(err), zap.String("order-id", order.ID))
+		if updateErr := s.DB.WithContext(issueCtx).UpdateOrderTicketIssue(order.ID, zeni.TicketIssueStatusFailed, trimTicketIssueError(err)); updateErr != nil {
+			s.Logger.Error("ticket-issuance-update-failed", zap.Error(updateErr), zap.String("order-id", order.ID))
+		}
+		return
+	}
+
+	if err := s.DB.WithContext(issueCtx).UpdateOrderTicketIssue(order.ID, zeni.TicketIssueStatusIssued, ""); err != nil {
+		s.Logger.Error("ticket-issuance-update-failed", zap.Error(err), zap.String("order-id", order.ID))
+		return
+	}
+
+	s.Logger.Info("ticket-issuance-complete",
+		zap.String("order-id", order.ID),
+		zap.Int("issued-count", issuedCount),
+	)
+}
+
+func (s *ZenaoServer) issueOrderTickets(ctx context.Context, order *zeni.Order) (int, error) {
+	if order == nil {
+		return 0, errors.New("order is required")
+	}
+
+	issuedCount := 0
+	tracer := otel.Tracer("ticketing")
+	txCtx, span := tracer.Start(ctx, "db.IssueOrderTickets", trace.WithSpanKind(trace.SpanKindClient))
+	defer span.End()
+
+	err := s.DB.WithContext(txCtx).Tx(func(tx zeni.DB) error {
+		attendees, err := tx.GetOrderAttendees(order.ID)
+		if err != nil {
+			return err
+		}
+		if len(attendees) == 0 {
+			return errors.New("order attendees not found")
+		}
+
+		existingIDs, err := tx.ListOrderAttendeeTicketIDs(order.ID)
+		if err != nil {
+			return err
+		}
+		existing := map[string]struct{}{}
+		for _, id := range existingIDs {
+			existing[id] = struct{}{}
+		}
+
+		newTickets := make([]*zeni.SoldTicket, 0)
+		for _, attendee := range attendees {
+			if attendee == nil {
+				return errors.New("order attendee is nil")
+			}
+			attendeeID := attendee.ID
+			if attendeeID == "" {
+				return errors.New("order attendee id is required")
+			}
+			if _, ok := existing[attendeeID]; ok {
+				continue
+			}
+
+			ticket, err := zeni.NewTicket()
+			if err != nil {
+				return err
+			}
+
+			newTickets = append(newTickets, &zeni.SoldTicket{
+				Ticket:          ticket,
+				EventID:         order.EventID,
+				BuyerID:         order.BuyerID,
+				UserID:          attendee.UserID,
+				OrderID:         order.ID,
+				PriceID:         attendee.PriceID,
+				PriceGroupID:    attendee.PriceGroupID,
+				OrderAttendeeID: attendeeID,
+			})
+		}
+
+		if len(newTickets) == 0 {
+			return nil
+		}
+
+		if err := tx.CreateSoldTickets(newTickets); err != nil {
+			return err
+		}
+		issuedCount = len(newTickets)
+		return nil
+	})
+	return issuedCount, err
+}
+
+func trimTicketIssueError(err error) string {
+	if err == nil {
+		return ""
+	}
+	msg := strings.TrimSpace(err.Error())
+	if msg == "" {
+		return ""
+	}
+	const maxLen = 1000
+	if len(msg) <= maxLen {
+		return msg
+	}
+	return msg[:maxLen]
 }
 
 func validateConfirmTicketPaymentRequest(req *connect.Request[zenaov1.ConfirmTicketPaymentRequest]) error {

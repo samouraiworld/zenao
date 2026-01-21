@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"sync"
 	"testing"
 	"time"
 
@@ -23,6 +24,10 @@ import (
 )
 
 func setupPaymentConfirmationFixture(t *testing.T) (zeni.DB, *sql.DB, string, string, *ticketPaymentStubAuth) {
+	return setupPaymentConfirmationFixtureWithAttendees(t, []string{"buyer@example.com"})
+}
+
+func setupPaymentConfirmationFixtureWithAttendees(t *testing.T, attendeeEmails []string) (zeni.DB, *sql.DB, string, string, *ticketPaymentStubAuth) {
 	db, sqlDB := ztesting.SetupTestDB(t)
 	organizerAuth := &ticketPaymentStubAuth{}
 	organizerAuth.user = organizerAuth.ensureAuthUser("org@example.com")
@@ -113,16 +118,23 @@ func setupPaymentConfirmationFixture(t *testing.T) (zeni.DB, *sql.DB, string, st
 		PaymentProviders: testPaymentProviders("sk_test_123"),
 	}
 
+	if len(attendeeEmails) == 0 {
+		attendeeEmails = []string{"buyer@example.com"}
+	}
+
+	lineItems := make([]*zenaov1.StartTicketPaymentLineItem, 0, len(attendeeEmails))
+	for _, email := range attendeeEmails {
+		lineItems = append(lineItems, &zenaov1.StartTicketPaymentLineItem{
+			PriceId:       priceID,
+			AttendeeEmail: email,
+		})
+	}
+
 	resp, err := checkoutServer.StartTicketPayment(
 		context.Background(),
 		connect.NewRequest(&zenaov1.StartTicketPaymentRequest{
-			EventId: createResp.Msg.Id,
-			LineItems: []*zenaov1.StartTicketPaymentLineItem{
-				{
-					PriceId:       priceID,
-					AttendeeEmail: "buyer@example.com",
-				},
-			},
+			EventId:     createResp.Msg.Id,
+			LineItems:   lineItems,
 			SuccessPath: "/events/paid-event",
 			CancelPath:  "/events/paid-event",
 		}),
@@ -307,6 +319,241 @@ func TestConfirmTicketPaymentStripeErrorDoesNotUpdateOrder(t *testing.T) {
 	require.NoError(t, row.Scan(&status, &confirmed))
 	require.Equal(t, string(zeni.OrderStatusPending), status)
 	require.False(t, confirmed.Valid)
+}
+
+func TestConfirmTicketPaymentIssuesTicketsForAttendees(t *testing.T) {
+	db, sqlDB, orderID, sessionID, checkoutAuth := setupPaymentConfirmationFixtureWithAttendees(
+		t,
+		[]string{"buyer@example.com", "guest@example.com"},
+	)
+
+	originalStripeGet := zpstripe.CheckoutSessionGet
+	zpstripe.CheckoutSessionGet = func(id string, params *stripe.CheckoutSessionParams) (*stripe.CheckoutSession, error) {
+		require.Equal(t, sessionID, id)
+		require.NotNil(t, params)
+		require.NotNil(t, params.StripeAccount)
+		require.Equal(t, "acct_123", *params.StripeAccount)
+		return &stripe.CheckoutSession{
+			PaymentStatus: stripe.CheckoutSessionPaymentStatusPaid,
+			PaymentIntent: &stripe.PaymentIntent{ID: "pi_test_123"},
+		}, nil
+	}
+	t.Cleanup(func() { zpstripe.CheckoutSessionGet = originalStripeGet })
+
+	server := &ZenaoServer{
+		Logger:           zap.NewNop(),
+		Auth:             checkoutAuth,
+		DB:               db,
+		StripeSecretKey:  "sk_test_123",
+		PaymentProviders: map[string]payment.Payment{zeni.PaymentPlatformStripeConnect: zpstripe.NewStripe("sk_test_123")},
+	}
+
+	_, err := server.ConfirmTicketPayment(
+		context.Background(),
+		connect.NewRequest(&zenaov1.ConfirmTicketPaymentRequest{
+			OrderId:           orderID,
+			CheckoutSessionId: sessionID,
+		}),
+	)
+	require.NoError(t, err)
+
+	var ticketCount int64
+	row := sqlDB.QueryRow("SELECT COUNT(*) FROM sold_tickets WHERE order_id = ?", orderID)
+	require.NoError(t, row.Scan(&ticketCount))
+	require.Equal(t, int64(2), ticketCount)
+
+	row = sqlDB.QueryRow("SELECT COUNT(DISTINCT order_attendee_id) FROM sold_tickets WHERE order_id = ?", orderID)
+	var distinctAttendees int64
+	require.NoError(t, row.Scan(&distinctAttendees))
+	require.Equal(t, int64(2), distinctAttendees)
+
+	row = sqlDB.QueryRow("SELECT ticket_issue_status FROM orders WHERE id = ?", orderID)
+	var issueStatus sql.NullString
+	require.NoError(t, row.Scan(&issueStatus))
+	require.Equal(t, "issued", issueStatus.String)
+}
+
+func TestConfirmTicketPaymentIssuanceIsIdempotent(t *testing.T) {
+	db, sqlDB, orderID, sessionID, checkoutAuth := setupPaymentConfirmationFixtureWithAttendees(
+		t,
+		[]string{"buyer@example.com", "guest@example.com"},
+	)
+
+	originalStripeGet := zpstripe.CheckoutSessionGet
+	zpstripe.CheckoutSessionGet = func(id string, params *stripe.CheckoutSessionParams) (*stripe.CheckoutSession, error) {
+		require.Equal(t, sessionID, id)
+		require.NotNil(t, params)
+		require.NotNil(t, params.StripeAccount)
+		require.Equal(t, "acct_123", *params.StripeAccount)
+		return &stripe.CheckoutSession{
+			PaymentStatus: stripe.CheckoutSessionPaymentStatusPaid,
+			PaymentIntent: &stripe.PaymentIntent{ID: "pi_test_123"},
+		}, nil
+	}
+	t.Cleanup(func() { zpstripe.CheckoutSessionGet = originalStripeGet })
+
+	server := &ZenaoServer{
+		Logger:           zap.NewNop(),
+		Auth:             checkoutAuth,
+		DB:               db,
+		StripeSecretKey:  "sk_test_123",
+		PaymentProviders: map[string]payment.Payment{zeni.PaymentPlatformStripeConnect: zpstripe.NewStripe("sk_test_123")},
+	}
+
+	_, err := server.ConfirmTicketPayment(
+		context.Background(),
+		connect.NewRequest(&zenaov1.ConfirmTicketPaymentRequest{
+			OrderId:           orderID,
+			CheckoutSessionId: sessionID,
+		}),
+	)
+	require.NoError(t, err)
+
+	_, err = server.ConfirmTicketPayment(
+		context.Background(),
+		connect.NewRequest(&zenaov1.ConfirmTicketPaymentRequest{
+			OrderId:           orderID,
+			CheckoutSessionId: sessionID,
+		}),
+	)
+	require.NoError(t, err)
+
+	var ticketCount int64
+	row := sqlDB.QueryRow("SELECT COUNT(*) FROM sold_tickets WHERE order_id = ?", orderID)
+	require.NoError(t, row.Scan(&ticketCount))
+	require.Equal(t, int64(2), ticketCount)
+}
+
+func TestConfirmTicketPaymentIssuanceIsIdempotentUnderConcurrency(t *testing.T) {
+	db, sqlDB, orderID, sessionID, checkoutAuth := setupPaymentConfirmationFixtureWithAttendees(
+		t,
+		[]string{"buyer@example.com", "guest@example.com"},
+	)
+
+	originalStripeGet := zpstripe.CheckoutSessionGet
+	zpstripe.CheckoutSessionGet = func(id string, params *stripe.CheckoutSessionParams) (*stripe.CheckoutSession, error) {
+		require.Equal(t, sessionID, id)
+		require.NotNil(t, params)
+		require.NotNil(t, params.StripeAccount)
+		require.Equal(t, "acct_123", *params.StripeAccount)
+		return &stripe.CheckoutSession{
+			PaymentStatus: stripe.CheckoutSessionPaymentStatusPaid,
+			PaymentIntent: &stripe.PaymentIntent{ID: "pi_test_123"},
+		}, nil
+	}
+	t.Cleanup(func() { zpstripe.CheckoutSessionGet = originalStripeGet })
+
+	server := &ZenaoServer{
+		Logger:           zap.NewNop(),
+		Auth:             checkoutAuth,
+		DB:               db,
+		StripeSecretKey:  "sk_test_123",
+		PaymentProviders: map[string]payment.Payment{zeni.PaymentPlatformStripeConnect: zpstripe.NewStripe("sk_test_123")},
+	}
+
+	req := connect.NewRequest(&zenaov1.ConfirmTicketPaymentRequest{
+		OrderId:           orderID,
+		CheckoutSessionId: sessionID,
+	})
+
+	var wg sync.WaitGroup
+	errs := make(chan error, 2)
+	for i := 0; i < 2; i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			_, err := server.ConfirmTicketPayment(context.Background(), req)
+			errs <- err
+		}()
+	}
+	wg.Wait()
+	close(errs)
+	for err := range errs {
+		require.NoError(t, err)
+	}
+
+	var ticketCount int64
+	row := sqlDB.QueryRow("SELECT COUNT(*) FROM sold_tickets WHERE order_id = ?", orderID)
+	require.NoError(t, row.Scan(&ticketCount))
+	require.Equal(t, int64(2), ticketCount)
+}
+
+func TestConfirmTicketPaymentIssuanceFailureFlagsOrder(t *testing.T) {
+	db, sqlDB, orderID, sessionID, checkoutAuth := setupPaymentConfirmationFixture(t)
+
+	originalStripeGet := zpstripe.CheckoutSessionGet
+	zpstripe.CheckoutSessionGet = func(id string, params *stripe.CheckoutSessionParams) (*stripe.CheckoutSession, error) {
+		require.Equal(t, sessionID, id)
+		require.NotNil(t, params)
+		require.NotNil(t, params.StripeAccount)
+		require.Equal(t, "acct_123", *params.StripeAccount)
+		return &stripe.CheckoutSession{
+			PaymentStatus: stripe.CheckoutSessionPaymentStatusPaid,
+			PaymentIntent: &stripe.PaymentIntent{ID: "pi_test_123"},
+		}, nil
+	}
+	t.Cleanup(func() { zpstripe.CheckoutSessionGet = originalStripeGet })
+
+	server := &ZenaoServer{
+		Logger:           zap.NewNop(),
+		Auth:             checkoutAuth,
+		DB:               &ticketIssueFailingDB{DB: db},
+		StripeSecretKey:  "sk_test_123",
+		PaymentProviders: map[string]payment.Payment{zeni.PaymentPlatformStripeConnect: zpstripe.NewStripe("sk_test_123")},
+	}
+
+	_, err := server.ConfirmTicketPayment(
+		context.Background(),
+		connect.NewRequest(&zenaov1.ConfirmTicketPaymentRequest{
+			OrderId:           orderID,
+			CheckoutSessionId: sessionID,
+		}),
+	)
+	require.NoError(t, err)
+
+	var ticketCount int64
+	row := sqlDB.QueryRow("SELECT COUNT(*) FROM sold_tickets WHERE order_id = ?", orderID)
+	require.NoError(t, row.Scan(&ticketCount))
+	require.Equal(t, int64(0), ticketCount)
+
+	row = sqlDB.QueryRow("SELECT ticket_issue_status, ticket_issue_error FROM orders WHERE id = ?", orderID)
+	var issueStatus sql.NullString
+	var issueError sql.NullString
+	require.NoError(t, row.Scan(&issueStatus, &issueError))
+	require.Equal(t, "failed", issueStatus.String)
+	require.NotEmpty(t, issueError.String)
+}
+
+type ticketIssueFailingDB struct {
+	zeni.DB
+}
+
+func (t *ticketIssueFailingDB) Tx(cb func(db zeni.DB) error) error {
+	return t.DB.Tx(func(db zeni.DB) error {
+		return cb(&ticketIssueFailingDB{DB: db})
+	})
+}
+
+func (t *ticketIssueFailingDB) WithContext(ctx context.Context) zeni.DB {
+	return &ticketIssueFailingDB{DB: t.DB.WithContext(ctx)}
+}
+
+func (t *ticketIssueFailingDB) TxWithSpan(ctx context.Context, label string, cb func(db zeni.DB) error) error {
+	return t.DB.TxWithSpan(ctx, label, func(db zeni.DB) error {
+		return cb(&ticketIssueFailingDB{DB: db})
+	})
+}
+
+func (t *ticketIssueFailingDB) CreateSoldTickets(_ []*zeni.SoldTicket) error {
+	return errTestTicketIssueFailure
+}
+
+var errTestTicketIssueFailure = &testTicketIssueFailure{}
+
+type testTicketIssueFailure struct{}
+
+func (e *testTicketIssueFailure) Error() string {
+	return "ticket issuance failed"
 }
 
 var errTestStripeFailure = &testStripeFailure{}
