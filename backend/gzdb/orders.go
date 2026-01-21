@@ -13,22 +13,24 @@ import (
 )
 
 type Order struct {
-	ID               string `gorm:"primaryKey;type:text"`
-	CreatedAt        int64  `gorm:"not null"`
-	EventID          uint   `gorm:"index;not null"`
-	BuyerID          uint   `gorm:"index;not null"`
-	CurrencyCode     string `gorm:"not null"`
-	AmountMinor      int64  `gorm:"not null"`
-	Status           string `gorm:"not null"`
-	PaymentProvider  string
-	PaymentAccountID uint `gorm:"index;not null"`
-	PaymentSessionID string
-	PaymentIntentID  string
-	ConfirmedAt      *int64
-	InvoiceID        string
-	InvoiceURL       string
-	Event            *Event          `gorm:"foreignKey:EventID"`
-	PaymentAccount   *PaymentAccount `gorm:"foreignKey:PaymentAccountID"`
+	ID                string `gorm:"primaryKey;type:text"`
+	CreatedAt         int64  `gorm:"not null"`
+	EventID           uint   `gorm:"index;not null"`
+	BuyerID           uint   `gorm:"index;not null"`
+	CurrencyCode      string `gorm:"not null"`
+	AmountMinor       int64  `gorm:"not null"`
+	Status            string `gorm:"not null"`
+	PaymentProvider   string
+	PaymentAccountID  uint `gorm:"index;not null"`
+	PaymentSessionID  string
+	PaymentIntentID   string
+	ConfirmedAt       *int64
+	InvoiceID         string
+	InvoiceURL        string
+	TicketIssueStatus string
+	TicketIssueError  string
+	Event             *Event          `gorm:"foreignKey:EventID"`
+	PaymentAccount    *PaymentAccount `gorm:"foreignKey:PaymentAccountID"`
 }
 
 type OrderAttendee struct {
@@ -63,20 +65,22 @@ func dbOrderToZeniOrder(dbOrder *Order) *zeni.Order {
 		return nil
 	}
 	return &zeni.Order{
-		CreatedAt:        dbOrder.CreatedAt,
-		ID:               dbOrder.ID,
-		EventID:          fmt.Sprintf("%d", dbOrder.EventID),
-		BuyerID:          fmt.Sprintf("%d", dbOrder.BuyerID),
-		CurrencyCode:     dbOrder.CurrencyCode,
-		AmountMinor:      dbOrder.AmountMinor,
-		Status:           zeni.OrderStatus(dbOrder.Status),
-		PaymentProvider:  dbOrder.PaymentProvider,
-		PaymentAccountID: fmt.Sprintf("%d", dbOrder.PaymentAccountID),
-		PaymentSessionID: dbOrder.PaymentSessionID,
-		PaymentIntentID:  dbOrder.PaymentIntentID,
-		ConfirmedAt:      dbOrder.ConfirmedAt,
-		InvoiceID:        dbOrder.InvoiceID,
-		InvoiceURL:       dbOrder.InvoiceURL,
+		CreatedAt:         dbOrder.CreatedAt,
+		ID:                dbOrder.ID,
+		EventID:           fmt.Sprintf("%d", dbOrder.EventID),
+		BuyerID:           fmt.Sprintf("%d", dbOrder.BuyerID),
+		CurrencyCode:      dbOrder.CurrencyCode,
+		AmountMinor:       dbOrder.AmountMinor,
+		Status:            zeni.OrderStatus(dbOrder.Status),
+		PaymentProvider:   dbOrder.PaymentProvider,
+		PaymentAccountID:  fmt.Sprintf("%d", dbOrder.PaymentAccountID),
+		PaymentSessionID:  dbOrder.PaymentSessionID,
+		PaymentIntentID:   dbOrder.PaymentIntentID,
+		ConfirmedAt:       dbOrder.ConfirmedAt,
+		InvoiceID:         dbOrder.InvoiceID,
+		InvoiceURL:        dbOrder.InvoiceURL,
+		TicketIssueStatus: dbOrder.TicketIssueStatus,
+		TicketIssueError:  dbOrder.TicketIssueError,
 	}
 }
 
@@ -113,20 +117,22 @@ func (g *gormZenaoDB) CreateOrder(order *zeni.Order, attendees []*zeni.OrderAtte
 	}
 
 	dbOrder := &Order{
-		ID:               id,
-		CreatedAt:        createdAt,
-		EventID:          uint(eventIDInt),
-		BuyerID:          uint(buyerIDInt),
-		CurrencyCode:     order.CurrencyCode,
-		AmountMinor:      order.AmountMinor,
-		Status:           string(status),
-		PaymentProvider:  order.PaymentProvider,
-		PaymentAccountID: uint(paymentAccountIDInt),
-		PaymentSessionID: order.PaymentSessionID,
-		PaymentIntentID:  order.PaymentIntentID,
-		ConfirmedAt:      order.ConfirmedAt,
-		InvoiceID:        order.InvoiceID,
-		InvoiceURL:       order.InvoiceURL,
+		ID:                id,
+		CreatedAt:         createdAt,
+		EventID:           uint(eventIDInt),
+		BuyerID:           uint(buyerIDInt),
+		CurrencyCode:      order.CurrencyCode,
+		AmountMinor:       order.AmountMinor,
+		Status:            string(status),
+		PaymentProvider:   order.PaymentProvider,
+		PaymentAccountID:  uint(paymentAccountIDInt),
+		PaymentSessionID:  order.PaymentSessionID,
+		PaymentIntentID:   order.PaymentIntentID,
+		ConfirmedAt:       order.ConfirmedAt,
+		InvoiceID:         order.InvoiceID,
+		InvoiceURL:        order.InvoiceURL,
+		TicketIssueStatus: order.TicketIssueStatus,
+		TicketIssueError:  order.TicketIssueError,
 	}
 	if err := g.db.Create(dbOrder).Error; err != nil {
 		return nil, err

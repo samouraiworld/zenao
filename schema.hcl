@@ -453,6 +453,14 @@ table "orders" {
     null = true
     type = text
   }
+  column "ticket_issue_status" {
+    null = true
+    type = text
+  }
+  column "ticket_issue_error" {
+    null = true
+    type = text
+  }
   primary_key {
     columns = [column.id]
   }
@@ -989,6 +997,30 @@ table "sold_tickets" {
     on_update   = NO_ACTION
     on_delete   = NO_ACTION
   }
+  foreign_key "fk_sold_tickets_order" {
+    columns     = [column.order_id]
+    ref_columns = [table.orders.column.id]
+    on_update   = NO_ACTION
+    on_delete   = NO_ACTION
+  }
+  foreign_key "fk_sold_tickets_price" {
+    columns     = [column.price_id]
+    ref_columns = [table.prices.column.id]
+    on_update   = NO_ACTION
+    on_delete   = NO_ACTION
+  }
+  foreign_key "fk_sold_tickets_price_group" {
+    columns     = [column.price_group_id]
+    ref_columns = [table.price_groups.column.id]
+    on_update   = NO_ACTION
+    on_delete   = NO_ACTION
+  }
+  foreign_key "fk_sold_tickets_order_attendee" {
+    columns     = [column.order_attendee_id]
+    ref_columns = [table.order_attendees.column.id]
+    on_update   = NO_ACTION
+    on_delete   = NO_ACTION
+  }
   index "idx_sold_tickets_pubkey" {
     unique  = true
     columns = [column.pubkey]
@@ -998,6 +1030,7 @@ table "sold_tickets" {
     columns = [column.secret]
   }
   index "idx_sold_tickets_order_attendee_id" {
+    unique  = true
     columns = [column.order_attendee_id]
   }
   index "idx_sold_tickets_price_group_id" {

@@ -160,22 +160,24 @@ type Price struct {
 }
 
 type Order struct {
-	CreatedAt        int64
-	ID               string
-	EventID          string
-	BuyerID          string
-	CurrencyCode     string
-	AmountMinor      int64
-	Status           OrderStatus
-	PaymentStatus    string
-	PaymentAccountID string
-	PaymentAccount   *PaymentAccount
-	PaymentProvider  string
-	PaymentSessionID string
-	PaymentIntentID  string
-	ConfirmedAt      *int64
-	InvoiceID        string
-	InvoiceURL       string
+	CreatedAt         int64
+	ID                string
+	EventID           string
+	BuyerID           string
+	CurrencyCode      string
+	AmountMinor       int64
+	Status            OrderStatus
+	PaymentStatus     string
+	PaymentAccountID  string
+	PaymentAccount    *PaymentAccount
+	PaymentProvider   string
+	PaymentSessionID  string
+	PaymentIntentID   string
+	ConfirmedAt       *int64
+	InvoiceID         string
+	InvoiceURL        string
+	TicketIssueStatus string
+	TicketIssueError  string
 }
 
 type OrderAttendee struct {
