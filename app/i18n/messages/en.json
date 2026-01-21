@@ -144,6 +144,23 @@
       "organizer": "You are the organizer of this event. Manage your event settings and attendees.",
       "start-scanning": "Start scanning tickets",
       "edit-event": "Edit event"
+    },
+    "payment-status-banner": {
+      "processing-title": "Processing your payment",
+      "processing-description": "We are confirming your purchase. This can take about 20 seconds.",
+      "checking-title": "Checking your payment status",
+      "checking-description": "We are checking the latest payment status now.",
+      "success-title": "Purchase confirmed",
+      "success-description": "Your confirmation is complete. A confirmation email will arrive shortly.",
+      "pending-title": "Payment pending",
+      "pending-description": "Your payment is still processing. We will email confirmation once it is complete.",
+      "pending-button": "Check again",
+      "canceled-title": "Payment canceled",
+      "canceled-description": "No charge was made. You can try again whenever you are ready.",
+      "error-title": "We couldn't confirm your payment",
+      "error-description": "We could not confirm the purchase yet. Please try again.",
+      "error-button": "Try again",
+      "receipt-reference": "Receipt reference"
     }
   },
   "profile-info": {

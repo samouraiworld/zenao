@@ -50,6 +50,54 @@ func (s *Stripe) CreateCheckoutSession(ctx context.Context, input payment.Checko
 	}, nil
 }
 
+func mapStripePaymentStatus(status stripe.CheckoutSessionPaymentStatus) (payment.PaymentStatus, error) {
+	switch status {
+	case stripe.CheckoutSessionPaymentStatusPaid:
+		return payment.PaymentStatusPaid, nil
+	case stripe.CheckoutSessionPaymentStatusUnpaid:
+		return payment.PaymentStatusUnpaid, nil
+	case stripe.CheckoutSessionPaymentStatusNoPaymentRequired:
+		return payment.PaymentStatusNoPaymentRequired, nil
+	}
+
+	return payment.PaymentStatusUnknown, fmt.Errorf("unknown stripe payment status: %s", status)
+}
+
+func (s *Stripe) GetCheckoutSession(ctx context.Context, sessionID string, accountID string) (*payment.CheckoutSessionStatus, error) {
+	_ = ctx
+	if strings.TrimSpace(sessionID) == "" {
+		return nil, errors.New("checkout session id is required")
+	}
+
+	params := &stripe.CheckoutSessionParams{}
+	if strings.TrimSpace(accountID) != "" {
+		params.SetStripeAccount(accountID)
+	}
+
+	session, err := CheckoutSessionGet(sessionID, params)
+	if err != nil {
+		return nil, err
+	}
+	if session == nil {
+		return nil, errors.New("stripe session is nil")
+	}
+
+	intentID := ""
+	if session.PaymentIntent != nil {
+		intentID = session.PaymentIntent.ID
+	}
+
+	paymentStatus, err := mapStripePaymentStatus(session.PaymentStatus)
+	if err != nil {
+		return nil, err
+	}
+
+	return &payment.CheckoutSessionStatus{
+		PaymentStatus:   paymentStatus,
+		PaymentIntentID: intentID,
+	}, nil
+}
+
 func (s *Stripe) CheckPaymentStatus(orderID string) (zeni.OrderStatus, error) {
 	if strings.TrimSpace(orderID) == "" {
 		return "", errors.New("order id is required")
@@ -85,4 +133,5 @@ func (s *Stripe) buildCheckoutSessionParams(input payment.CheckoutSessionInput) 
 }
 
 var CheckoutSessionNew = checkoutsession.New
+var CheckoutSessionGet = checkoutsession.Get
 var _ payment.Payment = (*Stripe)(nil)

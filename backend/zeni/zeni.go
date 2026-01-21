@@ -369,8 +369,12 @@ type DB interface {
 	CreatePrice(paymentAccount *PaymentAccount, price *Price) (*Price, error)
 	UpdatePrice(paymentAccount *PaymentAccount, price *Price) error
 	CreateOrder(order *Order, attendees []*OrderAttendee) (*Order, error)
+	GetOrder(orderID string) (*Order, error)
+	GetOrderPaymentAccount(orderID string) (*PaymentAccount, error)
 	UpdateOrderSetPaymentSession(orderID string, provider string, sessionID string) error
 	UpdateOrderSetStatus(orderID string, status OrderStatus) error
+	UpdateOrderConfirmation(orderID string, status OrderStatus, paymentIntentID string, confirmedAt int64) error
+	UpdateOrderConfirmationOnce(orderID string, status OrderStatus, paymentIntentID string, confirmedAt int64) (bool, error)
 	CreateTicketHold(hold *TicketHold) (*TicketHold, error)
 	DeleteTicketHoldsByOrderID(orderID string) error
 	DeleteExpiredTicketHolds(eventID string, nowUnix int64) error

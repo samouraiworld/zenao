@@ -7,6 +7,16 @@ import (
 	"github.com/samouraiworld/zenao/backend/zeni"
 )
 
+type PaymentStatus string
+
+const (
+	PaymentStatusUnknown           PaymentStatus = "unknown"
+	PaymentStatusPaid              PaymentStatus = "paid"
+	PaymentStatusNoPaymentRequired PaymentStatus = "no_payment_required"
+	PaymentStatusUnpaid            PaymentStatus = "unpaid"
+	PaymentStatusFailed            PaymentStatus = "failed"
+)
+
 type LineItem struct {
 	Quantity    uint32
 	AmountMinor int64
@@ -27,6 +37,15 @@ type CheckoutSessionInput struct {
 type CheckoutSession struct {
 	ID  string
 	URL string
+}
+
+type CheckoutSessionStatus struct {
+	PaymentStatus   PaymentStatus
+	PaymentIntentID string
+}
+
+type CheckoutSessionFetcher interface {
+	GetCheckoutSession(ctx context.Context, sessionID string, accountID string) (*CheckoutSessionStatus, error)
 }
 
 type Payment interface {

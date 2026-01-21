@@ -133,12 +133,14 @@ func (s *ZenaoServer) StartTicketPayment(
 	}
 
 	successURL, err := buildCheckoutRedirectURL(s.AppBaseURL, req.Msg.SuccessPath, map[string]string{
-		"checkout": "success",
-		"order_id": createdOrder.ID,
+		"checkout":   "success",
+		"order_id":   createdOrder.ID,
+		"session_id": "CHECKOUT_SESSION_ID",
 	})
 	if err != nil {
 		return nil, err
 	}
+	successURL = strings.ReplaceAll(successURL, "CHECKOUT_SESSION_ID", "{CHECKOUT_SESSION_ID}")
 
 	cancelURL, err := buildCheckoutRedirectURL(s.AppBaseURL, req.Msg.CancelPath, map[string]string{
 		"checkout": "cancel",

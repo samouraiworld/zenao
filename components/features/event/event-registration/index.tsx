@@ -136,7 +136,8 @@ export function EventRegistrationForm({
         }
         attendeeEmails.push(...guests);
         // TODO: Support multiple price selections so totals match chosen line items.
-        const checkoutPath = `${window.location.pathname}${window.location.search}`;
+        const returnPath = `${window.location.pathname}${window.location.search}`;
+        const checkoutPath = `/checkout/confirmation?return_path=${encodeURIComponent(returnPath)}`;
         const response = await startCheckout({
           eventId,
           lineItems: attendeeEmails.map((email) => ({

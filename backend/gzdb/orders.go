@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -177,6 +178,43 @@ func (g *gormZenaoDB) createOrderAttendees(orderID string, attendees []*zeni.Ord
 	return g.db.Create(&dbAttendees).Error
 }
 
+// GetOrder implements zeni.DB.
+func (g *gormZenaoDB) GetOrder(orderID string) (*zeni.Order, error) {
+	g, span := g.trace("gzdb.GetOrder")
+	defer span.End()
+
+	var order Order
+	if err := g.db.First(&order, "id = ?", orderID).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
+		return nil, err
+	}
+
+	return dbOrderToZeniOrder(&order), nil
+}
+
+// GetOrderPaymentAccount implements zeni.DB.
+func (g *gormZenaoDB) GetOrderPaymentAccount(orderID string) (*zeni.PaymentAccount, error) {
+	g, span := g.trace("gzdb.GetOrderPaymentAccount")
+	defer span.End()
+
+	var account PaymentAccount
+	err := g.db.Model(&PaymentAccount{}).
+		Joins("JOIN prices ON prices.payment_account_id = payment_accounts.id").
+		Joins("JOIN order_attendees ON order_attendees.price_id = prices.id").
+		Where("order_attendees.order_id = ?", orderID).
+		First(&account).Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
+		return nil, err
+	}
+
+	return dbPaymentAccountToZeniPaymentAccount(&account), nil
+}
+
 // UpdateOrderPaymentSession implements zeni.DB.
 func (g *gormZenaoDB) UpdateOrderSetPaymentSession(orderID string, provider string, sessionID string) error {
 	res := g.db.Model(&Order{}).Where("id = ?", orderID).Updates(map[string]any{
@@ -190,6 +228,54 @@ func (g *gormZenaoDB) UpdateOrderSetPaymentSession(orderID string, provider stri
 		return gorm.ErrRecordNotFound
 	}
 	return nil
+}
+
+// UpdateOrderConfirmation implements zeni.DB.
+func (g *gormZenaoDB) UpdateOrderConfirmation(orderID string, status zeni.OrderStatus, paymentIntentID string, confirmedAt int64) error {
+	g, span := g.trace("gzdb.UpdateOrderConfirmation")
+	defer span.End()
+
+	updates := map[string]any{
+		"status":       status,
+		"confirmed_at": confirmedAt,
+	}
+	if strings.TrimSpace(paymentIntentID) != "" {
+		updates["payment_intent_id"] = paymentIntentID
+	}
+
+	res := g.db.Model(&Order{}).Where("id = ?", orderID).Updates(updates)
+	if res.Error != nil {
+		return res.Error
+	}
+	if res.RowsAffected == 0 {
+		return gorm.ErrRecordNotFound
+	}
+	return nil
+}
+
+// UpdateOrderConfirmationOnce implements zeni.DB.
+func (g *gormZenaoDB) UpdateOrderConfirmationOnce(orderID string, status zeni.OrderStatus, paymentIntentID string, confirmedAt int64) (bool, error) {
+	g, span := g.trace("gzdb.UpdateOrderConfirmationOnce")
+	defer span.End()
+
+	updates := map[string]any{
+		"status":       status,
+		"confirmed_at": confirmedAt,
+	}
+	if strings.TrimSpace(paymentIntentID) != "" {
+		updates["payment_intent_id"] = paymentIntentID
+	}
+
+	res := g.db.Model(&Order{}).
+		Where("id = ? AND (confirmed_at IS NULL OR confirmed_at = 0 OR status != ?)", orderID, zeni.OrderStatusSuccess).
+		Updates(updates)
+	if res.Error != nil {
+		return false, res.Error
+	}
+	if res.RowsAffected == 0 {
+		return false, nil
+	}
+	return true, nil
 }
 
 // UpdateOrderStatus implements zeni.DB.

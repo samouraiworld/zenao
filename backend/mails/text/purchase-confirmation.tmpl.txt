@@ -1,0 +1,20 @@
+{{.WelcomeText}}
+
+
+EVENT DETAILS:
+
+{{.EventName}}
+
+DATE AND TIME
+
+
+
+{{.TimeText}}
+
+ADDRESS
+
+
+
+{{.LocationText}}
+
+See the event {{.EventURL}}

@@ -23,6 +23,8 @@ service ZenaoService {
   rpc Participate(ParticipateRequest) returns (ParticipateResponse);
   rpc StartTicketPayment(StartTicketPaymentRequest)
       returns (StartTicketPaymentResponse);
+  rpc ConfirmTicketPayment(ConfirmTicketPaymentRequest)
+      returns (ConfirmTicketPaymentResponse);
   rpc CancelParticipation(CancelParticipationRequest)
       returns (CancelParticipationResponse);
   rpc GetEventTickets(GetEventTicketsRequest) returns (GetEventTicketsResponse);
@@ -245,6 +247,17 @@ message StartTicketPaymentRequest {
 message StartTicketPaymentResponse {
   string checkout_url = 1;
   string order_id = 2;
+}
+
+message ConfirmTicketPaymentRequest {
+  string order_id = 1;
+  string checkout_session_id = 2;
+}
+
+message ConfirmTicketPaymentResponse {
+  string order_id = 1;
+  string status = 2;
+  string receipt_reference = 3;
 }
 
 message BroadcastEventRequest {
