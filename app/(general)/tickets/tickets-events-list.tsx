@@ -39,7 +39,7 @@ export function TicketsEventsList({
   } = useSuspenseInfiniteQuery(
     from === "upcoming"
       ? eventsByParticipantList(
-          actor?.actingAs ?? "",
+          actor?.actingAs,
           DiscoverableFilter.UNSPECIFIED,
           now,
           Number.MAX_SAFE_INTEGER,
@@ -48,7 +48,7 @@ export function TicketsEventsList({
           teamId,
         )
       : eventsByParticipantList(
-          actor?.actingAs ?? "",
+          actor?.actingAs,
           DiscoverableFilter.UNSPECIFIED,
           now - 1,
           0,
