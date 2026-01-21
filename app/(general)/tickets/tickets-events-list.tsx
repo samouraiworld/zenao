@@ -16,22 +16,19 @@ import Text from "@/components/widgets/texts/text";
 import EventCardListLayout from "@/components/features/event/event-card-list-layout";
 import { LoaderMoreButton } from "@/components/widgets/buttons/load-more-button";
 import { SafeEventInfo } from "@/types/schemas";
-import { useActiveAccount } from "@/components/providers/active-account-provider";
+import useActor from "@/hooks/use-actor";
 
 export function TicketsEventsList({
   now,
   from,
-  userId,
 }: {
   now: number;
   from: FromFilter;
-  userId: string;
 }) {
+  const actor = useActor();
   const { getToken } = useAuth();
-  const { activeAccount } = useActiveAccount();
 
-  const entityId = activeAccount?.id ?? userId;
-  const teamId = activeAccount?.type === "team" ? activeAccount.id : undefined;
+  const teamId = actor?.type === "team" ? actor.actingAs : undefined;
 
   const {
     data: eventsPages,
@@ -42,7 +39,7 @@ export function TicketsEventsList({
   } = useSuspenseInfiniteQuery(
     from === "upcoming"
       ? eventsByParticipantList(
-          entityId,
+          actor?.actingAs ?? "",
           DiscoverableFilter.UNSPECIFIED,
           now,
           Number.MAX_SAFE_INTEGER,
@@ -51,7 +48,7 @@ export function TicketsEventsList({
           teamId,
         )
       : eventsByParticipantList(
-          entityId,
+          actor?.actingAs ?? "",
           DiscoverableFilter.UNSPECIFIED,
           now - 1,
           0,
@@ -95,7 +92,7 @@ export function TicketsEventsList({
         return (
           <div key={startOfDay} className="flex flex-col gap-4">
             <Text suppressHydrationWarning size="lg" className="font-semibold">
-              {format(startOfDay, "iiii d  MMM")}
+              {format(new Date(startOfDay), "iiii d  MMM")}
             </Text>
 
             <EventCardListLayout>

@@ -8,10 +8,10 @@ import {
   ScreenContainer,
   ScreenContainerCentered,
 } from "@/components/layout/screen-container";
-import { userInfoOptions } from "@/lib/queries/user";
 import { eventsByParticipantList } from "@/lib/queries/events-list";
 import { EventsListLayout } from "@/components/features/event/events-list-layout";
 import { DiscoverableFilter } from "@/app/gen/zenao/v1/zenao_pb";
+import getActor from "@/lib/utils/actor";
 
 export const revalidate = 60;
 
@@ -30,38 +30,38 @@ export default async function TicketsPage({ params }: PageProps) {
     redirect("/tickets", RedirectType.replace);
   }
 
-  const { getToken, userId } = await auth();
-  const token = await getToken();
+  const { getToken } = await auth();
 
-  const userAddrOpts = userInfoOptions(getToken, userId);
-  const userInfo = await queryClient.fetchQuery(userAddrOpts);
-  const userProfileId = userInfo?.userId;
+  const actor = await getActor();
 
-  if (!token || !userProfileId) {
+  if (!actor) {
     return (
       <ScreenContainerCentered isSignedOutModal>
         {t("log-in")}
       </ScreenContainerCentered>
     );
   }
+  const teamId = actor.type === "team" ? actor.actingAs : undefined;
 
   queryClient.prefetchInfiniteQuery(
     from === "upcoming"
       ? eventsByParticipantList(
-          userProfileId,
+          actor.actingAs,
           DiscoverableFilter.UNSPECIFIED,
           now,
           Number.MAX_SAFE_INTEGER,
           20,
           getToken,
+          teamId,
         )
       : eventsByParticipantList(
-          userProfileId,
+          actor.actingAs,
           DiscoverableFilter.UNSPECIFIED,
           now - 1,
           0,
           20,
           getToken,
+          teamId,
         ),
   );
 
@@ -74,7 +74,7 @@ export default async function TicketsPage({ params }: PageProps) {
           description={t("description")}
           tabLinks={{ upcoming: "/tickets", past: "/tickets/past" }}
         >
-          <TicketsEventsList userId={userProfileId} from={from} now={now} />
+          <TicketsEventsList from={from} now={now} />
         </EventsListLayout>
       </ScreenContainer>
     </HydrationBoundary>
