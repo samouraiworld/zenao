@@ -398,9 +398,8 @@ table "payment_accounts" {
 table "orders" {
   schema = schema.main
   column "id" {
-    null           = true
-    type           = integer
-    auto_increment = true
+    null = false
+    type = text
   }
   column "created_at" {
     null = false
@@ -579,9 +578,8 @@ table "prices" {
 table "order_attendees" {
   schema = schema.main
   column "id" {
-    null           = true
-    type           = integer
-    auto_increment = true
+    null = false
+    type = text
   }
   column "created_at" {
     null = false
@@ -589,7 +587,7 @@ table "order_attendees" {
   }
   column "order_id" {
     null = false
-    type = integer
+    type = text
   }
   column "price_id" {
     null = false
@@ -952,7 +950,7 @@ table "sold_tickets" {
   }
   column "order_id" {
     null = true
-    type = integer
+    type = text
   }
   column "price_id" {
     null = true
@@ -964,7 +962,7 @@ table "sold_tickets" {
   }
   column "order_attendee_id" {
     null = true
-    type = integer
+    type = text
   }
   column "amount_minor" {
     null = true
@@ -1059,7 +1057,7 @@ table "ticket_holds" {
   }
   column "order_id" {
     null = false
-    type = integer
+    type = text
   }
   column "quantity" {
     null = false

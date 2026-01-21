@@ -394,7 +394,7 @@ func TestStartTicketPaymentRollsBackOnStripeFailure(t *testing.T) {
 	)
 	require.Error(t, err)
 
-	row := sqlDB.QueryRow("SELECT status FROM orders ORDER BY id DESC LIMIT 1")
+	row := sqlDB.QueryRow("SELECT status FROM orders ORDER BY created_at DESC LIMIT 1")
 	var status string
 	require.NoError(t, row.Scan(&status))
 	require.Equal(t, string(zeni.OrderStatusFailed), status)
@@ -951,7 +951,7 @@ func TestStartTicketPaymentUsesFirstEmailForBuyerWhenLoggedOut(t *testing.T) {
 	require.NoError(t, err)
 
 	var buyerID int64
-	row := sqlDB.QueryRow("SELECT buyer_id FROM orders ORDER BY id DESC LIMIT 1")
+	row := sqlDB.QueryRow("SELECT buyer_id FROM orders ORDER BY created_at DESC LIMIT 1")
 	require.NoError(t, row.Scan(&buyerID))
 
 	var expectedBuyerID int64

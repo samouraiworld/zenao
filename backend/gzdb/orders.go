@@ -6,12 +6,13 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/samouraiworld/zenao/backend/zeni"
 	"gorm.io/gorm"
 )
 
 type Order struct {
-	ID               uint   `gorm:"primaryKey"`
+	ID               string `gorm:"primaryKey;type:text"`
 	CreatedAt        int64  `gorm:"not null"`
 	EventID          uint   `gorm:"index;not null"`
 	BuyerID          uint   `gorm:"index;not null"`
@@ -30,9 +31,9 @@ type Order struct {
 }
 
 type OrderAttendee struct {
-	ID           uint        `gorm:"primaryKey"`
+	ID           string      `gorm:"primaryKey;type:text"`
 	CreatedAt    int64       `gorm:"not null"`
-	OrderID      uint        `gorm:"index;not null"`
+	OrderID      string      `gorm:"index;not null"`
 	PriceID      uint        `gorm:"index;not null"`
 	PriceGroupID uint        `gorm:"index;not null"`
 	UserID       uint        `gorm:"index;not null"`
@@ -48,7 +49,7 @@ type TicketHold struct {
 	CreatedAt    int64       `gorm:"not null"`
 	EventID      uint        `gorm:"index;not null"`
 	PriceGroupID uint        `gorm:"index;not null"`
-	OrderID      uint        `gorm:"index;not null"`
+	OrderID      string      `gorm:"index;not null"`
 	Quantity     uint32      `gorm:"not null"`
 	ExpiresAt    int64       `gorm:"index;not null"`
 	Event        *Event      `gorm:"foreignKey:EventID"`
@@ -62,7 +63,7 @@ func dbOrderToZeniOrder(dbOrder *Order) *zeni.Order {
 	}
 	return &zeni.Order{
 		CreatedAt:        dbOrder.CreatedAt,
-		ID:               fmt.Sprintf("%d", dbOrder.ID),
+		ID:               dbOrder.ID,
 		EventID:          fmt.Sprintf("%d", dbOrder.EventID),
 		BuyerID:          fmt.Sprintf("%d", dbOrder.BuyerID),
 		CurrencyCode:     dbOrder.CurrencyCode,
@@ -95,6 +96,10 @@ func (g *gormZenaoDB) CreateOrder(order *zeni.Order, attendees []*zeni.OrderAtte
 	if status == "" {
 		status = zeni.OrderStatusPending
 	}
+	id := order.ID
+	if id == "" {
+		id = uuid.NewString()
+	}
 
 	buyerIDInt, err := strconv.ParseUint(order.BuyerID, 10, 64)
 	if err != nil {
@@ -107,6 +112,7 @@ func (g *gormZenaoDB) CreateOrder(order *zeni.Order, attendees []*zeni.OrderAtte
 	}
 
 	dbOrder := &Order{
+		ID:               id,
 		CreatedAt:        createdAt,
 		EventID:          uint(eventIDInt),
 		BuyerID:          uint(buyerIDInt),
@@ -132,7 +138,7 @@ func (g *gormZenaoDB) CreateOrder(order *zeni.Order, attendees []*zeni.OrderAtte
 	return dbOrderToZeniOrder(dbOrder), nil
 }
 
-func (g *gormZenaoDB) createOrderAttendees(orderID uint, attendees []*zeni.OrderAttendee) error {
+func (g *gormZenaoDB) createOrderAttendees(orderID string, attendees []*zeni.OrderAttendee) error {
 	if len(attendees) == 0 {
 		return nil
 	}
@@ -158,6 +164,7 @@ func (g *gormZenaoDB) createOrderAttendees(orderID uint, attendees []*zeni.Order
 		}
 
 		dbAttendees = append(dbAttendees, OrderAttendee{
+			ID:           uuid.NewString(),
 			CreatedAt:    attendee.CreatedAt,
 			OrderID:      orderID,
 			PriceID:      uint(priceIDInt),
@@ -172,11 +179,7 @@ func (g *gormZenaoDB) createOrderAttendees(orderID uint, attendees []*zeni.Order
 
 // UpdateOrderPaymentSession implements zeni.DB.
 func (g *gormZenaoDB) UpdateOrderSetPaymentSession(orderID string, provider string, sessionID string) error {
-	orderIDInt, err := strconv.ParseUint(orderID, 10, 64)
-	if err != nil {
-		return fmt.Errorf("parse order id: %w", err)
-	}
-	res := g.db.Model(&Order{}).Where("id = ?", orderIDInt).Updates(map[string]any{
+	res := g.db.Model(&Order{}).Where("id = ?", orderID).Updates(map[string]any{
 		"payment_provider":   provider,
 		"payment_session_id": sessionID,
 	})
@@ -191,11 +194,7 @@ func (g *gormZenaoDB) UpdateOrderSetPaymentSession(orderID string, provider stri
 
 // UpdateOrderStatus implements zeni.DB.
 func (g *gormZenaoDB) UpdateOrderSetStatus(orderID string, status zeni.OrderStatus) error {
-	orderIDInt, err := strconv.ParseUint(orderID, 10, 64)
-	if err != nil {
-		return fmt.Errorf("parse order id: %w", err)
-	}
-	res := g.db.Model(&Order{}).Where("id = ?", orderIDInt).Update("status", status)
+	res := g.db.Model(&Order{}).Where("id = ?", orderID).Update("status", status)
 	if res.Error != nil {
 		return res.Error
 	}
@@ -218,10 +217,6 @@ func (g *gormZenaoDB) CreateTicketHold(hold *zeni.TicketHold) (*zeni.TicketHold,
 	if err != nil {
 		return nil, fmt.Errorf("parse price group id: %w", err)
 	}
-	orderIDInt, err := strconv.ParseUint(hold.OrderID, 10, 64)
-	if err != nil {
-		return nil, fmt.Errorf("parse order id: %w", err)
-	}
 	createdAt := hold.CreatedAt
 	if createdAt == 0 {
 		createdAt = time.Now().Unix()
@@ -230,7 +225,7 @@ func (g *gormZenaoDB) CreateTicketHold(hold *zeni.TicketHold) (*zeni.TicketHold,
 		CreatedAt:    createdAt,
 		EventID:      uint(eventIDInt),
 		PriceGroupID: uint(priceGroupIDInt),
-		OrderID:      uint(orderIDInt),
+		OrderID:      hold.OrderID,
 		Quantity:     hold.Quantity,
 		ExpiresAt:    hold.ExpiresAt,
 	}
@@ -242,7 +237,7 @@ func (g *gormZenaoDB) CreateTicketHold(hold *zeni.TicketHold) (*zeni.TicketHold,
 		ID:           fmt.Sprintf("%d", dbHold.ID),
 		EventID:      fmt.Sprintf("%d", dbHold.EventID),
 		PriceGroupID: fmt.Sprintf("%d", dbHold.PriceGroupID),
-		OrderID:      fmt.Sprintf("%d", dbHold.OrderID),
+		OrderID:      dbHold.OrderID,
 		Quantity:     dbHold.Quantity,
 		ExpiresAt:    dbHold.ExpiresAt,
 	}, nil
@@ -250,11 +245,7 @@ func (g *gormZenaoDB) CreateTicketHold(hold *zeni.TicketHold) (*zeni.TicketHold,
 
 // DeleteTicketHoldsByOrderID implements zeni.DB.
 func (g *gormZenaoDB) DeleteTicketHoldsByOrderID(orderID string) error {
-	orderIDInt, err := strconv.ParseUint(orderID, 10, 64)
-	if err != nil {
-		return fmt.Errorf("parse order id: %w", err)
-	}
-	return g.db.Where("order_id = ?", orderIDInt).Delete(&TicketHold{}).Error
+	return g.db.Where("order_id = ?", orderID).Delete(&TicketHold{}).Error
 }
 
 // DeleteExpiredTicketHolds implements zeni.DB.

@@ -5,7 +5,7 @@ PRAGMA foreign_keys = off;
 
 -- Create "orders" table
 CREATE TABLE `orders` (
-  `id` integer PRIMARY KEY AUTOINCREMENT,
+  `id` text NOT NULL PRIMARY KEY,
   `created_at` integer NOT NULL,
   `confirmed_at` integer NULL,
   `event_id` integer NOT NULL,
@@ -36,7 +36,7 @@ CREATE TABLE `ticket_holds` (
   `created_at` integer NOT NULL,
   `event_id` integer NOT NULL,
   `price_group_id` integer NOT NULL,
-  `order_id` integer NOT NULL,
+  `order_id` text NOT NULL,
   `quantity` integer NOT NULL,
   `expires_at` integer NOT NULL,
   CONSTRAINT `fk_ticket_holds_event` FOREIGN KEY (`event_id`) REFERENCES `events` (`id`) ON UPDATE NO ACTION ON DELETE NO ACTION,
@@ -54,9 +54,9 @@ CREATE INDEX `idx_ticket_holds_expires_at` ON `ticket_holds` (`expires_at`);
 
 -- Create "order_attendees" table
 CREATE TABLE `order_attendees` (
-  `id` integer PRIMARY KEY AUTOINCREMENT,
+  `id` text NOT NULL PRIMARY KEY,
   `created_at` integer NOT NULL,
-  `order_id` integer NOT NULL,
+  `order_id` text NOT NULL,
   `price_id` integer NOT NULL,
   `price_group_id` integer NOT NULL,
   `user_id` integer NOT NULL,
@@ -85,10 +85,10 @@ CREATE TABLE `new_sold_tickets` (
   `event_id` integer NULL,
   `buyer_id` integer NULL,
   `user_id` integer NULL,
-  `order_id` integer NULL,
+  `order_id` text NULL,
   `price_id` integer NULL,
   `price_group_id` integer NULL,
-  `order_attendee_id` integer NULL,
+  `order_attendee_id` text NULL,
   `amount_minor` integer NULL,
   `currency_code` text NULL,
   `secret` text NOT NULL,

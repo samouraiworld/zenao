@@ -54,10 +54,10 @@ type SoldTicket struct {
 	EventID         uint `gorm:"index"`
 	BuyerID         uint
 	UserID          uint
-	OrderID         *uint `gorm:"index"`
-	PriceID         *uint `gorm:"index"`
-	PriceGroupID    *uint `gorm:"index"`
-	OrderAttendeeID *uint `gorm:"index"`
+	OrderID         *string `gorm:"index"`
+	PriceID         *uint   `gorm:"index"`
+	PriceGroupID    *uint   `gorm:"index"`
+	OrderAttendeeID *string `gorm:"index"`
 	User            *User
 	AmountMinor     *int64
 	CurrencyCode    string
@@ -2678,10 +2678,10 @@ func dbSoldTicketToZeniSoldTicket(dbtick *SoldTicket) (*zeni.SoldTicket, error) 
 		Ticket:          tickobj,
 		BuyerID:         fmt.Sprint(dbtick.BuyerID),
 		UserID:          fmt.Sprint(dbtick.UserID),
-		OrderID:         uintPtrToString(dbtick.OrderID),
+		OrderID:         stringPtrToString(dbtick.OrderID),
 		PriceID:         uintPtrToString(dbtick.PriceID),
 		PriceGroupID:    uintPtrToString(dbtick.PriceGroupID),
-		OrderAttendeeID: uintPtrToString(dbtick.OrderAttendeeID),
+		OrderAttendeeID: stringPtrToString(dbtick.OrderAttendeeID),
 		Checkin:         checkin,
 		User:            user,
 		CreatedAt:       dbtick.CreatedAt,

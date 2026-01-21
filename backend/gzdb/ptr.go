@@ -9,3 +9,11 @@ func uintPtrToString(val *uint) string {
 
 	return fmt.Sprint(*val)
 }
+
+func stringPtrToString(val *string) string {
+	if val == nil {
+		return ""
+	}
+
+	return *val
+}
