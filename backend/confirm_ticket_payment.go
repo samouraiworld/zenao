@@ -198,6 +198,8 @@ func (s *ZenaoServer) issueOrderTickets(ctx context.Context, order *zeni.Order) 
 				PriceID:         attendee.PriceID,
 				PriceGroupID:    attendee.PriceGroupID,
 				OrderAttendeeID: attendeeID,
+				AmountMinor:     attendee.AmountMinor,
+				CurrencyCode:    attendee.CurrencyCode,
 			})
 		}
 

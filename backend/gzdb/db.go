@@ -964,7 +964,24 @@ func (g *gormZenaoDB) CreateUser(authID string) (*zeni.User, error) {
 
 // Participate implements zeni.DB.
 func (g *gormZenaoDB) Participate(eventID string, buyerID string, userID string, ticketSecret string, password string, needPassword bool) error {
-	g, span := g.trace("gzdb.Participate")
+	return g.participate(eventID, buyerID, userID, ticketSecret, password, needPassword, nil, nil, nil, nil, "", nil)
+}
+
+func (g *gormZenaoDB) participate(
+	eventID string,
+	buyerID string,
+	userID string,
+	ticketSecret string,
+	password string,
+	needPassword bool,
+	orderID *string,
+	priceID *uint,
+	priceGroupID *uint,
+	orderAttendeeID *string,
+	currencyCode string,
+	amountMinor *int64,
+) error {
+	g, span := g.trace("gzdb.participate")
 	defer span.End()
 
 	buyerIDint, err := strconv.ParseUint(buyerID, 10, 32)
@@ -1015,8 +1032,14 @@ func (g *gormZenaoDB) Participate(eventID string, buyerID string, userID string,
 		return errors.New("user is already participant for this event")
 	}
 
-	var priceGroupID *uint
-	{
+	if strings.TrimSpace(currencyCode) != "" {
+		currencyCode = strings.ToUpper(strings.TrimSpace(currencyCode))
+	}
+
+	var resolvedPriceGroupID *uint
+	if priceGroupID != nil {
+		resolvedPriceGroupID = priceGroupID
+	} else {
 		var group PriceGroup
 		err := g.db.
 			Select("id").
@@ -1027,17 +1050,30 @@ func (g *gormZenaoDB) Participate(eventID string, buyerID string, userID string,
 			return err
 		}
 		if group.ID != 0 {
-			priceGroupID = &group.ID
+			resolvedPriceGroupID = &group.ID
 		}
 	}
 
-	if err := g.db.Create(&SoldTicket{
-		EventID:      evt.ID,
-		BuyerID:      uint(buyerIDint),
-		UserID:       uint(userIDint),
-		PriceGroupID: priceGroupID,
-		Secret:       ticket.Secret(),
-		Pubkey:       ticket.Pubkey(),
+	createDB := g.db
+	if orderAttendeeID != nil && strings.TrimSpace(*orderAttendeeID) != "" {
+		createDB = createDB.Clauses(clause.OnConflict{
+			Columns:   []clause.Column{{Name: "order_attendee_id"}},
+			DoNothing: true,
+		})
+	}
+
+	if err := createDB.Create(&SoldTicket{
+		EventID:         evt.ID,
+		BuyerID:         uint(buyerIDint),
+		UserID:          uint(userIDint),
+		OrderID:         orderID,
+		PriceID:         priceID,
+		PriceGroupID:    resolvedPriceGroupID,
+		OrderAttendeeID: orderAttendeeID,
+		AmountMinor:     amountMinor,
+		CurrencyCode:    currencyCode,
+		Secret:          ticket.Secret(),
+		Pubkey:          ticket.Pubkey(),
 	}).Error; err != nil {
 		return err
 	}
@@ -2674,6 +2710,12 @@ func dbSoldTicketToZeniSoldTicket(dbtick *SoldTicket) (*zeni.SoldTicket, error) 
 	if dbtick.User != nil {
 		user = dbUserToZeniDBUser(dbtick.User)
 	}
+
+	amountMinor := int64(0)
+	if dbtick.AmountMinor != nil {
+		amountMinor = *dbtick.AmountMinor
+	}
+
 	ticket := &zeni.SoldTicket{
 		Ticket:          tickobj,
 		EventID:         fmt.Sprint(dbtick.EventID),
@@ -2683,6 +2725,8 @@ func dbSoldTicketToZeniSoldTicket(dbtick *SoldTicket) (*zeni.SoldTicket, error) 
 		PriceID:         uintPtrToString(dbtick.PriceID),
 		PriceGroupID:    uintPtrToString(dbtick.PriceGroupID),
 		OrderAttendeeID: stringPtrToString(dbtick.OrderAttendeeID),
+		AmountMinor:     amountMinor,
+		CurrencyCode:    dbtick.CurrencyCode,
 		Checkin:         checkin,
 		User:            user,
 		CreatedAt:       dbtick.CreatedAt,

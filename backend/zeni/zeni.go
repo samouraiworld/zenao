@@ -306,6 +306,8 @@ type SoldTicket struct {
 	PriceID         string
 	PriceGroupID    string
 	OrderAttendeeID string
+	AmountMinor     int64
+	CurrencyCode    string
 	User            *User
 	Checkin         *Checkin
 }

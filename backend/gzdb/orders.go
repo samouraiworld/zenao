@@ -10,7 +10,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/samouraiworld/zenao/backend/zeni"
 	"gorm.io/gorm"
-	"gorm.io/gorm/clause"
 )
 
 type Order struct {
@@ -465,7 +464,6 @@ func (g *gormZenaoDB) CreateSoldTickets(tickets []*zeni.SoldTicket) error {
 		return nil
 	}
 
-	dbTickets := make([]*SoldTicket, 0, len(tickets))
 	for _, ticket := range tickets {
 		if ticket == nil {
 			return errors.New("sold ticket is nil")
@@ -475,21 +473,6 @@ func (g *gormZenaoDB) CreateSoldTickets(tickets []*zeni.SoldTicket) error {
 		}
 		if strings.TrimSpace(ticket.OrderAttendeeID) == "" {
 			return errors.New("order attendee id is required")
-		}
-
-		eventIDInt, err := strconv.ParseUint(ticket.EventID, 10, 64)
-		if err != nil {
-			return fmt.Errorf("parse event id: %w", err)
-		}
-
-		buyerIDInt, err := strconv.ParseUint(ticket.BuyerID, 10, 64)
-		if err != nil {
-			return fmt.Errorf("parse buyer id: %w", err)
-		}
-
-		userIDInt, err := strconv.ParseUint(ticket.UserID, 10, 64)
-		if err != nil {
-			return fmt.Errorf("parse user id: %w", err)
 		}
 
 		var priceIDInt *uint
@@ -524,21 +507,30 @@ func (g *gormZenaoDB) CreateSoldTickets(tickets []*zeni.SoldTicket) error {
 			return errors.New("ticket secret and pubkey are required")
 		}
 
-		dbTickets = append(dbTickets, &SoldTicket{
-			EventID:         uint(eventIDInt),
-			BuyerID:         uint(buyerIDInt),
-			UserID:          uint(userIDInt),
-			OrderID:         &orderID,
-			PriceID:         priceIDInt,
-			PriceGroupID:    priceGroupIDInt,
-			OrderAttendeeID: &orderAttendeeID,
-			Secret:          secret,
-			Pubkey:          pubkey,
-		})
+		currencyCode := strings.TrimSpace(ticket.CurrencyCode)
+		amountMinor := ticket.AmountMinor
+		var amountMinorPtr *int64
+		if amountMinor != 0 || currencyCode != "" {
+			amountMinorPtr = &amountMinor
+		}
+
+		if err := g.participate(
+			ticket.EventID,
+			ticket.BuyerID,
+			ticket.UserID,
+			secret,
+			"",
+			false,
+			&orderID,
+			priceIDInt,
+			priceGroupIDInt,
+			&orderAttendeeID,
+			currencyCode,
+			amountMinorPtr,
+		); err != nil {
+			return err
+		}
 	}
 
-	return g.db.Clauses(clause.OnConflict{
-		Columns:   []clause.Column{{Name: "order_attendee_id"}},
-		DoNothing: true,
-	}).Create(&dbTickets).Error
+	return nil
 }
