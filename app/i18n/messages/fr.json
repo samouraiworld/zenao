@@ -10,6 +10,7 @@
     "zenao": "ZENAO",
     "your-events": "Vos événements",
     "your-tickets": "Vos billets",
+    "orders": "Commandes",
     "sign-in": "Se connecter",
     "sign-out": "Se déconnecter",
     "edit-profile": "Modifier mon profil",
@@ -340,6 +341,17 @@
     "no-tickets-event": "Aucun billet disponible pour cet événement",
     "description": "Événements auxquels vous participez.",
     "see-event-details": "Voir les détails de l'événement"
+  },
+  "orders": {
+    "title": "Vos commandes",
+    "subtitle": "Récapitulatif de vos achats de billets.",
+    "log-in": "Connectez-vous pour voir vos commandes",
+    "empty": "Aucune commande pour l'instant.",
+    "order-id-label": "ID de commande",
+    "date-label": "Date",
+    "date-unknown": "Inconnue",
+    "total-label": "Total",
+    "free": "Gratuit"
   },
   "event-card": {
     "exclusive-event": "Événement exclusif",

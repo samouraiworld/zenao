@@ -28,3 +28,24 @@ export const orderDetails = (
       });
     },
   });
+
+export const userOrders = (getToken: GetToken, teamId?: string) =>
+  queryOptions({
+    queryKey: ["orders"],
+    queryFn: async () => {
+      const token = await getToken();
+
+      return withSpan("query:backend:orders", async () => {
+        if (!token) {
+          throw new Error("User not logged in");
+        }
+
+        const data = await zenaoClient.getUserOrders(
+          {},
+          { headers: buildQueryHeaders(token, teamId) },
+        );
+
+        return data;
+      });
+    },
+  });

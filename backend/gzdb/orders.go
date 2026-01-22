@@ -206,6 +206,36 @@ func (g *gormZenaoDB) GetOrder(orderID string) (*zeni.Order, error) {
 	return dbOrderToZeniOrder(&order), nil
 }
 
+// ListOrdersByBuyer implements zeni.DB.
+func (g *gormZenaoDB) ListOrdersByBuyer(buyerID string) ([]*zeni.Order, error) {
+	g, span := g.trace("gzdb.ListOrdersByBuyer")
+	defer span.End()
+
+	if strings.TrimSpace(buyerID) == "" {
+		return nil, errors.New("buyer id is required")
+	}
+
+	buyerIDInt, err := strconv.ParseUint(buyerID, 10, 64)
+	if err != nil {
+		return nil, fmt.Errorf("parse buyer id: %w", err)
+	}
+
+	var orders []Order
+	if err := g.db.
+		Where("buyer_id = ?", buyerIDInt).
+		Order("created_at DESC, id DESC").
+		Find(&orders).Error; err != nil {
+		return nil, err
+	}
+
+	result := make([]*zeni.Order, len(orders))
+	for i := range orders {
+		result[i] = dbOrderToZeniOrder(&orders[i])
+	}
+
+	return result, nil
+}
+
 // GetOrderAttendees implements zeni.DB.
 func (g *gormZenaoDB) GetOrderAttendees(orderID string) ([]*zeni.OrderAttendee, error) {
 	g, span := g.trace("gzdb.GetOrderAttendees")

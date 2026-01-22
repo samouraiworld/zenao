@@ -10,6 +10,7 @@
     "zenao": "ZENAO",
     "your-events": "Your events",
     "your-tickets": "Your tickets",
+    "orders": "Orders",
     "sign-in": "Sign in",
     "sign-out": "Sign out",
     "edit-profile": "Edit my profile",
@@ -389,6 +390,17 @@
     "total-label": "Total",
     "ticket-label": "Ticket #{index}",
     "no-tickets": "No tickets are associated with this order yet.",
+    "free": "Free"
+  },
+  "orders": {
+    "title": "Your orders",
+    "subtitle": "A recap of your ticket purchases.",
+    "log-in": "Log in to view your orders",
+    "empty": "No orders yet.",
+    "order-id-label": "Order ID",
+    "date-label": "Date",
+    "date-unknown": "Unknown",
+    "total-label": "Total",
     "free": "Free"
   },
   "event-card": {
