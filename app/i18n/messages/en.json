@@ -160,7 +160,8 @@
       "error-title": "We couldn't confirm your payment",
       "error-description": "We could not confirm the purchase yet. Please try again.",
       "error-button": "Try again",
-      "receipt-reference": "Receipt reference"
+      "receipt-reference": "Receipt reference",
+      "view-order": "View order details"
     }
   },
   "profile-info": {
@@ -378,6 +379,17 @@
     "no-tickets-event": "No tickets available for this event",
     "description": "Events you are attending.",
     "see-event-details": "See event details"
+  },
+  "order": {
+    "title": "Your order",
+    "subtitle": "Here are the tickets and purchase recap for this order.",
+    "log-in": "Log in to view your order",
+    "order-id-label": "Order ID",
+    "quantity-label": "Tickets",
+    "total-label": "Total",
+    "ticket-label": "Ticket #{index}",
+    "no-tickets": "No tickets are associated with this order yet.",
+    "free": "Free"
   },
   "event-card": {
     "exclusive-event": "Exclusive event",

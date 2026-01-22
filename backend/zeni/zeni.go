@@ -384,6 +384,7 @@ type DB interface {
 	CreateOrder(order *Order, attendees []*OrderAttendee) (*Order, error)
 	GetOrder(orderID string) (*Order, error)
 	GetOrderAttendees(orderID string) ([]*OrderAttendee, error)
+	GetOrderTickets(orderID string) ([]*SoldTicket, error)
 	GetOrderPaymentAccount(orderID string) (*PaymentAccount, error)
 	UpdateOrderSetPaymentSession(orderID string, provider string, sessionID string) error
 	UpdateOrderSetStatus(orderID string, status OrderStatus) error

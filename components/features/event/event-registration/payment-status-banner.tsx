@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Alert, AlertDescription, AlertTitle } from "@/components/shadcn/alert";
@@ -172,6 +173,13 @@ export function PaymentStatusBanner() {
               <Text variant="secondary" size="sm" className="font-mono">
                 {t("receipt-reference")}: {receiptReference}
               </Text>
+            ) : null}
+            {orderId ? (
+              <Link href={`/order/${orderId}`} className="w-fit">
+                <Button variant="outline" size="sm">
+                  {t("view-order")}
+                </Button>
+              </Link>
             ) : null}
           </div>
         ) : (

@@ -28,6 +28,7 @@ service ZenaoService {
   rpc CancelParticipation(CancelParticipationRequest)
       returns (CancelParticipationResponse);
   rpc GetEventTickets(GetEventTicketsRequest) returns (GetEventTicketsResponse);
+  rpc GetOrderDetails(GetOrderDetailsRequest) returns (GetOrderDetailsResponse);
   rpc Checkin(CheckinRequest) returns (CheckinResponse);
   rpc ExportParticipants(ExportParticipantsRequest)
       returns (ExportParticipantsResponse);
@@ -455,6 +456,27 @@ message GetEventTicketsResponse { repeated TicketInfo tickets_info = 1; }
 message TicketInfo {
   string ticket_secret = 1;
   string user_email = 2;
+}
+
+message GetOrderDetailsRequest { string order_id = 1; }
+
+message OrderSummary {
+  string order_id = 1;
+  string event_id = 2;
+  string buyer_id = 3;
+  int64 amount_minor = 4;
+  string currency_code = 5;
+  int64 created_at = 6;
+}
+
+message OrderTicketInfo {
+  string ticket_secret = 1;
+  string user_email = 2;
+}
+
+message GetOrderDetailsResponse {
+  OrderSummary order = 1;
+  repeated OrderTicketInfo tickets = 2;
 }
 
 message CheckinRequest {

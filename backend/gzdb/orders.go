@@ -233,6 +233,38 @@ func (g *gormZenaoDB) GetOrderAttendees(orderID string) ([]*zeni.OrderAttendee, 
 	return result, nil
 }
 
+// GetOrderTickets implements zeni.DB.
+func (g *gormZenaoDB) GetOrderTickets(orderID string) ([]*zeni.SoldTicket, error) {
+	g, span := g.trace("gzdb.GetOrderTickets")
+	defer span.End()
+
+	if strings.TrimSpace(orderID) == "" {
+		return nil, errors.New("order id is required")
+	}
+
+	var tickets []*SoldTicket
+	if err := g.db.
+		Model(&SoldTicket{}).
+		Preload("Checkin").
+		Preload("User").
+		Where("order_id = ?", orderID).
+		Order("id ASC").
+		Find(&tickets).Error; err != nil {
+		return nil, err
+	}
+
+	result := make([]*zeni.SoldTicket, len(tickets))
+	for i, ticket := range tickets {
+		var err error
+		result[i], err = dbSoldTicketToZeniSoldTicket(ticket)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return result, nil
+}
+
 // GetOrderPaymentAccount implements zeni.DB.
 func (g *gormZenaoDB) GetOrderPaymentAccount(orderID string) (*zeni.PaymentAccount, error) {
 	g, span := g.trace("gzdb.GetOrderPaymentAccount")

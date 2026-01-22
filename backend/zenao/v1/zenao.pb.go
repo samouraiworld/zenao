@@ -4270,6 +4270,238 @@ func (x *TicketInfo) GetUserEmail() string {
 	return ""
 }
 
+type GetOrderDetailsRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	OrderId       string                 `protobuf:"bytes,1,opt,name=order_id,json=orderId,proto3" json:"order_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetOrderDetailsRequest) Reset() {
+	*x = GetOrderDetailsRequest{}
+	mi := &file_zenao_v1_zenao_proto_msgTypes[74]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetOrderDetailsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetOrderDetailsRequest) ProtoMessage() {}
+
+func (x *GetOrderDetailsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_zenao_v1_zenao_proto_msgTypes[74]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetOrderDetailsRequest.ProtoReflect.Descriptor instead.
+func (*GetOrderDetailsRequest) Descriptor() ([]byte, []int) {
+	return file_zenao_v1_zenao_proto_rawDescGZIP(), []int{74}
+}
+
+func (x *GetOrderDetailsRequest) GetOrderId() string {
+	if x != nil {
+		return x.OrderId
+	}
+	return ""
+}
+
+type OrderSummary struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	OrderId       string                 `protobuf:"bytes,1,opt,name=order_id,json=orderId,proto3" json:"order_id,omitempty"`
+	EventId       string                 `protobuf:"bytes,2,opt,name=event_id,json=eventId,proto3" json:"event_id,omitempty"`
+	BuyerId       string                 `protobuf:"bytes,3,opt,name=buyer_id,json=buyerId,proto3" json:"buyer_id,omitempty"`
+	AmountMinor   int64                  `protobuf:"varint,4,opt,name=amount_minor,json=amountMinor,proto3" json:"amount_minor,omitempty"`
+	CurrencyCode  string                 `protobuf:"bytes,5,opt,name=currency_code,json=currencyCode,proto3" json:"currency_code,omitempty"`
+	CreatedAt     int64                  `protobuf:"varint,6,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *OrderSummary) Reset() {
+	*x = OrderSummary{}
+	mi := &file_zenao_v1_zenao_proto_msgTypes[75]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *OrderSummary) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*OrderSummary) ProtoMessage() {}
+
+func (x *OrderSummary) ProtoReflect() protoreflect.Message {
+	mi := &file_zenao_v1_zenao_proto_msgTypes[75]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use OrderSummary.ProtoReflect.Descriptor instead.
+func (*OrderSummary) Descriptor() ([]byte, []int) {
+	return file_zenao_v1_zenao_proto_rawDescGZIP(), []int{75}
+}
+
+func (x *OrderSummary) GetOrderId() string {
+	if x != nil {
+		return x.OrderId
+	}
+	return ""
+}
+
+func (x *OrderSummary) GetEventId() string {
+	if x != nil {
+		return x.EventId
+	}
+	return ""
+}
+
+func (x *OrderSummary) GetBuyerId() string {
+	if x != nil {
+		return x.BuyerId
+	}
+	return ""
+}
+
+func (x *OrderSummary) GetAmountMinor() int64 {
+	if x != nil {
+		return x.AmountMinor
+	}
+	return 0
+}
+
+func (x *OrderSummary) GetCurrencyCode() string {
+	if x != nil {
+		return x.CurrencyCode
+	}
+	return ""
+}
+
+func (x *OrderSummary) GetCreatedAt() int64 {
+	if x != nil {
+		return x.CreatedAt
+	}
+	return 0
+}
+
+type OrderTicketInfo struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	TicketSecret  string                 `protobuf:"bytes,1,opt,name=ticket_secret,json=ticketSecret,proto3" json:"ticket_secret,omitempty"`
+	UserEmail     string                 `protobuf:"bytes,2,opt,name=user_email,json=userEmail,proto3" json:"user_email,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *OrderTicketInfo) Reset() {
+	*x = OrderTicketInfo{}
+	mi := &file_zenao_v1_zenao_proto_msgTypes[76]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *OrderTicketInfo) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*OrderTicketInfo) ProtoMessage() {}
+
+func (x *OrderTicketInfo) ProtoReflect() protoreflect.Message {
+	mi := &file_zenao_v1_zenao_proto_msgTypes[76]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use OrderTicketInfo.ProtoReflect.Descriptor instead.
+func (*OrderTicketInfo) Descriptor() ([]byte, []int) {
+	return file_zenao_v1_zenao_proto_rawDescGZIP(), []int{76}
+}
+
+func (x *OrderTicketInfo) GetTicketSecret() string {
+	if x != nil {
+		return x.TicketSecret
+	}
+	return ""
+}
+
+func (x *OrderTicketInfo) GetUserEmail() string {
+	if x != nil {
+		return x.UserEmail
+	}
+	return ""
+}
+
+type GetOrderDetailsResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Order         *OrderSummary          `protobuf:"bytes,1,opt,name=order,proto3" json:"order,omitempty"`
+	Tickets       []*OrderTicketInfo     `protobuf:"bytes,2,rep,name=tickets,proto3" json:"tickets,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetOrderDetailsResponse) Reset() {
+	*x = GetOrderDetailsResponse{}
+	mi := &file_zenao_v1_zenao_proto_msgTypes[77]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetOrderDetailsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetOrderDetailsResponse) ProtoMessage() {}
+
+func (x *GetOrderDetailsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_zenao_v1_zenao_proto_msgTypes[77]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetOrderDetailsResponse.ProtoReflect.Descriptor instead.
+func (*GetOrderDetailsResponse) Descriptor() ([]byte, []int) {
+	return file_zenao_v1_zenao_proto_rawDescGZIP(), []int{77}
+}
+
+func (x *GetOrderDetailsResponse) GetOrder() *OrderSummary {
+	if x != nil {
+		return x.Order
+	}
+	return nil
+}
+
+func (x *GetOrderDetailsResponse) GetTickets() []*OrderTicketInfo {
+	if x != nil {
+		return x.Tickets
+	}
+	return nil
+}
+
 type CheckinRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	TicketPubkey  string                 `protobuf:"bytes,1,opt,name=ticket_pubkey,json=ticketPubkey,proto3" json:"ticket_pubkey,omitempty"`
@@ -4280,7 +4512,7 @@ type CheckinRequest struct {
 
 func (x *CheckinRequest) Reset() {
 	*x = CheckinRequest{}
-	mi := &file_zenao_v1_zenao_proto_msgTypes[74]
+	mi := &file_zenao_v1_zenao_proto_msgTypes[78]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4292,7 +4524,7 @@ func (x *CheckinRequest) String() string {
 func (*CheckinRequest) ProtoMessage() {}
 
 func (x *CheckinRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_zenao_v1_zenao_proto_msgTypes[74]
+	mi := &file_zenao_v1_zenao_proto_msgTypes[78]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4305,7 +4537,7 @@ func (x *CheckinRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CheckinRequest.ProtoReflect.Descriptor instead.
 func (*CheckinRequest) Descriptor() ([]byte, []int) {
-	return file_zenao_v1_zenao_proto_rawDescGZIP(), []int{74}
+	return file_zenao_v1_zenao_proto_rawDescGZIP(), []int{78}
 }
 
 func (x *CheckinRequest) GetTicketPubkey() string {
@@ -4330,7 +4562,7 @@ type CheckinResponse struct {
 
 func (x *CheckinResponse) Reset() {
 	*x = CheckinResponse{}
-	mi := &file_zenao_v1_zenao_proto_msgTypes[75]
+	mi := &file_zenao_v1_zenao_proto_msgTypes[79]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4342,7 +4574,7 @@ func (x *CheckinResponse) String() string {
 func (*CheckinResponse) ProtoMessage() {}
 
 func (x *CheckinResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_zenao_v1_zenao_proto_msgTypes[75]
+	mi := &file_zenao_v1_zenao_proto_msgTypes[79]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4355,7 +4587,7 @@ func (x *CheckinResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CheckinResponse.ProtoReflect.Descriptor instead.
 func (*CheckinResponse) Descriptor() ([]byte, []int) {
-	return file_zenao_v1_zenao_proto_rawDescGZIP(), []int{75}
+	return file_zenao_v1_zenao_proto_rawDescGZIP(), []int{79}
 }
 
 type ExportParticipantsRequest struct {
@@ -4367,7 +4599,7 @@ type ExportParticipantsRequest struct {
 
 func (x *ExportParticipantsRequest) Reset() {
 	*x = ExportParticipantsRequest{}
-	mi := &file_zenao_v1_zenao_proto_msgTypes[76]
+	mi := &file_zenao_v1_zenao_proto_msgTypes[80]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4379,7 +4611,7 @@ func (x *ExportParticipantsRequest) String() string {
 func (*ExportParticipantsRequest) ProtoMessage() {}
 
 func (x *ExportParticipantsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_zenao_v1_zenao_proto_msgTypes[76]
+	mi := &file_zenao_v1_zenao_proto_msgTypes[80]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4392,7 +4624,7 @@ func (x *ExportParticipantsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ExportParticipantsRequest.ProtoReflect.Descriptor instead.
 func (*ExportParticipantsRequest) Descriptor() ([]byte, []int) {
-	return file_zenao_v1_zenao_proto_rawDescGZIP(), []int{76}
+	return file_zenao_v1_zenao_proto_rawDescGZIP(), []int{80}
 }
 
 func (x *ExportParticipantsRequest) GetEventId() string {
@@ -4415,7 +4647,7 @@ type ExportParticipantsResponse struct {
 
 func (x *ExportParticipantsResponse) Reset() {
 	*x = ExportParticipantsResponse{}
-	mi := &file_zenao_v1_zenao_proto_msgTypes[77]
+	mi := &file_zenao_v1_zenao_proto_msgTypes[81]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4427,7 +4659,7 @@ func (x *ExportParticipantsResponse) String() string {
 func (*ExportParticipantsResponse) ProtoMessage() {}
 
 func (x *ExportParticipantsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_zenao_v1_zenao_proto_msgTypes[77]
+	mi := &file_zenao_v1_zenao_proto_msgTypes[81]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4440,7 +4672,7 @@ func (x *ExportParticipantsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ExportParticipantsResponse.ProtoReflect.Descriptor instead.
 func (*ExportParticipantsResponse) Descriptor() ([]byte, []int) {
-	return file_zenao_v1_zenao_proto_rawDescGZIP(), []int{77}
+	return file_zenao_v1_zenao_proto_rawDescGZIP(), []int{81}
 }
 
 func (x *ExportParticipantsResponse) GetContent() string {
@@ -4474,7 +4706,7 @@ type Entity struct {
 
 func (x *Entity) Reset() {
 	*x = Entity{}
-	mi := &file_zenao_v1_zenao_proto_msgTypes[78]
+	mi := &file_zenao_v1_zenao_proto_msgTypes[82]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4486,7 +4718,7 @@ func (x *Entity) String() string {
 func (*Entity) ProtoMessage() {}
 
 func (x *Entity) ProtoReflect() protoreflect.Message {
-	mi := &file_zenao_v1_zenao_proto_msgTypes[78]
+	mi := &file_zenao_v1_zenao_proto_msgTypes[82]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4499,7 +4731,7 @@ func (x *Entity) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Entity.ProtoReflect.Descriptor instead.
 func (*Entity) Descriptor() ([]byte, []int) {
-	return file_zenao_v1_zenao_proto_rawDescGZIP(), []int{78}
+	return file_zenao_v1_zenao_proto_rawDescGZIP(), []int{82}
 }
 
 func (x *Entity) GetEntityType() string {
@@ -4526,7 +4758,7 @@ type EntityRolesRequest struct {
 
 func (x *EntityRolesRequest) Reset() {
 	*x = EntityRolesRequest{}
-	mi := &file_zenao_v1_zenao_proto_msgTypes[79]
+	mi := &file_zenao_v1_zenao_proto_msgTypes[83]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4538,7 +4770,7 @@ func (x *EntityRolesRequest) String() string {
 func (*EntityRolesRequest) ProtoMessage() {}
 
 func (x *EntityRolesRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_zenao_v1_zenao_proto_msgTypes[79]
+	mi := &file_zenao_v1_zenao_proto_msgTypes[83]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4551,7 +4783,7 @@ func (x *EntityRolesRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use EntityRolesRequest.ProtoReflect.Descriptor instead.
 func (*EntityRolesRequest) Descriptor() ([]byte, []int) {
-	return file_zenao_v1_zenao_proto_rawDescGZIP(), []int{79}
+	return file_zenao_v1_zenao_proto_rawDescGZIP(), []int{83}
 }
 
 func (x *EntityRolesRequest) GetOrg() *Entity {
@@ -4577,7 +4809,7 @@ type EntityRolesResponse struct {
 
 func (x *EntityRolesResponse) Reset() {
 	*x = EntityRolesResponse{}
-	mi := &file_zenao_v1_zenao_proto_msgTypes[80]
+	mi := &file_zenao_v1_zenao_proto_msgTypes[84]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4589,7 +4821,7 @@ func (x *EntityRolesResponse) String() string {
 func (*EntityRolesResponse) ProtoMessage() {}
 
 func (x *EntityRolesResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_zenao_v1_zenao_proto_msgTypes[80]
+	mi := &file_zenao_v1_zenao_proto_msgTypes[84]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4602,7 +4834,7 @@ func (x *EntityRolesResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use EntityRolesResponse.ProtoReflect.Descriptor instead.
 func (*EntityRolesResponse) Descriptor() ([]byte, []int) {
-	return file_zenao_v1_zenao_proto_rawDescGZIP(), []int{80}
+	return file_zenao_v1_zenao_proto_rawDescGZIP(), []int{84}
 }
 
 func (x *EntityRolesResponse) GetRoles() []string {
@@ -4622,7 +4854,7 @@ type EntitiesWithRolesRequest struct {
 
 func (x *EntitiesWithRolesRequest) Reset() {
 	*x = EntitiesWithRolesRequest{}
-	mi := &file_zenao_v1_zenao_proto_msgTypes[81]
+	mi := &file_zenao_v1_zenao_proto_msgTypes[85]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4634,7 +4866,7 @@ func (x *EntitiesWithRolesRequest) String() string {
 func (*EntitiesWithRolesRequest) ProtoMessage() {}
 
 func (x *EntitiesWithRolesRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_zenao_v1_zenao_proto_msgTypes[81]
+	mi := &file_zenao_v1_zenao_proto_msgTypes[85]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4647,7 +4879,7 @@ func (x *EntitiesWithRolesRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use EntitiesWithRolesRequest.ProtoReflect.Descriptor instead.
 func (*EntitiesWithRolesRequest) Descriptor() ([]byte, []int) {
-	return file_zenao_v1_zenao_proto_rawDescGZIP(), []int{81}
+	return file_zenao_v1_zenao_proto_rawDescGZIP(), []int{85}
 }
 
 func (x *EntitiesWithRolesRequest) GetOrg() *Entity {
@@ -4675,7 +4907,7 @@ type EntityWithRoles struct {
 
 func (x *EntityWithRoles) Reset() {
 	*x = EntityWithRoles{}
-	mi := &file_zenao_v1_zenao_proto_msgTypes[82]
+	mi := &file_zenao_v1_zenao_proto_msgTypes[86]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4687,7 +4919,7 @@ func (x *EntityWithRoles) String() string {
 func (*EntityWithRoles) ProtoMessage() {}
 
 func (x *EntityWithRoles) ProtoReflect() protoreflect.Message {
-	mi := &file_zenao_v1_zenao_proto_msgTypes[82]
+	mi := &file_zenao_v1_zenao_proto_msgTypes[86]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4700,7 +4932,7 @@ func (x *EntityWithRoles) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use EntityWithRoles.ProtoReflect.Descriptor instead.
 func (*EntityWithRoles) Descriptor() ([]byte, []int) {
-	return file_zenao_v1_zenao_proto_rawDescGZIP(), []int{82}
+	return file_zenao_v1_zenao_proto_rawDescGZIP(), []int{86}
 }
 
 func (x *EntityWithRoles) GetEntityType() string {
@@ -4733,7 +4965,7 @@ type EntitiesWithRolesResponse struct {
 
 func (x *EntitiesWithRolesResponse) Reset() {
 	*x = EntitiesWithRolesResponse{}
-	mi := &file_zenao_v1_zenao_proto_msgTypes[83]
+	mi := &file_zenao_v1_zenao_proto_msgTypes[87]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4745,7 +4977,7 @@ func (x *EntitiesWithRolesResponse) String() string {
 func (*EntitiesWithRolesResponse) ProtoMessage() {}
 
 func (x *EntitiesWithRolesResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_zenao_v1_zenao_proto_msgTypes[83]
+	mi := &file_zenao_v1_zenao_proto_msgTypes[87]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4758,7 +4990,7 @@ func (x *EntitiesWithRolesResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use EntitiesWithRolesResponse.ProtoReflect.Descriptor instead.
 func (*EntitiesWithRolesResponse) Descriptor() ([]byte, []int) {
-	return file_zenao_v1_zenao_proto_rawDescGZIP(), []int{83}
+	return file_zenao_v1_zenao_proto_rawDescGZIP(), []int{87}
 }
 
 func (x *EntitiesWithRolesResponse) GetEntitiesWithRoles() []*EntityWithRoles {
@@ -4777,7 +5009,7 @@ type GetCommunityRequest struct {
 
 func (x *GetCommunityRequest) Reset() {
 	*x = GetCommunityRequest{}
-	mi := &file_zenao_v1_zenao_proto_msgTypes[84]
+	mi := &file_zenao_v1_zenao_proto_msgTypes[88]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4789,7 +5021,7 @@ func (x *GetCommunityRequest) String() string {
 func (*GetCommunityRequest) ProtoMessage() {}
 
 func (x *GetCommunityRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_zenao_v1_zenao_proto_msgTypes[84]
+	mi := &file_zenao_v1_zenao_proto_msgTypes[88]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4802,7 +5034,7 @@ func (x *GetCommunityRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetCommunityRequest.ProtoReflect.Descriptor instead.
 func (*GetCommunityRequest) Descriptor() ([]byte, []int) {
-	return file_zenao_v1_zenao_proto_rawDescGZIP(), []int{84}
+	return file_zenao_v1_zenao_proto_rawDescGZIP(), []int{88}
 }
 
 func (x *GetCommunityRequest) GetCommunityId() string {
@@ -4821,7 +5053,7 @@ type GetCommunityResponse struct {
 
 func (x *GetCommunityResponse) Reset() {
 	*x = GetCommunityResponse{}
-	mi := &file_zenao_v1_zenao_proto_msgTypes[85]
+	mi := &file_zenao_v1_zenao_proto_msgTypes[89]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4833,7 +5065,7 @@ func (x *GetCommunityResponse) String() string {
 func (*GetCommunityResponse) ProtoMessage() {}
 
 func (x *GetCommunityResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_zenao_v1_zenao_proto_msgTypes[85]
+	mi := &file_zenao_v1_zenao_proto_msgTypes[89]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4846,7 +5078,7 @@ func (x *GetCommunityResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetCommunityResponse.ProtoReflect.Descriptor instead.
 func (*GetCommunityResponse) Descriptor() ([]byte, []int) {
-	return file_zenao_v1_zenao_proto_rawDescGZIP(), []int{85}
+	return file_zenao_v1_zenao_proto_rawDescGZIP(), []int{89}
 }
 
 func (x *GetCommunityResponse) GetCommunity() *CommunityInfo {
@@ -4871,7 +5103,7 @@ type CommunityInfo struct {
 
 func (x *CommunityInfo) Reset() {
 	*x = CommunityInfo{}
-	mi := &file_zenao_v1_zenao_proto_msgTypes[86]
+	mi := &file_zenao_v1_zenao_proto_msgTypes[90]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4883,7 +5115,7 @@ func (x *CommunityInfo) String() string {
 func (*CommunityInfo) ProtoMessage() {}
 
 func (x *CommunityInfo) ProtoReflect() protoreflect.Message {
-	mi := &file_zenao_v1_zenao_proto_msgTypes[86]
+	mi := &file_zenao_v1_zenao_proto_msgTypes[90]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4896,7 +5128,7 @@ func (x *CommunityInfo) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CommunityInfo.ProtoReflect.Descriptor instead.
 func (*CommunityInfo) Descriptor() ([]byte, []int) {
-	return file_zenao_v1_zenao_proto_rawDescGZIP(), []int{86}
+	return file_zenao_v1_zenao_proto_rawDescGZIP(), []int{90}
 }
 
 func (x *CommunityInfo) GetId() string {
@@ -4958,7 +5190,7 @@ type ListCommunitiesRequest struct {
 
 func (x *ListCommunitiesRequest) Reset() {
 	*x = ListCommunitiesRequest{}
-	mi := &file_zenao_v1_zenao_proto_msgTypes[87]
+	mi := &file_zenao_v1_zenao_proto_msgTypes[91]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4970,7 +5202,7 @@ func (x *ListCommunitiesRequest) String() string {
 func (*ListCommunitiesRequest) ProtoMessage() {}
 
 func (x *ListCommunitiesRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_zenao_v1_zenao_proto_msgTypes[87]
+	mi := &file_zenao_v1_zenao_proto_msgTypes[91]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4983,7 +5215,7 @@ func (x *ListCommunitiesRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListCommunitiesRequest.ProtoReflect.Descriptor instead.
 func (*ListCommunitiesRequest) Descriptor() ([]byte, []int) {
-	return file_zenao_v1_zenao_proto_rawDescGZIP(), []int{87}
+	return file_zenao_v1_zenao_proto_rawDescGZIP(), []int{91}
 }
 
 func (x *ListCommunitiesRequest) GetLimit() uint32 {
@@ -5009,7 +5241,7 @@ type ListCommunitiesResponse struct {
 
 func (x *ListCommunitiesResponse) Reset() {
 	*x = ListCommunitiesResponse{}
-	mi := &file_zenao_v1_zenao_proto_msgTypes[88]
+	mi := &file_zenao_v1_zenao_proto_msgTypes[92]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5021,7 +5253,7 @@ func (x *ListCommunitiesResponse) String() string {
 func (*ListCommunitiesResponse) ProtoMessage() {}
 
 func (x *ListCommunitiesResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_zenao_v1_zenao_proto_msgTypes[88]
+	mi := &file_zenao_v1_zenao_proto_msgTypes[92]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5034,7 +5266,7 @@ func (x *ListCommunitiesResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListCommunitiesResponse.ProtoReflect.Descriptor instead.
 func (*ListCommunitiesResponse) Descriptor() ([]byte, []int) {
-	return file_zenao_v1_zenao_proto_rawDescGZIP(), []int{88}
+	return file_zenao_v1_zenao_proto_rawDescGZIP(), []int{92}
 }
 
 func (x *ListCommunitiesResponse) GetCommunities() []*CommunityInfo {
@@ -5055,7 +5287,7 @@ type ListCommunitiesByEventRequest struct {
 
 func (x *ListCommunitiesByEventRequest) Reset() {
 	*x = ListCommunitiesByEventRequest{}
-	mi := &file_zenao_v1_zenao_proto_msgTypes[89]
+	mi := &file_zenao_v1_zenao_proto_msgTypes[93]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5067,7 +5299,7 @@ func (x *ListCommunitiesByEventRequest) String() string {
 func (*ListCommunitiesByEventRequest) ProtoMessage() {}
 
 func (x *ListCommunitiesByEventRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_zenao_v1_zenao_proto_msgTypes[89]
+	mi := &file_zenao_v1_zenao_proto_msgTypes[93]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5080,7 +5312,7 @@ func (x *ListCommunitiesByEventRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListCommunitiesByEventRequest.ProtoReflect.Descriptor instead.
 func (*ListCommunitiesByEventRequest) Descriptor() ([]byte, []int) {
-	return file_zenao_v1_zenao_proto_rawDescGZIP(), []int{89}
+	return file_zenao_v1_zenao_proto_rawDescGZIP(), []int{93}
 }
 
 func (x *ListCommunitiesByEventRequest) GetEventId() string {
@@ -5113,7 +5345,7 @@ type ListCommunitiesByEventResponse struct {
 
 func (x *ListCommunitiesByEventResponse) Reset() {
 	*x = ListCommunitiesByEventResponse{}
-	mi := &file_zenao_v1_zenao_proto_msgTypes[90]
+	mi := &file_zenao_v1_zenao_proto_msgTypes[94]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5125,7 +5357,7 @@ func (x *ListCommunitiesByEventResponse) String() string {
 func (*ListCommunitiesByEventResponse) ProtoMessage() {}
 
 func (x *ListCommunitiesByEventResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_zenao_v1_zenao_proto_msgTypes[90]
+	mi := &file_zenao_v1_zenao_proto_msgTypes[94]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5138,7 +5370,7 @@ func (x *ListCommunitiesByEventResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListCommunitiesByEventResponse.ProtoReflect.Descriptor instead.
 func (*ListCommunitiesByEventResponse) Descriptor() ([]byte, []int) {
-	return file_zenao_v1_zenao_proto_rawDescGZIP(), []int{90}
+	return file_zenao_v1_zenao_proto_rawDescGZIP(), []int{94}
 }
 
 func (x *ListCommunitiesByEventResponse) GetCommunities() []*CommunityInfo {
@@ -5158,7 +5390,7 @@ type CommunityUser struct {
 
 func (x *CommunityUser) Reset() {
 	*x = CommunityUser{}
-	mi := &file_zenao_v1_zenao_proto_msgTypes[91]
+	mi := &file_zenao_v1_zenao_proto_msgTypes[95]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5170,7 +5402,7 @@ func (x *CommunityUser) String() string {
 func (*CommunityUser) ProtoMessage() {}
 
 func (x *CommunityUser) ProtoReflect() protoreflect.Message {
-	mi := &file_zenao_v1_zenao_proto_msgTypes[91]
+	mi := &file_zenao_v1_zenao_proto_msgTypes[95]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5183,7 +5415,7 @@ func (x *CommunityUser) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CommunityUser.ProtoReflect.Descriptor instead.
 func (*CommunityUser) Descriptor() ([]byte, []int) {
-	return file_zenao_v1_zenao_proto_rawDescGZIP(), []int{91}
+	return file_zenao_v1_zenao_proto_rawDescGZIP(), []int{95}
 }
 
 func (x *CommunityUser) GetCommunity() *CommunityInfo {
@@ -5212,7 +5444,7 @@ type ListCommunitiesByUserRolesRequest struct {
 
 func (x *ListCommunitiesByUserRolesRequest) Reset() {
 	*x = ListCommunitiesByUserRolesRequest{}
-	mi := &file_zenao_v1_zenao_proto_msgTypes[92]
+	mi := &file_zenao_v1_zenao_proto_msgTypes[96]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5224,7 +5456,7 @@ func (x *ListCommunitiesByUserRolesRequest) String() string {
 func (*ListCommunitiesByUserRolesRequest) ProtoMessage() {}
 
 func (x *ListCommunitiesByUserRolesRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_zenao_v1_zenao_proto_msgTypes[92]
+	mi := &file_zenao_v1_zenao_proto_msgTypes[96]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5237,7 +5469,7 @@ func (x *ListCommunitiesByUserRolesRequest) ProtoReflect() protoreflect.Message 
 
 // Deprecated: Use ListCommunitiesByUserRolesRequest.ProtoReflect.Descriptor instead.
 func (*ListCommunitiesByUserRolesRequest) Descriptor() ([]byte, []int) {
-	return file_zenao_v1_zenao_proto_rawDescGZIP(), []int{92}
+	return file_zenao_v1_zenao_proto_rawDescGZIP(), []int{96}
 }
 
 func (x *ListCommunitiesByUserRolesRequest) GetUserId() string {
@@ -5277,7 +5509,7 @@ type ListCommunitiesByUserRolesResponse struct {
 
 func (x *ListCommunitiesByUserRolesResponse) Reset() {
 	*x = ListCommunitiesByUserRolesResponse{}
-	mi := &file_zenao_v1_zenao_proto_msgTypes[93]
+	mi := &file_zenao_v1_zenao_proto_msgTypes[97]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5289,7 +5521,7 @@ func (x *ListCommunitiesByUserRolesResponse) String() string {
 func (*ListCommunitiesByUserRolesResponse) ProtoMessage() {}
 
 func (x *ListCommunitiesByUserRolesResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_zenao_v1_zenao_proto_msgTypes[93]
+	mi := &file_zenao_v1_zenao_proto_msgTypes[97]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5302,7 +5534,7 @@ func (x *ListCommunitiesByUserRolesResponse) ProtoReflect() protoreflect.Message
 
 // Deprecated: Use ListCommunitiesByUserRolesResponse.ProtoReflect.Descriptor instead.
 func (*ListCommunitiesByUserRolesResponse) Descriptor() ([]byte, []int) {
-	return file_zenao_v1_zenao_proto_rawDescGZIP(), []int{93}
+	return file_zenao_v1_zenao_proto_rawDescGZIP(), []int{97}
 }
 
 func (x *ListCommunitiesByUserRolesResponse) GetCommunities() []*CommunityUser {
@@ -5325,7 +5557,7 @@ type CreateCommunityRequest struct {
 
 func (x *CreateCommunityRequest) Reset() {
 	*x = CreateCommunityRequest{}
-	mi := &file_zenao_v1_zenao_proto_msgTypes[94]
+	mi := &file_zenao_v1_zenao_proto_msgTypes[98]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5337,7 +5569,7 @@ func (x *CreateCommunityRequest) String() string {
 func (*CreateCommunityRequest) ProtoMessage() {}
 
 func (x *CreateCommunityRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_zenao_v1_zenao_proto_msgTypes[94]
+	mi := &file_zenao_v1_zenao_proto_msgTypes[98]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5350,7 +5582,7 @@ func (x *CreateCommunityRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateCommunityRequest.ProtoReflect.Descriptor instead.
 func (*CreateCommunityRequest) Descriptor() ([]byte, []int) {
-	return file_zenao_v1_zenao_proto_rawDescGZIP(), []int{94}
+	return file_zenao_v1_zenao_proto_rawDescGZIP(), []int{98}
 }
 
 func (x *CreateCommunityRequest) GetDisplayName() string {
@@ -5397,7 +5629,7 @@ type CreateCommunityResponse struct {
 
 func (x *CreateCommunityResponse) Reset() {
 	*x = CreateCommunityResponse{}
-	mi := &file_zenao_v1_zenao_proto_msgTypes[95]
+	mi := &file_zenao_v1_zenao_proto_msgTypes[99]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5409,7 +5641,7 @@ func (x *CreateCommunityResponse) String() string {
 func (*CreateCommunityResponse) ProtoMessage() {}
 
 func (x *CreateCommunityResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_zenao_v1_zenao_proto_msgTypes[95]
+	mi := &file_zenao_v1_zenao_proto_msgTypes[99]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5422,7 +5654,7 @@ func (x *CreateCommunityResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateCommunityResponse.ProtoReflect.Descriptor instead.
 func (*CreateCommunityResponse) Descriptor() ([]byte, []int) {
-	return file_zenao_v1_zenao_proto_rawDescGZIP(), []int{95}
+	return file_zenao_v1_zenao_proto_rawDescGZIP(), []int{99}
 }
 
 func (x *CreateCommunityResponse) GetCommunityId() string {
@@ -5446,7 +5678,7 @@ type EditCommunityRequest struct {
 
 func (x *EditCommunityRequest) Reset() {
 	*x = EditCommunityRequest{}
-	mi := &file_zenao_v1_zenao_proto_msgTypes[96]
+	mi := &file_zenao_v1_zenao_proto_msgTypes[100]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5458,7 +5690,7 @@ func (x *EditCommunityRequest) String() string {
 func (*EditCommunityRequest) ProtoMessage() {}
 
 func (x *EditCommunityRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_zenao_v1_zenao_proto_msgTypes[96]
+	mi := &file_zenao_v1_zenao_proto_msgTypes[100]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5471,7 +5703,7 @@ func (x *EditCommunityRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use EditCommunityRequest.ProtoReflect.Descriptor instead.
 func (*EditCommunityRequest) Descriptor() ([]byte, []int) {
-	return file_zenao_v1_zenao_proto_rawDescGZIP(), []int{96}
+	return file_zenao_v1_zenao_proto_rawDescGZIP(), []int{100}
 }
 
 func (x *EditCommunityRequest) GetCommunityId() string {
@@ -5524,7 +5756,7 @@ type EditCommunityResponse struct {
 
 func (x *EditCommunityResponse) Reset() {
 	*x = EditCommunityResponse{}
-	mi := &file_zenao_v1_zenao_proto_msgTypes[97]
+	mi := &file_zenao_v1_zenao_proto_msgTypes[101]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5536,7 +5768,7 @@ func (x *EditCommunityResponse) String() string {
 func (*EditCommunityResponse) ProtoMessage() {}
 
 func (x *EditCommunityResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_zenao_v1_zenao_proto_msgTypes[97]
+	mi := &file_zenao_v1_zenao_proto_msgTypes[101]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5549,7 +5781,7 @@ func (x *EditCommunityResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use EditCommunityResponse.ProtoReflect.Descriptor instead.
 func (*EditCommunityResponse) Descriptor() ([]byte, []int) {
-	return file_zenao_v1_zenao_proto_rawDescGZIP(), []int{97}
+	return file_zenao_v1_zenao_proto_rawDescGZIP(), []int{101}
 }
 
 type StartCommunityStripeOnboardingRequest struct {
@@ -5563,7 +5795,7 @@ type StartCommunityStripeOnboardingRequest struct {
 
 func (x *StartCommunityStripeOnboardingRequest) Reset() {
 	*x = StartCommunityStripeOnboardingRequest{}
-	mi := &file_zenao_v1_zenao_proto_msgTypes[98]
+	mi := &file_zenao_v1_zenao_proto_msgTypes[102]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5575,7 +5807,7 @@ func (x *StartCommunityStripeOnboardingRequest) String() string {
 func (*StartCommunityStripeOnboardingRequest) ProtoMessage() {}
 
 func (x *StartCommunityStripeOnboardingRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_zenao_v1_zenao_proto_msgTypes[98]
+	mi := &file_zenao_v1_zenao_proto_msgTypes[102]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5588,7 +5820,7 @@ func (x *StartCommunityStripeOnboardingRequest) ProtoReflect() protoreflect.Mess
 
 // Deprecated: Use StartCommunityStripeOnboardingRequest.ProtoReflect.Descriptor instead.
 func (*StartCommunityStripeOnboardingRequest) Descriptor() ([]byte, []int) {
-	return file_zenao_v1_zenao_proto_rawDescGZIP(), []int{98}
+	return file_zenao_v1_zenao_proto_rawDescGZIP(), []int{102}
 }
 
 func (x *StartCommunityStripeOnboardingRequest) GetCommunityId() string {
@@ -5621,7 +5853,7 @@ type StartCommunityStripeOnboardingResponse struct {
 
 func (x *StartCommunityStripeOnboardingResponse) Reset() {
 	*x = StartCommunityStripeOnboardingResponse{}
-	mi := &file_zenao_v1_zenao_proto_msgTypes[99]
+	mi := &file_zenao_v1_zenao_proto_msgTypes[103]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5633,7 +5865,7 @@ func (x *StartCommunityStripeOnboardingResponse) String() string {
 func (*StartCommunityStripeOnboardingResponse) ProtoMessage() {}
 
 func (x *StartCommunityStripeOnboardingResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_zenao_v1_zenao_proto_msgTypes[99]
+	mi := &file_zenao_v1_zenao_proto_msgTypes[103]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5646,7 +5878,7 @@ func (x *StartCommunityStripeOnboardingResponse) ProtoReflect() protoreflect.Mes
 
 // Deprecated: Use StartCommunityStripeOnboardingResponse.ProtoReflect.Descriptor instead.
 func (*StartCommunityStripeOnboardingResponse) Descriptor() ([]byte, []int) {
-	return file_zenao_v1_zenao_proto_rawDescGZIP(), []int{99}
+	return file_zenao_v1_zenao_proto_rawDescGZIP(), []int{103}
 }
 
 func (x *StartCommunityStripeOnboardingResponse) GetOnboardingUrl() string {
@@ -5665,7 +5897,7 @@ type GetCommunityPayoutStatusRequest struct {
 
 func (x *GetCommunityPayoutStatusRequest) Reset() {
 	*x = GetCommunityPayoutStatusRequest{}
-	mi := &file_zenao_v1_zenao_proto_msgTypes[100]
+	mi := &file_zenao_v1_zenao_proto_msgTypes[104]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5677,7 +5909,7 @@ func (x *GetCommunityPayoutStatusRequest) String() string {
 func (*GetCommunityPayoutStatusRequest) ProtoMessage() {}
 
 func (x *GetCommunityPayoutStatusRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_zenao_v1_zenao_proto_msgTypes[100]
+	mi := &file_zenao_v1_zenao_proto_msgTypes[104]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5690,7 +5922,7 @@ func (x *GetCommunityPayoutStatusRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetCommunityPayoutStatusRequest.ProtoReflect.Descriptor instead.
 func (*GetCommunityPayoutStatusRequest) Descriptor() ([]byte, []int) {
-	return file_zenao_v1_zenao_proto_rawDescGZIP(), []int{100}
+	return file_zenao_v1_zenao_proto_rawDescGZIP(), []int{104}
 }
 
 func (x *GetCommunityPayoutStatusRequest) GetCommunityId() string {
@@ -5715,7 +5947,7 @@ type GetCommunityPayoutStatusResponse struct {
 
 func (x *GetCommunityPayoutStatusResponse) Reset() {
 	*x = GetCommunityPayoutStatusResponse{}
-	mi := &file_zenao_v1_zenao_proto_msgTypes[101]
+	mi := &file_zenao_v1_zenao_proto_msgTypes[105]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5727,7 +5959,7 @@ func (x *GetCommunityPayoutStatusResponse) String() string {
 func (*GetCommunityPayoutStatusResponse) ProtoMessage() {}
 
 func (x *GetCommunityPayoutStatusResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_zenao_v1_zenao_proto_msgTypes[101]
+	mi := &file_zenao_v1_zenao_proto_msgTypes[105]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5740,7 +5972,7 @@ func (x *GetCommunityPayoutStatusResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetCommunityPayoutStatusResponse.ProtoReflect.Descriptor instead.
 func (*GetCommunityPayoutStatusResponse) Descriptor() ([]byte, []int) {
-	return file_zenao_v1_zenao_proto_rawDescGZIP(), []int{101}
+	return file_zenao_v1_zenao_proto_rawDescGZIP(), []int{105}
 }
 
 func (x *GetCommunityPayoutStatusResponse) GetVerificationState() string {
@@ -5801,7 +6033,7 @@ type CreateTeamRequest struct {
 
 func (x *CreateTeamRequest) Reset() {
 	*x = CreateTeamRequest{}
-	mi := &file_zenao_v1_zenao_proto_msgTypes[102]
+	mi := &file_zenao_v1_zenao_proto_msgTypes[106]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5813,7 +6045,7 @@ func (x *CreateTeamRequest) String() string {
 func (*CreateTeamRequest) ProtoMessage() {}
 
 func (x *CreateTeamRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_zenao_v1_zenao_proto_msgTypes[102]
+	mi := &file_zenao_v1_zenao_proto_msgTypes[106]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5826,7 +6058,7 @@ func (x *CreateTeamRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateTeamRequest.ProtoReflect.Descriptor instead.
 func (*CreateTeamRequest) Descriptor() ([]byte, []int) {
-	return file_zenao_v1_zenao_proto_rawDescGZIP(), []int{102}
+	return file_zenao_v1_zenao_proto_rawDescGZIP(), []int{106}
 }
 
 func (x *CreateTeamRequest) GetDisplayName() string {
@@ -5845,7 +6077,7 @@ type CreateTeamResponse struct {
 
 func (x *CreateTeamResponse) Reset() {
 	*x = CreateTeamResponse{}
-	mi := &file_zenao_v1_zenao_proto_msgTypes[103]
+	mi := &file_zenao_v1_zenao_proto_msgTypes[107]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5857,7 +6089,7 @@ func (x *CreateTeamResponse) String() string {
 func (*CreateTeamResponse) ProtoMessage() {}
 
 func (x *CreateTeamResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_zenao_v1_zenao_proto_msgTypes[103]
+	mi := &file_zenao_v1_zenao_proto_msgTypes[107]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5870,7 +6102,7 @@ func (x *CreateTeamResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateTeamResponse.ProtoReflect.Descriptor instead.
 func (*CreateTeamResponse) Descriptor() ([]byte, []int) {
-	return file_zenao_v1_zenao_proto_rawDescGZIP(), []int{103}
+	return file_zenao_v1_zenao_proto_rawDescGZIP(), []int{107}
 }
 
 func (x *CreateTeamResponse) GetTeamId() string {
@@ -5893,7 +6125,7 @@ type EditTeamRequest struct {
 
 func (x *EditTeamRequest) Reset() {
 	*x = EditTeamRequest{}
-	mi := &file_zenao_v1_zenao_proto_msgTypes[104]
+	mi := &file_zenao_v1_zenao_proto_msgTypes[108]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5905,7 +6137,7 @@ func (x *EditTeamRequest) String() string {
 func (*EditTeamRequest) ProtoMessage() {}
 
 func (x *EditTeamRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_zenao_v1_zenao_proto_msgTypes[104]
+	mi := &file_zenao_v1_zenao_proto_msgTypes[108]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5918,7 +6150,7 @@ func (x *EditTeamRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use EditTeamRequest.ProtoReflect.Descriptor instead.
 func (*EditTeamRequest) Descriptor() ([]byte, []int) {
-	return file_zenao_v1_zenao_proto_rawDescGZIP(), []int{104}
+	return file_zenao_v1_zenao_proto_rawDescGZIP(), []int{108}
 }
 
 func (x *EditTeamRequest) GetTeamId() string {
@@ -5964,7 +6196,7 @@ type EditTeamResponse struct {
 
 func (x *EditTeamResponse) Reset() {
 	*x = EditTeamResponse{}
-	mi := &file_zenao_v1_zenao_proto_msgTypes[105]
+	mi := &file_zenao_v1_zenao_proto_msgTypes[109]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5976,7 +6208,7 @@ func (x *EditTeamResponse) String() string {
 func (*EditTeamResponse) ProtoMessage() {}
 
 func (x *EditTeamResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_zenao_v1_zenao_proto_msgTypes[105]
+	mi := &file_zenao_v1_zenao_proto_msgTypes[109]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5989,7 +6221,7 @@ func (x *EditTeamResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use EditTeamResponse.ProtoReflect.Descriptor instead.
 func (*EditTeamResponse) Descriptor() ([]byte, []int) {
-	return file_zenao_v1_zenao_proto_rawDescGZIP(), []int{105}
+	return file_zenao_v1_zenao_proto_rawDescGZIP(), []int{109}
 }
 
 type DeleteTeamRequest struct {
@@ -6001,7 +6233,7 @@ type DeleteTeamRequest struct {
 
 func (x *DeleteTeamRequest) Reset() {
 	*x = DeleteTeamRequest{}
-	mi := &file_zenao_v1_zenao_proto_msgTypes[106]
+	mi := &file_zenao_v1_zenao_proto_msgTypes[110]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -6013,7 +6245,7 @@ func (x *DeleteTeamRequest) String() string {
 func (*DeleteTeamRequest) ProtoMessage() {}
 
 func (x *DeleteTeamRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_zenao_v1_zenao_proto_msgTypes[106]
+	mi := &file_zenao_v1_zenao_proto_msgTypes[110]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -6026,7 +6258,7 @@ func (x *DeleteTeamRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteTeamRequest.ProtoReflect.Descriptor instead.
 func (*DeleteTeamRequest) Descriptor() ([]byte, []int) {
-	return file_zenao_v1_zenao_proto_rawDescGZIP(), []int{106}
+	return file_zenao_v1_zenao_proto_rawDescGZIP(), []int{110}
 }
 
 func (x *DeleteTeamRequest) GetTeamId() string {
@@ -6044,7 +6276,7 @@ type DeleteTeamResponse struct {
 
 func (x *DeleteTeamResponse) Reset() {
 	*x = DeleteTeamResponse{}
-	mi := &file_zenao_v1_zenao_proto_msgTypes[107]
+	mi := &file_zenao_v1_zenao_proto_msgTypes[111]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -6056,7 +6288,7 @@ func (x *DeleteTeamResponse) String() string {
 func (*DeleteTeamResponse) ProtoMessage() {}
 
 func (x *DeleteTeamResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_zenao_v1_zenao_proto_msgTypes[107]
+	mi := &file_zenao_v1_zenao_proto_msgTypes[111]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -6069,7 +6301,7 @@ func (x *DeleteTeamResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteTeamResponse.ProtoReflect.Descriptor instead.
 func (*DeleteTeamResponse) Descriptor() ([]byte, []int) {
-	return file_zenao_v1_zenao_proto_rawDescGZIP(), []int{107}
+	return file_zenao_v1_zenao_proto_rawDescGZIP(), []int{111}
 }
 
 type GetUserTeamsRequest struct {
@@ -6080,7 +6312,7 @@ type GetUserTeamsRequest struct {
 
 func (x *GetUserTeamsRequest) Reset() {
 	*x = GetUserTeamsRequest{}
-	mi := &file_zenao_v1_zenao_proto_msgTypes[108]
+	mi := &file_zenao_v1_zenao_proto_msgTypes[112]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -6092,7 +6324,7 @@ func (x *GetUserTeamsRequest) String() string {
 func (*GetUserTeamsRequest) ProtoMessage() {}
 
 func (x *GetUserTeamsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_zenao_v1_zenao_proto_msgTypes[108]
+	mi := &file_zenao_v1_zenao_proto_msgTypes[112]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -6105,7 +6337,7 @@ func (x *GetUserTeamsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetUserTeamsRequest.ProtoReflect.Descriptor instead.
 func (*GetUserTeamsRequest) Descriptor() ([]byte, []int) {
-	return file_zenao_v1_zenao_proto_rawDescGZIP(), []int{108}
+	return file_zenao_v1_zenao_proto_rawDescGZIP(), []int{112}
 }
 
 type GetUserTeamsResponse struct {
@@ -6117,7 +6349,7 @@ type GetUserTeamsResponse struct {
 
 func (x *GetUserTeamsResponse) Reset() {
 	*x = GetUserTeamsResponse{}
-	mi := &file_zenao_v1_zenao_proto_msgTypes[109]
+	mi := &file_zenao_v1_zenao_proto_msgTypes[113]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -6129,7 +6361,7 @@ func (x *GetUserTeamsResponse) String() string {
 func (*GetUserTeamsResponse) ProtoMessage() {}
 
 func (x *GetUserTeamsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_zenao_v1_zenao_proto_msgTypes[109]
+	mi := &file_zenao_v1_zenao_proto_msgTypes[113]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -6142,7 +6374,7 @@ func (x *GetUserTeamsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetUserTeamsResponse.ProtoReflect.Descriptor instead.
 func (*GetUserTeamsResponse) Descriptor() ([]byte, []int) {
-	return file_zenao_v1_zenao_proto_rawDescGZIP(), []int{109}
+	return file_zenao_v1_zenao_proto_rawDescGZIP(), []int{113}
 }
 
 func (x *GetUserTeamsResponse) GetTeams() []*UserTeam {
@@ -6166,7 +6398,7 @@ type UserTeam struct {
 
 func (x *UserTeam) Reset() {
 	*x = UserTeam{}
-	mi := &file_zenao_v1_zenao_proto_msgTypes[110]
+	mi := &file_zenao_v1_zenao_proto_msgTypes[114]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -6178,7 +6410,7 @@ func (x *UserTeam) String() string {
 func (*UserTeam) ProtoMessage() {}
 
 func (x *UserTeam) ProtoReflect() protoreflect.Message {
-	mi := &file_zenao_v1_zenao_proto_msgTypes[110]
+	mi := &file_zenao_v1_zenao_proto_msgTypes[114]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -6191,7 +6423,7 @@ func (x *UserTeam) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UserTeam.ProtoReflect.Descriptor instead.
 func (*UserTeam) Descriptor() ([]byte, []int) {
-	return file_zenao_v1_zenao_proto_rawDescGZIP(), []int{110}
+	return file_zenao_v1_zenao_proto_rawDescGZIP(), []int{114}
 }
 
 func (x *UserTeam) GetTeamId() string {
@@ -6245,7 +6477,7 @@ type GetTeamMembersRequest struct {
 
 func (x *GetTeamMembersRequest) Reset() {
 	*x = GetTeamMembersRequest{}
-	mi := &file_zenao_v1_zenao_proto_msgTypes[111]
+	mi := &file_zenao_v1_zenao_proto_msgTypes[115]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -6257,7 +6489,7 @@ func (x *GetTeamMembersRequest) String() string {
 func (*GetTeamMembersRequest) ProtoMessage() {}
 
 func (x *GetTeamMembersRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_zenao_v1_zenao_proto_msgTypes[111]
+	mi := &file_zenao_v1_zenao_proto_msgTypes[115]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -6270,7 +6502,7 @@ func (x *GetTeamMembersRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetTeamMembersRequest.ProtoReflect.Descriptor instead.
 func (*GetTeamMembersRequest) Descriptor() ([]byte, []int) {
-	return file_zenao_v1_zenao_proto_rawDescGZIP(), []int{111}
+	return file_zenao_v1_zenao_proto_rawDescGZIP(), []int{115}
 }
 
 func (x *GetTeamMembersRequest) GetTeamId() string {
@@ -6289,7 +6521,7 @@ type GetTeamMembersResponse struct {
 
 func (x *GetTeamMembersResponse) Reset() {
 	*x = GetTeamMembersResponse{}
-	mi := &file_zenao_v1_zenao_proto_msgTypes[112]
+	mi := &file_zenao_v1_zenao_proto_msgTypes[116]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -6301,7 +6533,7 @@ func (x *GetTeamMembersResponse) String() string {
 func (*GetTeamMembersResponse) ProtoMessage() {}
 
 func (x *GetTeamMembersResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_zenao_v1_zenao_proto_msgTypes[112]
+	mi := &file_zenao_v1_zenao_proto_msgTypes[116]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -6314,7 +6546,7 @@ func (x *GetTeamMembersResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetTeamMembersResponse.ProtoReflect.Descriptor instead.
 func (*GetTeamMembersResponse) Descriptor() ([]byte, []int) {
-	return file_zenao_v1_zenao_proto_rawDescGZIP(), []int{112}
+	return file_zenao_v1_zenao_proto_rawDescGZIP(), []int{116}
 }
 
 func (x *GetTeamMembersResponse) GetMembers() []*TeamMember {
@@ -6337,7 +6569,7 @@ type TeamMember struct {
 
 func (x *TeamMember) Reset() {
 	*x = TeamMember{}
-	mi := &file_zenao_v1_zenao_proto_msgTypes[113]
+	mi := &file_zenao_v1_zenao_proto_msgTypes[117]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -6349,7 +6581,7 @@ func (x *TeamMember) String() string {
 func (*TeamMember) ProtoMessage() {}
 
 func (x *TeamMember) ProtoReflect() protoreflect.Message {
-	mi := &file_zenao_v1_zenao_proto_msgTypes[113]
+	mi := &file_zenao_v1_zenao_proto_msgTypes[117]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -6362,7 +6594,7 @@ func (x *TeamMember) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TeamMember.ProtoReflect.Descriptor instead.
 func (*TeamMember) Descriptor() ([]byte, []int) {
-	return file_zenao_v1_zenao_proto_rawDescGZIP(), []int{113}
+	return file_zenao_v1_zenao_proto_rawDescGZIP(), []int{117}
 }
 
 func (x *TeamMember) GetUserId() string {
@@ -6409,7 +6641,7 @@ type GetCommunityAdministratorsRequest struct {
 
 func (x *GetCommunityAdministratorsRequest) Reset() {
 	*x = GetCommunityAdministratorsRequest{}
-	mi := &file_zenao_v1_zenao_proto_msgTypes[114]
+	mi := &file_zenao_v1_zenao_proto_msgTypes[118]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -6421,7 +6653,7 @@ func (x *GetCommunityAdministratorsRequest) String() string {
 func (*GetCommunityAdministratorsRequest) ProtoMessage() {}
 
 func (x *GetCommunityAdministratorsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_zenao_v1_zenao_proto_msgTypes[114]
+	mi := &file_zenao_v1_zenao_proto_msgTypes[118]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -6434,7 +6666,7 @@ func (x *GetCommunityAdministratorsRequest) ProtoReflect() protoreflect.Message 
 
 // Deprecated: Use GetCommunityAdministratorsRequest.ProtoReflect.Descriptor instead.
 func (*GetCommunityAdministratorsRequest) Descriptor() ([]byte, []int) {
-	return file_zenao_v1_zenao_proto_rawDescGZIP(), []int{114}
+	return file_zenao_v1_zenao_proto_rawDescGZIP(), []int{118}
 }
 
 func (x *GetCommunityAdministratorsRequest) GetCommunityId() string {
@@ -6453,7 +6685,7 @@ type GetCommunityAdministratorsResponse struct {
 
 func (x *GetCommunityAdministratorsResponse) Reset() {
 	*x = GetCommunityAdministratorsResponse{}
-	mi := &file_zenao_v1_zenao_proto_msgTypes[115]
+	mi := &file_zenao_v1_zenao_proto_msgTypes[119]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -6465,7 +6697,7 @@ func (x *GetCommunityAdministratorsResponse) String() string {
 func (*GetCommunityAdministratorsResponse) ProtoMessage() {}
 
 func (x *GetCommunityAdministratorsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_zenao_v1_zenao_proto_msgTypes[115]
+	mi := &file_zenao_v1_zenao_proto_msgTypes[119]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -6478,7 +6710,7 @@ func (x *GetCommunityAdministratorsResponse) ProtoReflect() protoreflect.Message
 
 // Deprecated: Use GetCommunityAdministratorsResponse.ProtoReflect.Descriptor instead.
 func (*GetCommunityAdministratorsResponse) Descriptor() ([]byte, []int) {
-	return file_zenao_v1_zenao_proto_rawDescGZIP(), []int{115}
+	return file_zenao_v1_zenao_proto_rawDescGZIP(), []int{119}
 }
 
 func (x *GetCommunityAdministratorsResponse) GetAdministrators() []string {
@@ -6497,7 +6729,7 @@ type JoinCommunityRequest struct {
 
 func (x *JoinCommunityRequest) Reset() {
 	*x = JoinCommunityRequest{}
-	mi := &file_zenao_v1_zenao_proto_msgTypes[116]
+	mi := &file_zenao_v1_zenao_proto_msgTypes[120]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -6509,7 +6741,7 @@ func (x *JoinCommunityRequest) String() string {
 func (*JoinCommunityRequest) ProtoMessage() {}
 
 func (x *JoinCommunityRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_zenao_v1_zenao_proto_msgTypes[116]
+	mi := &file_zenao_v1_zenao_proto_msgTypes[120]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -6522,7 +6754,7 @@ func (x *JoinCommunityRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use JoinCommunityRequest.ProtoReflect.Descriptor instead.
 func (*JoinCommunityRequest) Descriptor() ([]byte, []int) {
-	return file_zenao_v1_zenao_proto_rawDescGZIP(), []int{116}
+	return file_zenao_v1_zenao_proto_rawDescGZIP(), []int{120}
 }
 
 func (x *JoinCommunityRequest) GetCommunityId() string {
@@ -6540,7 +6772,7 @@ type JoinCommunityResponse struct {
 
 func (x *JoinCommunityResponse) Reset() {
 	*x = JoinCommunityResponse{}
-	mi := &file_zenao_v1_zenao_proto_msgTypes[117]
+	mi := &file_zenao_v1_zenao_proto_msgTypes[121]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -6552,7 +6784,7 @@ func (x *JoinCommunityResponse) String() string {
 func (*JoinCommunityResponse) ProtoMessage() {}
 
 func (x *JoinCommunityResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_zenao_v1_zenao_proto_msgTypes[117]
+	mi := &file_zenao_v1_zenao_proto_msgTypes[121]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -6565,7 +6797,7 @@ func (x *JoinCommunityResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use JoinCommunityResponse.ProtoReflect.Descriptor instead.
 func (*JoinCommunityResponse) Descriptor() ([]byte, []int) {
-	return file_zenao_v1_zenao_proto_rawDescGZIP(), []int{117}
+	return file_zenao_v1_zenao_proto_rawDescGZIP(), []int{121}
 }
 
 type LeaveCommunityRequest struct {
@@ -6577,7 +6809,7 @@ type LeaveCommunityRequest struct {
 
 func (x *LeaveCommunityRequest) Reset() {
 	*x = LeaveCommunityRequest{}
-	mi := &file_zenao_v1_zenao_proto_msgTypes[118]
+	mi := &file_zenao_v1_zenao_proto_msgTypes[122]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -6589,7 +6821,7 @@ func (x *LeaveCommunityRequest) String() string {
 func (*LeaveCommunityRequest) ProtoMessage() {}
 
 func (x *LeaveCommunityRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_zenao_v1_zenao_proto_msgTypes[118]
+	mi := &file_zenao_v1_zenao_proto_msgTypes[122]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -6602,7 +6834,7 @@ func (x *LeaveCommunityRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use LeaveCommunityRequest.ProtoReflect.Descriptor instead.
 func (*LeaveCommunityRequest) Descriptor() ([]byte, []int) {
-	return file_zenao_v1_zenao_proto_rawDescGZIP(), []int{118}
+	return file_zenao_v1_zenao_proto_rawDescGZIP(), []int{122}
 }
 
 func (x *LeaveCommunityRequest) GetCommunityId() string {
@@ -6620,7 +6852,7 @@ type LeaveCommunityResponse struct {
 
 func (x *LeaveCommunityResponse) Reset() {
 	*x = LeaveCommunityResponse{}
-	mi := &file_zenao_v1_zenao_proto_msgTypes[119]
+	mi := &file_zenao_v1_zenao_proto_msgTypes[123]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -6632,7 +6864,7 @@ func (x *LeaveCommunityResponse) String() string {
 func (*LeaveCommunityResponse) ProtoMessage() {}
 
 func (x *LeaveCommunityResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_zenao_v1_zenao_proto_msgTypes[119]
+	mi := &file_zenao_v1_zenao_proto_msgTypes[123]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -6645,7 +6877,7 @@ func (x *LeaveCommunityResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use LeaveCommunityResponse.ProtoReflect.Descriptor instead.
 func (*LeaveCommunityResponse) Descriptor() ([]byte, []int) {
-	return file_zenao_v1_zenao_proto_rawDescGZIP(), []int{119}
+	return file_zenao_v1_zenao_proto_rawDescGZIP(), []int{123}
 }
 
 type AddEventToCommunityRequest struct {
@@ -6658,7 +6890,7 @@ type AddEventToCommunityRequest struct {
 
 func (x *AddEventToCommunityRequest) Reset() {
 	*x = AddEventToCommunityRequest{}
-	mi := &file_zenao_v1_zenao_proto_msgTypes[120]
+	mi := &file_zenao_v1_zenao_proto_msgTypes[124]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -6670,7 +6902,7 @@ func (x *AddEventToCommunityRequest) String() string {
 func (*AddEventToCommunityRequest) ProtoMessage() {}
 
 func (x *AddEventToCommunityRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_zenao_v1_zenao_proto_msgTypes[120]
+	mi := &file_zenao_v1_zenao_proto_msgTypes[124]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -6683,7 +6915,7 @@ func (x *AddEventToCommunityRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AddEventToCommunityRequest.ProtoReflect.Descriptor instead.
 func (*AddEventToCommunityRequest) Descriptor() ([]byte, []int) {
-	return file_zenao_v1_zenao_proto_rawDescGZIP(), []int{120}
+	return file_zenao_v1_zenao_proto_rawDescGZIP(), []int{124}
 }
 
 func (x *AddEventToCommunityRequest) GetCommunityId() string {
@@ -6708,7 +6940,7 @@ type AddEventToCommunityResponse struct {
 
 func (x *AddEventToCommunityResponse) Reset() {
 	*x = AddEventToCommunityResponse{}
-	mi := &file_zenao_v1_zenao_proto_msgTypes[121]
+	mi := &file_zenao_v1_zenao_proto_msgTypes[125]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -6720,7 +6952,7 @@ func (x *AddEventToCommunityResponse) String() string {
 func (*AddEventToCommunityResponse) ProtoMessage() {}
 
 func (x *AddEventToCommunityResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_zenao_v1_zenao_proto_msgTypes[121]
+	mi := &file_zenao_v1_zenao_proto_msgTypes[125]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -6733,7 +6965,7 @@ func (x *AddEventToCommunityResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AddEventToCommunityResponse.ProtoReflect.Descriptor instead.
 func (*AddEventToCommunityResponse) Descriptor() ([]byte, []int) {
-	return file_zenao_v1_zenao_proto_rawDescGZIP(), []int{121}
+	return file_zenao_v1_zenao_proto_rawDescGZIP(), []int{125}
 }
 
 type RemoveEventFromCommunityRequest struct {
@@ -6746,7 +6978,7 @@ type RemoveEventFromCommunityRequest struct {
 
 func (x *RemoveEventFromCommunityRequest) Reset() {
 	*x = RemoveEventFromCommunityRequest{}
-	mi := &file_zenao_v1_zenao_proto_msgTypes[122]
+	mi := &file_zenao_v1_zenao_proto_msgTypes[126]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -6758,7 +6990,7 @@ func (x *RemoveEventFromCommunityRequest) String() string {
 func (*RemoveEventFromCommunityRequest) ProtoMessage() {}
 
 func (x *RemoveEventFromCommunityRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_zenao_v1_zenao_proto_msgTypes[122]
+	mi := &file_zenao_v1_zenao_proto_msgTypes[126]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -6771,7 +7003,7 @@ func (x *RemoveEventFromCommunityRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RemoveEventFromCommunityRequest.ProtoReflect.Descriptor instead.
 func (*RemoveEventFromCommunityRequest) Descriptor() ([]byte, []int) {
-	return file_zenao_v1_zenao_proto_rawDescGZIP(), []int{122}
+	return file_zenao_v1_zenao_proto_rawDescGZIP(), []int{126}
 }
 
 func (x *RemoveEventFromCommunityRequest) GetCommunityId() string {
@@ -6796,7 +7028,7 @@ type RemoveEventFromCommunityResponse struct {
 
 func (x *RemoveEventFromCommunityResponse) Reset() {
 	*x = RemoveEventFromCommunityResponse{}
-	mi := &file_zenao_v1_zenao_proto_msgTypes[123]
+	mi := &file_zenao_v1_zenao_proto_msgTypes[127]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -6808,7 +7040,7 @@ func (x *RemoveEventFromCommunityResponse) String() string {
 func (*RemoveEventFromCommunityResponse) ProtoMessage() {}
 
 func (x *RemoveEventFromCommunityResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_zenao_v1_zenao_proto_msgTypes[123]
+	mi := &file_zenao_v1_zenao_proto_msgTypes[127]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -6821,7 +7053,7 @@ func (x *RemoveEventFromCommunityResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RemoveEventFromCommunityResponse.ProtoReflect.Descriptor instead.
 func (*RemoveEventFromCommunityResponse) Descriptor() ([]byte, []int) {
-	return file_zenao_v1_zenao_proto_rawDescGZIP(), []int{123}
+	return file_zenao_v1_zenao_proto_rawDescGZIP(), []int{127}
 }
 
 var File_zenao_v1_zenao_proto protoreflect.FileDescriptor
@@ -7109,7 +7341,24 @@ const file_zenao_v1_zenao_proto_rawDesc = "" +
 	"TicketInfo\x12#\n" +
 	"\rticket_secret\x18\x01 \x01(\tR\fticketSecret\x12\x1d\n" +
 	"\n" +
-	"user_email\x18\x02 \x01(\tR\tuserEmail\"S\n" +
+	"user_email\x18\x02 \x01(\tR\tuserEmail\"3\n" +
+	"\x16GetOrderDetailsRequest\x12\x19\n" +
+	"\border_id\x18\x01 \x01(\tR\aorderId\"\xc6\x01\n" +
+	"\fOrderSummary\x12\x19\n" +
+	"\border_id\x18\x01 \x01(\tR\aorderId\x12\x19\n" +
+	"\bevent_id\x18\x02 \x01(\tR\aeventId\x12\x19\n" +
+	"\bbuyer_id\x18\x03 \x01(\tR\abuyerId\x12!\n" +
+	"\famount_minor\x18\x04 \x01(\x03R\vamountMinor\x12#\n" +
+	"\rcurrency_code\x18\x05 \x01(\tR\fcurrencyCode\x12\x1d\n" +
+	"\n" +
+	"created_at\x18\x06 \x01(\x03R\tcreatedAt\"U\n" +
+	"\x0fOrderTicketInfo\x12#\n" +
+	"\rticket_secret\x18\x01 \x01(\tR\fticketSecret\x12\x1d\n" +
+	"\n" +
+	"user_email\x18\x02 \x01(\tR\tuserEmail\"|\n" +
+	"\x17GetOrderDetailsResponse\x12,\n" +
+	"\x05order\x18\x01 \x01(\v2\x16.zenao.v1.OrderSummaryR\x05order\x123\n" +
+	"\atickets\x18\x02 \x03(\v2\x19.zenao.v1.OrderTicketInfoR\atickets\"S\n" +
 	"\x0eCheckinRequest\x12#\n" +
 	"\rticket_pubkey\x18\x01 \x01(\tR\fticketPubkey\x12\x1c\n" +
 	"\tsignature\x18\x02 \x01(\tR\tsignature\"\x11\n" +
@@ -7272,7 +7521,7 @@ const file_zenao_v1_zenao_proto_rawDesc = "" +
 	"\x12DiscoverableFilter\x12#\n" +
 	"\x1fDISCOVERABLE_FILTER_UNSPECIFIED\x10\x00\x12$\n" +
 	" DISCOVERABLE_FILTER_DISCOVERABLE\x10\x01\x12&\n" +
-	"\"DISCOVERABLE_FILTER_UNDISCOVERABLE\x10\x022\xe6!\n" +
+	"\"DISCOVERABLE_FILTER_UNDISCOVERABLE\x10\x022\xbe\"\n" +
 	"\fZenaoService\x12A\n" +
 	"\bEditUser\x12\x19.zenao.v1.EditUserRequest\x1a\x1a.zenao.v1.EditUserResponse\x12J\n" +
 	"\vGetUserInfo\x12\x1c.zenao.v1.GetUserInfoRequest\x1a\x1d.zenao.v1.GetUserInfoResponse\x12J\n" +
@@ -7286,7 +7535,8 @@ const file_zenao_v1_zenao_proto_rawDesc = "" +
 	"\x12StartTicketPayment\x12#.zenao.v1.StartTicketPaymentRequest\x1a$.zenao.v1.StartTicketPaymentResponse\x12e\n" +
 	"\x14ConfirmTicketPayment\x12%.zenao.v1.ConfirmTicketPaymentRequest\x1a&.zenao.v1.ConfirmTicketPaymentResponse\x12b\n" +
 	"\x13CancelParticipation\x12$.zenao.v1.CancelParticipationRequest\x1a%.zenao.v1.CancelParticipationResponse\x12V\n" +
-	"\x0fGetEventTickets\x12 .zenao.v1.GetEventTicketsRequest\x1a!.zenao.v1.GetEventTicketsResponse\x12>\n" +
+	"\x0fGetEventTickets\x12 .zenao.v1.GetEventTicketsRequest\x1a!.zenao.v1.GetEventTicketsResponse\x12V\n" +
+	"\x0fGetOrderDetails\x12 .zenao.v1.GetOrderDetailsRequest\x1a!.zenao.v1.GetOrderDetailsResponse\x12>\n" +
 	"\aCheckin\x12\x18.zenao.v1.CheckinRequest\x1a\x19.zenao.v1.CheckinResponse\x12_\n" +
 	"\x12ExportParticipants\x12#.zenao.v1.ExportParticipantsRequest\x1a$.zenao.v1.ExportParticipantsResponse\x12V\n" +
 	"\x0fCreateCommunity\x12 .zenao.v1.CreateCommunityRequest\x1a!.zenao.v1.CreateCommunityResponse\x12P\n" +
@@ -7345,7 +7595,7 @@ func file_zenao_v1_zenao_proto_rawDescGZIP() []byte {
 }
 
 var file_zenao_v1_zenao_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_zenao_v1_zenao_proto_msgTypes = make([]protoimpl.MessageInfo, 124)
+var file_zenao_v1_zenao_proto_msgTypes = make([]protoimpl.MessageInfo, 128)
 var file_zenao_v1_zenao_proto_goTypes = []any{
 	(DiscoverableFilter)(0),                        // 0: zenao.v1.DiscoverableFilter
 	(*HealthRequest)(nil),                          // 1: zenao.v1.HealthRequest
@@ -7422,59 +7672,63 @@ var file_zenao_v1_zenao_proto_goTypes = []any{
 	(*GetEventTicketsRequest)(nil),                 // 72: zenao.v1.GetEventTicketsRequest
 	(*GetEventTicketsResponse)(nil),                // 73: zenao.v1.GetEventTicketsResponse
 	(*TicketInfo)(nil),                             // 74: zenao.v1.TicketInfo
-	(*CheckinRequest)(nil),                         // 75: zenao.v1.CheckinRequest
-	(*CheckinResponse)(nil),                        // 76: zenao.v1.CheckinResponse
-	(*ExportParticipantsRequest)(nil),              // 77: zenao.v1.ExportParticipantsRequest
-	(*ExportParticipantsResponse)(nil),             // 78: zenao.v1.ExportParticipantsResponse
-	(*Entity)(nil),                                 // 79: zenao.v1.Entity
-	(*EntityRolesRequest)(nil),                     // 80: zenao.v1.EntityRolesRequest
-	(*EntityRolesResponse)(nil),                    // 81: zenao.v1.EntityRolesResponse
-	(*EntitiesWithRolesRequest)(nil),               // 82: zenao.v1.EntitiesWithRolesRequest
-	(*EntityWithRoles)(nil),                        // 83: zenao.v1.EntityWithRoles
-	(*EntitiesWithRolesResponse)(nil),              // 84: zenao.v1.EntitiesWithRolesResponse
-	(*GetCommunityRequest)(nil),                    // 85: zenao.v1.GetCommunityRequest
-	(*GetCommunityResponse)(nil),                   // 86: zenao.v1.GetCommunityResponse
-	(*CommunityInfo)(nil),                          // 87: zenao.v1.CommunityInfo
-	(*ListCommunitiesRequest)(nil),                 // 88: zenao.v1.ListCommunitiesRequest
-	(*ListCommunitiesResponse)(nil),                // 89: zenao.v1.ListCommunitiesResponse
-	(*ListCommunitiesByEventRequest)(nil),          // 90: zenao.v1.ListCommunitiesByEventRequest
-	(*ListCommunitiesByEventResponse)(nil),         // 91: zenao.v1.ListCommunitiesByEventResponse
-	(*CommunityUser)(nil),                          // 92: zenao.v1.CommunityUser
-	(*ListCommunitiesByUserRolesRequest)(nil),      // 93: zenao.v1.ListCommunitiesByUserRolesRequest
-	(*ListCommunitiesByUserRolesResponse)(nil),     // 94: zenao.v1.ListCommunitiesByUserRolesResponse
-	(*CreateCommunityRequest)(nil),                 // 95: zenao.v1.CreateCommunityRequest
-	(*CreateCommunityResponse)(nil),                // 96: zenao.v1.CreateCommunityResponse
-	(*EditCommunityRequest)(nil),                   // 97: zenao.v1.EditCommunityRequest
-	(*EditCommunityResponse)(nil),                  // 98: zenao.v1.EditCommunityResponse
-	(*StartCommunityStripeOnboardingRequest)(nil),  // 99: zenao.v1.StartCommunityStripeOnboardingRequest
-	(*StartCommunityStripeOnboardingResponse)(nil), // 100: zenao.v1.StartCommunityStripeOnboardingResponse
-	(*GetCommunityPayoutStatusRequest)(nil),        // 101: zenao.v1.GetCommunityPayoutStatusRequest
-	(*GetCommunityPayoutStatusResponse)(nil),       // 102: zenao.v1.GetCommunityPayoutStatusResponse
-	(*CreateTeamRequest)(nil),                      // 103: zenao.v1.CreateTeamRequest
-	(*CreateTeamResponse)(nil),                     // 104: zenao.v1.CreateTeamResponse
-	(*EditTeamRequest)(nil),                        // 105: zenao.v1.EditTeamRequest
-	(*EditTeamResponse)(nil),                       // 106: zenao.v1.EditTeamResponse
-	(*DeleteTeamRequest)(nil),                      // 107: zenao.v1.DeleteTeamRequest
-	(*DeleteTeamResponse)(nil),                     // 108: zenao.v1.DeleteTeamResponse
-	(*GetUserTeamsRequest)(nil),                    // 109: zenao.v1.GetUserTeamsRequest
-	(*GetUserTeamsResponse)(nil),                   // 110: zenao.v1.GetUserTeamsResponse
-	(*UserTeam)(nil),                               // 111: zenao.v1.UserTeam
-	(*GetTeamMembersRequest)(nil),                  // 112: zenao.v1.GetTeamMembersRequest
-	(*GetTeamMembersResponse)(nil),                 // 113: zenao.v1.GetTeamMembersResponse
-	(*TeamMember)(nil),                             // 114: zenao.v1.TeamMember
-	(*GetCommunityAdministratorsRequest)(nil),      // 115: zenao.v1.GetCommunityAdministratorsRequest
-	(*GetCommunityAdministratorsResponse)(nil),     // 116: zenao.v1.GetCommunityAdministratorsResponse
-	(*JoinCommunityRequest)(nil),                   // 117: zenao.v1.JoinCommunityRequest
-	(*JoinCommunityResponse)(nil),                  // 118: zenao.v1.JoinCommunityResponse
-	(*LeaveCommunityRequest)(nil),                  // 119: zenao.v1.LeaveCommunityRequest
-	(*LeaveCommunityResponse)(nil),                 // 120: zenao.v1.LeaveCommunityResponse
-	(*AddEventToCommunityRequest)(nil),             // 121: zenao.v1.AddEventToCommunityRequest
-	(*AddEventToCommunityResponse)(nil),            // 122: zenao.v1.AddEventToCommunityResponse
-	(*RemoveEventFromCommunityRequest)(nil),        // 123: zenao.v1.RemoveEventFromCommunityRequest
-	(*RemoveEventFromCommunityResponse)(nil),       // 124: zenao.v1.RemoveEventFromCommunityResponse
-	(v1.PollKind)(0),                               // 125: polls.v1.PollKind
-	(*v1.Poll)(nil),                                // 126: polls.v1.Poll
-	(*v11.PostView)(nil),                           // 127: feeds.v1.PostView
+	(*GetOrderDetailsRequest)(nil),                 // 75: zenao.v1.GetOrderDetailsRequest
+	(*OrderSummary)(nil),                           // 76: zenao.v1.OrderSummary
+	(*OrderTicketInfo)(nil),                        // 77: zenao.v1.OrderTicketInfo
+	(*GetOrderDetailsResponse)(nil),                // 78: zenao.v1.GetOrderDetailsResponse
+	(*CheckinRequest)(nil),                         // 79: zenao.v1.CheckinRequest
+	(*CheckinResponse)(nil),                        // 80: zenao.v1.CheckinResponse
+	(*ExportParticipantsRequest)(nil),              // 81: zenao.v1.ExportParticipantsRequest
+	(*ExportParticipantsResponse)(nil),             // 82: zenao.v1.ExportParticipantsResponse
+	(*Entity)(nil),                                 // 83: zenao.v1.Entity
+	(*EntityRolesRequest)(nil),                     // 84: zenao.v1.EntityRolesRequest
+	(*EntityRolesResponse)(nil),                    // 85: zenao.v1.EntityRolesResponse
+	(*EntitiesWithRolesRequest)(nil),               // 86: zenao.v1.EntitiesWithRolesRequest
+	(*EntityWithRoles)(nil),                        // 87: zenao.v1.EntityWithRoles
+	(*EntitiesWithRolesResponse)(nil),              // 88: zenao.v1.EntitiesWithRolesResponse
+	(*GetCommunityRequest)(nil),                    // 89: zenao.v1.GetCommunityRequest
+	(*GetCommunityResponse)(nil),                   // 90: zenao.v1.GetCommunityResponse
+	(*CommunityInfo)(nil),                          // 91: zenao.v1.CommunityInfo
+	(*ListCommunitiesRequest)(nil),                 // 92: zenao.v1.ListCommunitiesRequest
+	(*ListCommunitiesResponse)(nil),                // 93: zenao.v1.ListCommunitiesResponse
+	(*ListCommunitiesByEventRequest)(nil),          // 94: zenao.v1.ListCommunitiesByEventRequest
+	(*ListCommunitiesByEventResponse)(nil),         // 95: zenao.v1.ListCommunitiesByEventResponse
+	(*CommunityUser)(nil),                          // 96: zenao.v1.CommunityUser
+	(*ListCommunitiesByUserRolesRequest)(nil),      // 97: zenao.v1.ListCommunitiesByUserRolesRequest
+	(*ListCommunitiesByUserRolesResponse)(nil),     // 98: zenao.v1.ListCommunitiesByUserRolesResponse
+	(*CreateCommunityRequest)(nil),                 // 99: zenao.v1.CreateCommunityRequest
+	(*CreateCommunityResponse)(nil),                // 100: zenao.v1.CreateCommunityResponse
+	(*EditCommunityRequest)(nil),                   // 101: zenao.v1.EditCommunityRequest
+	(*EditCommunityResponse)(nil),                  // 102: zenao.v1.EditCommunityResponse
+	(*StartCommunityStripeOnboardingRequest)(nil),  // 103: zenao.v1.StartCommunityStripeOnboardingRequest
+	(*StartCommunityStripeOnboardingResponse)(nil), // 104: zenao.v1.StartCommunityStripeOnboardingResponse
+	(*GetCommunityPayoutStatusRequest)(nil),        // 105: zenao.v1.GetCommunityPayoutStatusRequest
+	(*GetCommunityPayoutStatusResponse)(nil),       // 106: zenao.v1.GetCommunityPayoutStatusResponse
+	(*CreateTeamRequest)(nil),                      // 107: zenao.v1.CreateTeamRequest
+	(*CreateTeamResponse)(nil),                     // 108: zenao.v1.CreateTeamResponse
+	(*EditTeamRequest)(nil),                        // 109: zenao.v1.EditTeamRequest
+	(*EditTeamResponse)(nil),                       // 110: zenao.v1.EditTeamResponse
+	(*DeleteTeamRequest)(nil),                      // 111: zenao.v1.DeleteTeamRequest
+	(*DeleteTeamResponse)(nil),                     // 112: zenao.v1.DeleteTeamResponse
+	(*GetUserTeamsRequest)(nil),                    // 113: zenao.v1.GetUserTeamsRequest
+	(*GetUserTeamsResponse)(nil),                   // 114: zenao.v1.GetUserTeamsResponse
+	(*UserTeam)(nil),                               // 115: zenao.v1.UserTeam
+	(*GetTeamMembersRequest)(nil),                  // 116: zenao.v1.GetTeamMembersRequest
+	(*GetTeamMembersResponse)(nil),                 // 117: zenao.v1.GetTeamMembersResponse
+	(*TeamMember)(nil),                             // 118: zenao.v1.TeamMember
+	(*GetCommunityAdministratorsRequest)(nil),      // 119: zenao.v1.GetCommunityAdministratorsRequest
+	(*GetCommunityAdministratorsResponse)(nil),     // 120: zenao.v1.GetCommunityAdministratorsResponse
+	(*JoinCommunityRequest)(nil),                   // 121: zenao.v1.JoinCommunityRequest
+	(*JoinCommunityResponse)(nil),                  // 122: zenao.v1.JoinCommunityResponse
+	(*LeaveCommunityRequest)(nil),                  // 123: zenao.v1.LeaveCommunityRequest
+	(*LeaveCommunityResponse)(nil),                 // 124: zenao.v1.LeaveCommunityResponse
+	(*AddEventToCommunityRequest)(nil),             // 125: zenao.v1.AddEventToCommunityRequest
+	(*AddEventToCommunityResponse)(nil),            // 126: zenao.v1.AddEventToCommunityResponse
+	(*RemoveEventFromCommunityRequest)(nil),        // 127: zenao.v1.RemoveEventFromCommunityRequest
+	(*RemoveEventFromCommunityResponse)(nil),       // 128: zenao.v1.RemoveEventFromCommunityResponse
+	(v1.PollKind)(0),                               // 129: polls.v1.PollKind
+	(*v1.Poll)(nil),                                // 130: polls.v1.Poll
+	(*v11.PostView)(nil),                           // 131: feeds.v1.PostView
 }
 var file_zenao_v1_zenao_proto_depIdxs = []int32{
 	7,   // 0: zenao.v1.GetUsersProfileResponse.profiles:type_name -> zenao.v1.Profile
@@ -7499,131 +7753,135 @@ var file_zenao_v1_zenao_proto_depIdxs = []int32{
 	46,  // 19: zenao.v1.EventInfo.prices_groups:type_name -> zenao.v1.EventPriceGroup
 	47,  // 20: zenao.v1.EventPriceGroup.prices:type_name -> zenao.v1.EventPrice
 	48,  // 21: zenao.v1.BatchProfileRequest.fields:type_name -> zenao.v1.BatchProfileField
-	125, // 22: zenao.v1.CreatePollRequest.kind:type_name -> polls.v1.PollKind
-	126, // 23: zenao.v1.GetPollResponse.poll:type_name -> polls.v1.Poll
-	127, // 24: zenao.v1.GetPostResponse.post:type_name -> feeds.v1.PostView
-	79,  // 25: zenao.v1.GetFeedPostsRequest.org:type_name -> zenao.v1.Entity
-	127, // 26: zenao.v1.GetFeedPostsResponse.posts:type_name -> feeds.v1.PostView
-	127, // 27: zenao.v1.GetChildrenPostsResponse.posts:type_name -> feeds.v1.PostView
+	129, // 22: zenao.v1.CreatePollRequest.kind:type_name -> polls.v1.PollKind
+	130, // 23: zenao.v1.GetPollResponse.poll:type_name -> polls.v1.Poll
+	131, // 24: zenao.v1.GetPostResponse.post:type_name -> feeds.v1.PostView
+	83,  // 25: zenao.v1.GetFeedPostsRequest.org:type_name -> zenao.v1.Entity
+	131, // 26: zenao.v1.GetFeedPostsResponse.posts:type_name -> feeds.v1.PostView
+	131, // 27: zenao.v1.GetChildrenPostsResponse.posts:type_name -> feeds.v1.PostView
 	74,  // 28: zenao.v1.GetEventTicketsResponse.tickets_info:type_name -> zenao.v1.TicketInfo
-	79,  // 29: zenao.v1.EntityRolesRequest.org:type_name -> zenao.v1.Entity
-	79,  // 30: zenao.v1.EntityRolesRequest.entity:type_name -> zenao.v1.Entity
-	79,  // 31: zenao.v1.EntitiesWithRolesRequest.org:type_name -> zenao.v1.Entity
-	83,  // 32: zenao.v1.EntitiesWithRolesResponse.entities_with_roles:type_name -> zenao.v1.EntityWithRoles
-	87,  // 33: zenao.v1.GetCommunityResponse.community:type_name -> zenao.v1.CommunityInfo
-	87,  // 34: zenao.v1.ListCommunitiesResponse.communities:type_name -> zenao.v1.CommunityInfo
-	87,  // 35: zenao.v1.ListCommunitiesByEventResponse.communities:type_name -> zenao.v1.CommunityInfo
-	87,  // 36: zenao.v1.CommunityUser.community:type_name -> zenao.v1.CommunityInfo
-	92,  // 37: zenao.v1.ListCommunitiesByUserRolesResponse.communities:type_name -> zenao.v1.CommunityUser
-	111, // 38: zenao.v1.GetUserTeamsResponse.teams:type_name -> zenao.v1.UserTeam
-	114, // 39: zenao.v1.GetTeamMembersResponse.members:type_name -> zenao.v1.TeamMember
-	3,   // 40: zenao.v1.ZenaoService.EditUser:input_type -> zenao.v1.EditUserRequest
-	5,   // 41: zenao.v1.ZenaoService.GetUserInfo:input_type -> zenao.v1.GetUserInfoRequest
-	17,  // 42: zenao.v1.ZenaoService.CreateEvent:input_type -> zenao.v1.CreateEventRequest
-	19,  // 43: zenao.v1.ZenaoService.CancelEvent:input_type -> zenao.v1.CancelEventRequest
-	21,  // 44: zenao.v1.ZenaoService.EditEvent:input_type -> zenao.v1.EditEventRequest
-	23,  // 45: zenao.v1.ZenaoService.GetEventGatekeepers:input_type -> zenao.v1.GetEventGatekeepersRequest
-	25,  // 46: zenao.v1.ZenaoService.ValidatePassword:input_type -> zenao.v1.ValidatePasswordRequest
-	36,  // 47: zenao.v1.ZenaoService.BroadcastEvent:input_type -> zenao.v1.BroadcastEventRequest
-	27,  // 48: zenao.v1.ZenaoService.Participate:input_type -> zenao.v1.ParticipateRequest
-	32,  // 49: zenao.v1.ZenaoService.StartTicketPayment:input_type -> zenao.v1.StartTicketPaymentRequest
-	34,  // 50: zenao.v1.ZenaoService.ConfirmTicketPayment:input_type -> zenao.v1.ConfirmTicketPaymentRequest
-	28,  // 51: zenao.v1.ZenaoService.CancelParticipation:input_type -> zenao.v1.CancelParticipationRequest
-	72,  // 52: zenao.v1.ZenaoService.GetEventTickets:input_type -> zenao.v1.GetEventTicketsRequest
-	75,  // 53: zenao.v1.ZenaoService.Checkin:input_type -> zenao.v1.CheckinRequest
-	77,  // 54: zenao.v1.ZenaoService.ExportParticipants:input_type -> zenao.v1.ExportParticipantsRequest
-	95,  // 55: zenao.v1.ZenaoService.CreateCommunity:input_type -> zenao.v1.CreateCommunityRequest
-	97,  // 56: zenao.v1.ZenaoService.EditCommunity:input_type -> zenao.v1.EditCommunityRequest
-	99,  // 57: zenao.v1.ZenaoService.StartCommunityStripeOnboarding:input_type -> zenao.v1.StartCommunityStripeOnboardingRequest
-	101, // 58: zenao.v1.ZenaoService.GetCommunityPayoutStatus:input_type -> zenao.v1.GetCommunityPayoutStatusRequest
-	115, // 59: zenao.v1.ZenaoService.GetCommunityAdministrators:input_type -> zenao.v1.GetCommunityAdministratorsRequest
-	117, // 60: zenao.v1.ZenaoService.JoinCommunity:input_type -> zenao.v1.JoinCommunityRequest
-	119, // 61: zenao.v1.ZenaoService.LeaveCommunity:input_type -> zenao.v1.LeaveCommunityRequest
-	121, // 62: zenao.v1.ZenaoService.AddEventToCommunity:input_type -> zenao.v1.AddEventToCommunityRequest
-	123, // 63: zenao.v1.ZenaoService.RemoveEventFromCommunity:input_type -> zenao.v1.RemoveEventFromCommunityRequest
-	103, // 64: zenao.v1.ZenaoService.CreateTeam:input_type -> zenao.v1.CreateTeamRequest
-	105, // 65: zenao.v1.ZenaoService.EditTeam:input_type -> zenao.v1.EditTeamRequest
-	107, // 66: zenao.v1.ZenaoService.DeleteTeam:input_type -> zenao.v1.DeleteTeamRequest
-	109, // 67: zenao.v1.ZenaoService.GetUserTeams:input_type -> zenao.v1.GetUserTeamsRequest
-	112, // 68: zenao.v1.ZenaoService.GetTeamMembers:input_type -> zenao.v1.GetTeamMembersRequest
-	80,  // 69: zenao.v1.ZenaoService.EntityRoles:input_type -> zenao.v1.EntityRolesRequest
-	82,  // 70: zenao.v1.ZenaoService.EntitiesWithRoles:input_type -> zenao.v1.EntitiesWithRolesRequest
-	85,  // 71: zenao.v1.ZenaoService.GetCommunity:input_type -> zenao.v1.GetCommunityRequest
-	88,  // 72: zenao.v1.ZenaoService.ListCommunities:input_type -> zenao.v1.ListCommunitiesRequest
-	90,  // 73: zenao.v1.ZenaoService.ListCommunitiesByEvent:input_type -> zenao.v1.ListCommunitiesByEventRequest
-	93,  // 74: zenao.v1.ZenaoService.ListCommunitiesByUserRoles:input_type -> zenao.v1.ListCommunitiesByUserRolesRequest
-	10,  // 75: zenao.v1.ZenaoService.GetEvent:input_type -> zenao.v1.GetEventRequest
-	12,  // 76: zenao.v1.ZenaoService.ListEvents:input_type -> zenao.v1.ListEventsRequest
-	15,  // 77: zenao.v1.ZenaoService.ListEventsByUserRoles:input_type -> zenao.v1.ListEventsByUserRolesRequest
-	58,  // 78: zenao.v1.ZenaoService.GetPost:input_type -> zenao.v1.GetPostRequest
-	60,  // 79: zenao.v1.ZenaoService.GetFeedPosts:input_type -> zenao.v1.GetFeedPostsRequest
-	62,  // 80: zenao.v1.ZenaoService.GetChildrenPosts:input_type -> zenao.v1.GetChildrenPostsRequest
-	52,  // 81: zenao.v1.ZenaoService.GetPoll:input_type -> zenao.v1.GetPollRequest
-	8,   // 82: zenao.v1.ZenaoService.GetUsersProfile:input_type -> zenao.v1.GetUsersProfileRequest
-	50,  // 83: zenao.v1.ZenaoService.CreatePoll:input_type -> zenao.v1.CreatePollRequest
-	54,  // 84: zenao.v1.ZenaoService.VotePoll:input_type -> zenao.v1.VotePollRequest
-	56,  // 85: zenao.v1.ZenaoService.CreatePost:input_type -> zenao.v1.CreatePostRequest
-	64,  // 86: zenao.v1.ZenaoService.DeletePost:input_type -> zenao.v1.DeletePostRequest
-	66,  // 87: zenao.v1.ZenaoService.ReactPost:input_type -> zenao.v1.ReactPostRequest
-	68,  // 88: zenao.v1.ZenaoService.PinPost:input_type -> zenao.v1.PinPostRequest
-	70,  // 89: zenao.v1.ZenaoService.EditPost:input_type -> zenao.v1.EditPostRequest
-	1,   // 90: zenao.v1.ZenaoService.Health:input_type -> zenao.v1.HealthRequest
-	4,   // 91: zenao.v1.ZenaoService.EditUser:output_type -> zenao.v1.EditUserResponse
-	6,   // 92: zenao.v1.ZenaoService.GetUserInfo:output_type -> zenao.v1.GetUserInfoResponse
-	18,  // 93: zenao.v1.ZenaoService.CreateEvent:output_type -> zenao.v1.CreateEventResponse
-	20,  // 94: zenao.v1.ZenaoService.CancelEvent:output_type -> zenao.v1.CancelEventResponse
-	22,  // 95: zenao.v1.ZenaoService.EditEvent:output_type -> zenao.v1.EditEventResponse
-	24,  // 96: zenao.v1.ZenaoService.GetEventGatekeepers:output_type -> zenao.v1.GetEventGatekeepersResponse
-	26,  // 97: zenao.v1.ZenaoService.ValidatePassword:output_type -> zenao.v1.ValidatePasswordResponse
-	37,  // 98: zenao.v1.ZenaoService.BroadcastEvent:output_type -> zenao.v1.BroadcastEventResponse
-	30,  // 99: zenao.v1.ZenaoService.Participate:output_type -> zenao.v1.ParticipateResponse
-	33,  // 100: zenao.v1.ZenaoService.StartTicketPayment:output_type -> zenao.v1.StartTicketPaymentResponse
-	35,  // 101: zenao.v1.ZenaoService.ConfirmTicketPayment:output_type -> zenao.v1.ConfirmTicketPaymentResponse
-	29,  // 102: zenao.v1.ZenaoService.CancelParticipation:output_type -> zenao.v1.CancelParticipationResponse
-	73,  // 103: zenao.v1.ZenaoService.GetEventTickets:output_type -> zenao.v1.GetEventTicketsResponse
-	76,  // 104: zenao.v1.ZenaoService.Checkin:output_type -> zenao.v1.CheckinResponse
-	78,  // 105: zenao.v1.ZenaoService.ExportParticipants:output_type -> zenao.v1.ExportParticipantsResponse
-	96,  // 106: zenao.v1.ZenaoService.CreateCommunity:output_type -> zenao.v1.CreateCommunityResponse
-	98,  // 107: zenao.v1.ZenaoService.EditCommunity:output_type -> zenao.v1.EditCommunityResponse
-	100, // 108: zenao.v1.ZenaoService.StartCommunityStripeOnboarding:output_type -> zenao.v1.StartCommunityStripeOnboardingResponse
-	102, // 109: zenao.v1.ZenaoService.GetCommunityPayoutStatus:output_type -> zenao.v1.GetCommunityPayoutStatusResponse
-	116, // 110: zenao.v1.ZenaoService.GetCommunityAdministrators:output_type -> zenao.v1.GetCommunityAdministratorsResponse
-	118, // 111: zenao.v1.ZenaoService.JoinCommunity:output_type -> zenao.v1.JoinCommunityResponse
-	120, // 112: zenao.v1.ZenaoService.LeaveCommunity:output_type -> zenao.v1.LeaveCommunityResponse
-	122, // 113: zenao.v1.ZenaoService.AddEventToCommunity:output_type -> zenao.v1.AddEventToCommunityResponse
-	124, // 114: zenao.v1.ZenaoService.RemoveEventFromCommunity:output_type -> zenao.v1.RemoveEventFromCommunityResponse
-	104, // 115: zenao.v1.ZenaoService.CreateTeam:output_type -> zenao.v1.CreateTeamResponse
-	106, // 116: zenao.v1.ZenaoService.EditTeam:output_type -> zenao.v1.EditTeamResponse
-	108, // 117: zenao.v1.ZenaoService.DeleteTeam:output_type -> zenao.v1.DeleteTeamResponse
-	110, // 118: zenao.v1.ZenaoService.GetUserTeams:output_type -> zenao.v1.GetUserTeamsResponse
-	113, // 119: zenao.v1.ZenaoService.GetTeamMembers:output_type -> zenao.v1.GetTeamMembersResponse
-	81,  // 120: zenao.v1.ZenaoService.EntityRoles:output_type -> zenao.v1.EntityRolesResponse
-	84,  // 121: zenao.v1.ZenaoService.EntitiesWithRoles:output_type -> zenao.v1.EntitiesWithRolesResponse
-	86,  // 122: zenao.v1.ZenaoService.GetCommunity:output_type -> zenao.v1.GetCommunityResponse
-	89,  // 123: zenao.v1.ZenaoService.ListCommunities:output_type -> zenao.v1.ListCommunitiesResponse
-	91,  // 124: zenao.v1.ZenaoService.ListCommunitiesByEvent:output_type -> zenao.v1.ListCommunitiesByEventResponse
-	94,  // 125: zenao.v1.ZenaoService.ListCommunitiesByUserRoles:output_type -> zenao.v1.ListCommunitiesByUserRolesResponse
-	11,  // 126: zenao.v1.ZenaoService.GetEvent:output_type -> zenao.v1.GetEventResponse
-	13,  // 127: zenao.v1.ZenaoService.ListEvents:output_type -> zenao.v1.ListEventsResponse
-	16,  // 128: zenao.v1.ZenaoService.ListEventsByUserRoles:output_type -> zenao.v1.ListEventsByUserRolesResponse
-	59,  // 129: zenao.v1.ZenaoService.GetPost:output_type -> zenao.v1.GetPostResponse
-	61,  // 130: zenao.v1.ZenaoService.GetFeedPosts:output_type -> zenao.v1.GetFeedPostsResponse
-	63,  // 131: zenao.v1.ZenaoService.GetChildrenPosts:output_type -> zenao.v1.GetChildrenPostsResponse
-	53,  // 132: zenao.v1.ZenaoService.GetPoll:output_type -> zenao.v1.GetPollResponse
-	9,   // 133: zenao.v1.ZenaoService.GetUsersProfile:output_type -> zenao.v1.GetUsersProfileResponse
-	51,  // 134: zenao.v1.ZenaoService.CreatePoll:output_type -> zenao.v1.CreatePollResponse
-	55,  // 135: zenao.v1.ZenaoService.VotePoll:output_type -> zenao.v1.VotePollResponse
-	57,  // 136: zenao.v1.ZenaoService.CreatePost:output_type -> zenao.v1.CreatePostResponse
-	65,  // 137: zenao.v1.ZenaoService.DeletePost:output_type -> zenao.v1.DeletePostResponse
-	67,  // 138: zenao.v1.ZenaoService.ReactPost:output_type -> zenao.v1.ReactPostResponse
-	69,  // 139: zenao.v1.ZenaoService.PinPost:output_type -> zenao.v1.PinPostResponse
-	71,  // 140: zenao.v1.ZenaoService.EditPost:output_type -> zenao.v1.EditPostResponse
-	2,   // 141: zenao.v1.ZenaoService.Health:output_type -> zenao.v1.HealthResponse
-	91,  // [91:142] is the sub-list for method output_type
-	40,  // [40:91] is the sub-list for method input_type
-	40,  // [40:40] is the sub-list for extension type_name
-	40,  // [40:40] is the sub-list for extension extendee
-	0,   // [0:40] is the sub-list for field type_name
+	76,  // 29: zenao.v1.GetOrderDetailsResponse.order:type_name -> zenao.v1.OrderSummary
+	77,  // 30: zenao.v1.GetOrderDetailsResponse.tickets:type_name -> zenao.v1.OrderTicketInfo
+	83,  // 31: zenao.v1.EntityRolesRequest.org:type_name -> zenao.v1.Entity
+	83,  // 32: zenao.v1.EntityRolesRequest.entity:type_name -> zenao.v1.Entity
+	83,  // 33: zenao.v1.EntitiesWithRolesRequest.org:type_name -> zenao.v1.Entity
+	87,  // 34: zenao.v1.EntitiesWithRolesResponse.entities_with_roles:type_name -> zenao.v1.EntityWithRoles
+	91,  // 35: zenao.v1.GetCommunityResponse.community:type_name -> zenao.v1.CommunityInfo
+	91,  // 36: zenao.v1.ListCommunitiesResponse.communities:type_name -> zenao.v1.CommunityInfo
+	91,  // 37: zenao.v1.ListCommunitiesByEventResponse.communities:type_name -> zenao.v1.CommunityInfo
+	91,  // 38: zenao.v1.CommunityUser.community:type_name -> zenao.v1.CommunityInfo
+	96,  // 39: zenao.v1.ListCommunitiesByUserRolesResponse.communities:type_name -> zenao.v1.CommunityUser
+	115, // 40: zenao.v1.GetUserTeamsResponse.teams:type_name -> zenao.v1.UserTeam
+	118, // 41: zenao.v1.GetTeamMembersResponse.members:type_name -> zenao.v1.TeamMember
+	3,   // 42: zenao.v1.ZenaoService.EditUser:input_type -> zenao.v1.EditUserRequest
+	5,   // 43: zenao.v1.ZenaoService.GetUserInfo:input_type -> zenao.v1.GetUserInfoRequest
+	17,  // 44: zenao.v1.ZenaoService.CreateEvent:input_type -> zenao.v1.CreateEventRequest
+	19,  // 45: zenao.v1.ZenaoService.CancelEvent:input_type -> zenao.v1.CancelEventRequest
+	21,  // 46: zenao.v1.ZenaoService.EditEvent:input_type -> zenao.v1.EditEventRequest
+	23,  // 47: zenao.v1.ZenaoService.GetEventGatekeepers:input_type -> zenao.v1.GetEventGatekeepersRequest
+	25,  // 48: zenao.v1.ZenaoService.ValidatePassword:input_type -> zenao.v1.ValidatePasswordRequest
+	36,  // 49: zenao.v1.ZenaoService.BroadcastEvent:input_type -> zenao.v1.BroadcastEventRequest
+	27,  // 50: zenao.v1.ZenaoService.Participate:input_type -> zenao.v1.ParticipateRequest
+	32,  // 51: zenao.v1.ZenaoService.StartTicketPayment:input_type -> zenao.v1.StartTicketPaymentRequest
+	34,  // 52: zenao.v1.ZenaoService.ConfirmTicketPayment:input_type -> zenao.v1.ConfirmTicketPaymentRequest
+	28,  // 53: zenao.v1.ZenaoService.CancelParticipation:input_type -> zenao.v1.CancelParticipationRequest
+	72,  // 54: zenao.v1.ZenaoService.GetEventTickets:input_type -> zenao.v1.GetEventTicketsRequest
+	75,  // 55: zenao.v1.ZenaoService.GetOrderDetails:input_type -> zenao.v1.GetOrderDetailsRequest
+	79,  // 56: zenao.v1.ZenaoService.Checkin:input_type -> zenao.v1.CheckinRequest
+	81,  // 57: zenao.v1.ZenaoService.ExportParticipants:input_type -> zenao.v1.ExportParticipantsRequest
+	99,  // 58: zenao.v1.ZenaoService.CreateCommunity:input_type -> zenao.v1.CreateCommunityRequest
+	101, // 59: zenao.v1.ZenaoService.EditCommunity:input_type -> zenao.v1.EditCommunityRequest
+	103, // 60: zenao.v1.ZenaoService.StartCommunityStripeOnboarding:input_type -> zenao.v1.StartCommunityStripeOnboardingRequest
+	105, // 61: zenao.v1.ZenaoService.GetCommunityPayoutStatus:input_type -> zenao.v1.GetCommunityPayoutStatusRequest
+	119, // 62: zenao.v1.ZenaoService.GetCommunityAdministrators:input_type -> zenao.v1.GetCommunityAdministratorsRequest
+	121, // 63: zenao.v1.ZenaoService.JoinCommunity:input_type -> zenao.v1.JoinCommunityRequest
+	123, // 64: zenao.v1.ZenaoService.LeaveCommunity:input_type -> zenao.v1.LeaveCommunityRequest
+	125, // 65: zenao.v1.ZenaoService.AddEventToCommunity:input_type -> zenao.v1.AddEventToCommunityRequest
+	127, // 66: zenao.v1.ZenaoService.RemoveEventFromCommunity:input_type -> zenao.v1.RemoveEventFromCommunityRequest
+	107, // 67: zenao.v1.ZenaoService.CreateTeam:input_type -> zenao.v1.CreateTeamRequest
+	109, // 68: zenao.v1.ZenaoService.EditTeam:input_type -> zenao.v1.EditTeamRequest
+	111, // 69: zenao.v1.ZenaoService.DeleteTeam:input_type -> zenao.v1.DeleteTeamRequest
+	113, // 70: zenao.v1.ZenaoService.GetUserTeams:input_type -> zenao.v1.GetUserTeamsRequest
+	116, // 71: zenao.v1.ZenaoService.GetTeamMembers:input_type -> zenao.v1.GetTeamMembersRequest
+	84,  // 72: zenao.v1.ZenaoService.EntityRoles:input_type -> zenao.v1.EntityRolesRequest
+	86,  // 73: zenao.v1.ZenaoService.EntitiesWithRoles:input_type -> zenao.v1.EntitiesWithRolesRequest
+	89,  // 74: zenao.v1.ZenaoService.GetCommunity:input_type -> zenao.v1.GetCommunityRequest
+	92,  // 75: zenao.v1.ZenaoService.ListCommunities:input_type -> zenao.v1.ListCommunitiesRequest
+	94,  // 76: zenao.v1.ZenaoService.ListCommunitiesByEvent:input_type -> zenao.v1.ListCommunitiesByEventRequest
+	97,  // 77: zenao.v1.ZenaoService.ListCommunitiesByUserRoles:input_type -> zenao.v1.ListCommunitiesByUserRolesRequest
+	10,  // 78: zenao.v1.ZenaoService.GetEvent:input_type -> zenao.v1.GetEventRequest
+	12,  // 79: zenao.v1.ZenaoService.ListEvents:input_type -> zenao.v1.ListEventsRequest
+	15,  // 80: zenao.v1.ZenaoService.ListEventsByUserRoles:input_type -> zenao.v1.ListEventsByUserRolesRequest
+	58,  // 81: zenao.v1.ZenaoService.GetPost:input_type -> zenao.v1.GetPostRequest
+	60,  // 82: zenao.v1.ZenaoService.GetFeedPosts:input_type -> zenao.v1.GetFeedPostsRequest
+	62,  // 83: zenao.v1.ZenaoService.GetChildrenPosts:input_type -> zenao.v1.GetChildrenPostsRequest
+	52,  // 84: zenao.v1.ZenaoService.GetPoll:input_type -> zenao.v1.GetPollRequest
+	8,   // 85: zenao.v1.ZenaoService.GetUsersProfile:input_type -> zenao.v1.GetUsersProfileRequest
+	50,  // 86: zenao.v1.ZenaoService.CreatePoll:input_type -> zenao.v1.CreatePollRequest
+	54,  // 87: zenao.v1.ZenaoService.VotePoll:input_type -> zenao.v1.VotePollRequest
+	56,  // 88: zenao.v1.ZenaoService.CreatePost:input_type -> zenao.v1.CreatePostRequest
+	64,  // 89: zenao.v1.ZenaoService.DeletePost:input_type -> zenao.v1.DeletePostRequest
+	66,  // 90: zenao.v1.ZenaoService.ReactPost:input_type -> zenao.v1.ReactPostRequest
+	68,  // 91: zenao.v1.ZenaoService.PinPost:input_type -> zenao.v1.PinPostRequest
+	70,  // 92: zenao.v1.ZenaoService.EditPost:input_type -> zenao.v1.EditPostRequest
+	1,   // 93: zenao.v1.ZenaoService.Health:input_type -> zenao.v1.HealthRequest
+	4,   // 94: zenao.v1.ZenaoService.EditUser:output_type -> zenao.v1.EditUserResponse
+	6,   // 95: zenao.v1.ZenaoService.GetUserInfo:output_type -> zenao.v1.GetUserInfoResponse
+	18,  // 96: zenao.v1.ZenaoService.CreateEvent:output_type -> zenao.v1.CreateEventResponse
+	20,  // 97: zenao.v1.ZenaoService.CancelEvent:output_type -> zenao.v1.CancelEventResponse
+	22,  // 98: zenao.v1.ZenaoService.EditEvent:output_type -> zenao.v1.EditEventResponse
+	24,  // 99: zenao.v1.ZenaoService.GetEventGatekeepers:output_type -> zenao.v1.GetEventGatekeepersResponse
+	26,  // 100: zenao.v1.ZenaoService.ValidatePassword:output_type -> zenao.v1.ValidatePasswordResponse
+	37,  // 101: zenao.v1.ZenaoService.BroadcastEvent:output_type -> zenao.v1.BroadcastEventResponse
+	30,  // 102: zenao.v1.ZenaoService.Participate:output_type -> zenao.v1.ParticipateResponse
+	33,  // 103: zenao.v1.ZenaoService.StartTicketPayment:output_type -> zenao.v1.StartTicketPaymentResponse
+	35,  // 104: zenao.v1.ZenaoService.ConfirmTicketPayment:output_type -> zenao.v1.ConfirmTicketPaymentResponse
+	29,  // 105: zenao.v1.ZenaoService.CancelParticipation:output_type -> zenao.v1.CancelParticipationResponse
+	73,  // 106: zenao.v1.ZenaoService.GetEventTickets:output_type -> zenao.v1.GetEventTicketsResponse
+	78,  // 107: zenao.v1.ZenaoService.GetOrderDetails:output_type -> zenao.v1.GetOrderDetailsResponse
+	80,  // 108: zenao.v1.ZenaoService.Checkin:output_type -> zenao.v1.CheckinResponse
+	82,  // 109: zenao.v1.ZenaoService.ExportParticipants:output_type -> zenao.v1.ExportParticipantsResponse
+	100, // 110: zenao.v1.ZenaoService.CreateCommunity:output_type -> zenao.v1.CreateCommunityResponse
+	102, // 111: zenao.v1.ZenaoService.EditCommunity:output_type -> zenao.v1.EditCommunityResponse
+	104, // 112: zenao.v1.ZenaoService.StartCommunityStripeOnboarding:output_type -> zenao.v1.StartCommunityStripeOnboardingResponse
+	106, // 113: zenao.v1.ZenaoService.GetCommunityPayoutStatus:output_type -> zenao.v1.GetCommunityPayoutStatusResponse
+	120, // 114: zenao.v1.ZenaoService.GetCommunityAdministrators:output_type -> zenao.v1.GetCommunityAdministratorsResponse
+	122, // 115: zenao.v1.ZenaoService.JoinCommunity:output_type -> zenao.v1.JoinCommunityResponse
+	124, // 116: zenao.v1.ZenaoService.LeaveCommunity:output_type -> zenao.v1.LeaveCommunityResponse
+	126, // 117: zenao.v1.ZenaoService.AddEventToCommunity:output_type -> zenao.v1.AddEventToCommunityResponse
+	128, // 118: zenao.v1.ZenaoService.RemoveEventFromCommunity:output_type -> zenao.v1.RemoveEventFromCommunityResponse
+	108, // 119: zenao.v1.ZenaoService.CreateTeam:output_type -> zenao.v1.CreateTeamResponse
+	110, // 120: zenao.v1.ZenaoService.EditTeam:output_type -> zenao.v1.EditTeamResponse
+	112, // 121: zenao.v1.ZenaoService.DeleteTeam:output_type -> zenao.v1.DeleteTeamResponse
+	114, // 122: zenao.v1.ZenaoService.GetUserTeams:output_type -> zenao.v1.GetUserTeamsResponse
+	117, // 123: zenao.v1.ZenaoService.GetTeamMembers:output_type -> zenao.v1.GetTeamMembersResponse
+	85,  // 124: zenao.v1.ZenaoService.EntityRoles:output_type -> zenao.v1.EntityRolesResponse
+	88,  // 125: zenao.v1.ZenaoService.EntitiesWithRoles:output_type -> zenao.v1.EntitiesWithRolesResponse
+	90,  // 126: zenao.v1.ZenaoService.GetCommunity:output_type -> zenao.v1.GetCommunityResponse
+	93,  // 127: zenao.v1.ZenaoService.ListCommunities:output_type -> zenao.v1.ListCommunitiesResponse
+	95,  // 128: zenao.v1.ZenaoService.ListCommunitiesByEvent:output_type -> zenao.v1.ListCommunitiesByEventResponse
+	98,  // 129: zenao.v1.ZenaoService.ListCommunitiesByUserRoles:output_type -> zenao.v1.ListCommunitiesByUserRolesResponse
+	11,  // 130: zenao.v1.ZenaoService.GetEvent:output_type -> zenao.v1.GetEventResponse
+	13,  // 131: zenao.v1.ZenaoService.ListEvents:output_type -> zenao.v1.ListEventsResponse
+	16,  // 132: zenao.v1.ZenaoService.ListEventsByUserRoles:output_type -> zenao.v1.ListEventsByUserRolesResponse
+	59,  // 133: zenao.v1.ZenaoService.GetPost:output_type -> zenao.v1.GetPostResponse
+	61,  // 134: zenao.v1.ZenaoService.GetFeedPosts:output_type -> zenao.v1.GetFeedPostsResponse
+	63,  // 135: zenao.v1.ZenaoService.GetChildrenPosts:output_type -> zenao.v1.GetChildrenPostsResponse
+	53,  // 136: zenao.v1.ZenaoService.GetPoll:output_type -> zenao.v1.GetPollResponse
+	9,   // 137: zenao.v1.ZenaoService.GetUsersProfile:output_type -> zenao.v1.GetUsersProfileResponse
+	51,  // 138: zenao.v1.ZenaoService.CreatePoll:output_type -> zenao.v1.CreatePollResponse
+	55,  // 139: zenao.v1.ZenaoService.VotePoll:output_type -> zenao.v1.VotePollResponse
+	57,  // 140: zenao.v1.ZenaoService.CreatePost:output_type -> zenao.v1.CreatePostResponse
+	65,  // 141: zenao.v1.ZenaoService.DeletePost:output_type -> zenao.v1.DeletePostResponse
+	67,  // 142: zenao.v1.ZenaoService.ReactPost:output_type -> zenao.v1.ReactPostResponse
+	69,  // 143: zenao.v1.ZenaoService.PinPost:output_type -> zenao.v1.PinPostResponse
+	71,  // 144: zenao.v1.ZenaoService.EditPost:output_type -> zenao.v1.EditPostResponse
+	2,   // 145: zenao.v1.ZenaoService.Health:output_type -> zenao.v1.HealthResponse
+	94,  // [94:146] is the sub-list for method output_type
+	42,  // [42:94] is the sub-list for method input_type
+	42,  // [42:42] is the sub-list for extension type_name
+	42,  // [42:42] is the sub-list for extension extendee
+	0,   // [0:42] is the sub-list for field type_name
 }
 
 func init() { file_zenao_v1_zenao_proto_init() }
@@ -7646,7 +7904,7 @@ func file_zenao_v1_zenao_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_zenao_v1_zenao_proto_rawDesc), len(file_zenao_v1_zenao_proto_rawDesc)),
 			NumEnums:      1,
-			NumMessages:   124,
+			NumMessages:   128,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
