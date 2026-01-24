@@ -12,9 +12,20 @@ import (
 func (s *ZenaoServer) ListEvents(ctx context.Context, req *connect.Request[zenaov1.ListEventsRequest]) (*connect.Response[zenaov1.ListEventsResponse], error) {
 	var evts []*zeni.Event
 	var infos []*zenaov1.EventInfo
+
+	// Extract location filter parameters
+	var locFilter *zeni.LocationFilter
+	if req.Msg.LocationFilter != nil {
+		locFilter = &zeni.LocationFilter{
+			Lat:      req.Msg.LocationFilter.Lat,
+			Lng:      req.Msg.LocationFilter.Lng,
+			RadiusKm: req.Msg.LocationFilter.RadiusKm,
+		}
+	}
+
 	if err := s.DB.TxWithSpan(ctx, "ListEvents", func(tx zeni.DB) error {
 		var err error
-		evts, err = tx.ListEvents(int(req.Msg.Limit), int(req.Msg.Offset), req.Msg.From, req.Msg.To, req.Msg.DiscoverableFilter)
+		evts, err = tx.ListEvents(int(req.Msg.Limit), int(req.Msg.Offset), req.Msg.From, req.Msg.To, req.Msg.DiscoverableFilter, locFilter)
 		if err != nil {
 			return err
 		}

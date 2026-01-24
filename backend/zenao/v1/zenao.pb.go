@@ -621,6 +621,7 @@ type ListEventsRequest struct {
 	From               int64                  `protobuf:"varint,3,opt,name=from,proto3" json:"from,omitempty"`                                                                                        // unix seconds
 	To                 int64                  `protobuf:"varint,4,opt,name=to,proto3" json:"to,omitempty"`                                                                                            // unix seconds
 	DiscoverableFilter DiscoverableFilter     `protobuf:"varint,5,opt,name=discoverable_filter,json=discoverableFilter,proto3,enum=zenao.v1.DiscoverableFilter" json:"discoverable_filter,omitempty"` // XXX: should we ensure events non discoverable are listed only if the user is an organizer?
+	LocationFilter     *LocationFilter        `protobuf:"bytes,6,opt,name=location_filter,json=locationFilter,proto3" json:"location_filter,omitempty"`                                              // optional location filter
 	unknownFields      protoimpl.UnknownFields
 	sizeCache          protoimpl.SizeCache
 }
@@ -688,6 +689,54 @@ func (x *ListEventsRequest) GetDiscoverableFilter() DiscoverableFilter {
 		return x.DiscoverableFilter
 	}
 	return DiscoverableFilter_DISCOVERABLE_FILTER_UNSPECIFIED
+}
+
+func (x *ListEventsRequest) GetLocationFilter() *LocationFilter {
+	if x != nil {
+		return x.LocationFilter
+	}
+	return nil
+}
+
+// Filter events by geographical location
+type LocationFilter struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Lat           float32                `protobuf:"fixed32,1,opt,name=lat,proto3" json:"lat,omitempty"`       // latitude of the center point
+	Lng           float32                `protobuf:"fixed32,2,opt,name=lng,proto3" json:"lng,omitempty"`       // longitude of the center point
+	RadiusKm      float32                `protobuf:"fixed32,3,opt,name=radius_km,json=radiusKm,proto3" json:"radius_km,omitempty"` // radius in kilometers
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *LocationFilter) Reset() {
+	*x = LocationFilter{}
+}
+
+func (x *LocationFilter) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*LocationFilter) ProtoMessage() {}
+
+func (x *LocationFilter) GetLat() float32 {
+	if x != nil {
+		return x.Lat
+	}
+	return 0
+}
+
+func (x *LocationFilter) GetLng() float32 {
+	if x != nil {
+		return x.Lng
+	}
+	return 0
+}
+
+func (x *LocationFilter) GetRadiusKm() float32 {
+	if x != nil {
+		return x.RadiusKm
+	}
+	return 0
 }
 
 type ListEventsResponse struct {

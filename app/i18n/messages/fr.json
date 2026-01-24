@@ -358,7 +358,23 @@
   },
   "discover": {
     "title": "Découvrir les événements",
-    "description": "Plongez dans le pouls des événements tribaux, soirées rave, événements de hacking, avant-premières de cinéma privées, et plus encore."
+    "description": "Plongez dans le pouls des événements tribaux, soirées rave, événements de hacking, avant-premières de cinéma privées, et plus encore.",
+    "location-filter": {
+      "title": "Filtrer par lieu",
+      "description": "Afficher les événements près de chez vous",
+      "filter-by-location": "Filtrer par lieu",
+      "nearby": "Dans un rayon de {radius} km",
+      "use-my-location": "Utiliser ma position",
+      "locating": "Localisation...",
+      "location-set": "Position définie",
+      "radius": "Rayon",
+      "clear-filter": "Supprimer le filtre",
+      "geolocation-not-supported": "La géolocalisation n'est pas supportée par votre navigateur",
+      "permission-denied": "Permission de localisation refusée. Veuillez l'activer dans les paramètres de votre navigateur.",
+      "position-unavailable": "Les informations de localisation ne sont pas disponibles",
+      "timeout": "La demande de localisation a expiré",
+      "unknown-error": "Une erreur inconnue s'est produite lors de la récupération de votre position"
+    }
   },
   "tickets": {
     "title": "Vos billets",

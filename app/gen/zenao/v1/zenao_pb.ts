@@ -425,6 +425,13 @@ export type ListEventsRequest = Message<"zenao.v1.ListEventsRequest"> & {
    * @generated from field: zenao.v1.DiscoverableFilter discoverable_filter = 5;
    */
   discoverableFilter: DiscoverableFilter;
+
+  /**
+   * optional location filter
+   *
+   * @generated from field: zenao.v1.LocationFilter location_filter = 6;
+   */
+  locationFilter?: LocationFilter;
 };
 
 /**
@@ -461,6 +468,13 @@ export type ListEventsRequestJson = {
    * @generated from field: zenao.v1.DiscoverableFilter discoverable_filter = 5;
    */
   discoverableFilter?: DiscoverableFilterJson;
+
+  /**
+   * optional location filter
+   *
+   * @generated from field: zenao.v1.LocationFilter location_filter = 6;
+   */
+  locationFilter?: LocationFilterJson;
 };
 
 /**
@@ -469,6 +483,62 @@ export type ListEventsRequestJson = {
  */
 export const ListEventsRequestSchema: GenMessage<ListEventsRequest, {jsonType: ListEventsRequestJson}> = /*@__PURE__*/
   messageDesc(file_zenao_v1_zenao, 11);
+
+/**
+ * Filter events by geographical location
+ *
+ * @generated from message zenao.v1.LocationFilter
+ */
+export type LocationFilter = Message<"zenao.v1.LocationFilter"> & {
+  /**
+   * latitude of the center point
+   *
+   * @generated from field: float lat = 1;
+   */
+  lat: number;
+
+  /**
+   * longitude of the center point
+   *
+   * @generated from field: float lng = 2;
+   */
+  lng: number;
+
+  /**
+   * radius in kilometers
+   *
+   * @generated from field: float radius_km = 3;
+   */
+  radiusKm: number;
+};
+
+/**
+ * Filter events by geographical location
+ *
+ * @generated from message zenao.v1.LocationFilter
+ */
+export type LocationFilterJson = {
+  /**
+   * latitude of the center point
+   *
+   * @generated from field: float lat = 1;
+   */
+  lat?: number;
+
+  /**
+   * longitude of the center point
+   *
+   * @generated from field: float lng = 2;
+   */
+  lng?: number;
+
+  /**
+   * radius in kilometers
+   *
+   * @generated from field: float radius_km = 3;
+   */
+  radiusKm?: number;
+};
 
 /**
  * @generated from message zenao.v1.ListEventsResponse

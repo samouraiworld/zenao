@@ -133,6 +133,14 @@ message ListEventsRequest {
   int64 from = 3; // unix seconds
   int64 to = 4; // unix seconds
   DiscoverableFilter discoverable_filter = 5; // XXX: should we ensure events non discoverable are listed only if the user is an organizer?
+  LocationFilter location_filter = 6; // optional location filter
+}
+
+// Filter events by geographical location
+message LocationFilter {
+  float lat = 1; // latitude of the center point
+  float lng = 2; // longitude of the center point
+  float radius_km = 3; // radius in kilometers
 }
 
 message ListEventsResponse {
