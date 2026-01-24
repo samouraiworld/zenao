@@ -358,7 +358,23 @@
   },
   "discover": {
     "title": "Discover events",
-    "description": "Dive into the pulse of tribes events, rave parties, hacking events, private cinema avant-premieres, and more."
+    "description": "Dive into the pulse of tribes events, rave parties, hacking events, private cinema avant-premieres, and more.",
+    "location-filter": {
+      "title": "Filter by location",
+      "description": "Show events near your location",
+      "filter-by-location": "Filter by location",
+      "nearby": "Within {radius} km",
+      "use-my-location": "Use my location",
+      "locating": "Getting location...",
+      "location-set": "Location set",
+      "radius": "Radius",
+      "clear-filter": "Clear filter",
+      "geolocation-not-supported": "Geolocation is not supported by your browser",
+      "permission-denied": "Location permission denied. Please enable it in your browser settings.",
+      "position-unavailable": "Location information is unavailable",
+      "timeout": "Location request timed out",
+      "unknown-error": "An unknown error occurred while getting your location"
+    }
   },
   "tickets": {
     "title": "Your tickets",

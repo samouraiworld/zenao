@@ -9,7 +9,7 @@ import { withSpan } from "../tracer";
 import { zenaoClient } from "../zenao-client";
 import { buildQueryHeaders } from "./build-query-headers";
 import { EventUserRole } from "./event-users";
-import { DiscoverableFilter } from "@/app/gen/zenao/v1/zenao_pb";
+import { DiscoverableFilter, LocationFilter } from "@/app/gen/zenao/v1/zenao_pb";
 import { GetToken } from "@/lib/utils";
 import {
   eventInfoSchema,
@@ -18,6 +18,12 @@ import {
 } from "@/types/schemas";
 
 export const DEFAULT_EVENTS_LIMIT = 20;
+
+export type LocationFilterParams = {
+  lat: number;
+  lng: number;
+  radiusKm: number;
+};
 
 export const eventsList = (
   fromUnixSec: number,
@@ -28,7 +34,7 @@ export const eventsList = (
       SafeEventInfo[],
       Error,
       InfiniteData<SafeEventInfo[]>,
-      (string | number)[],
+      (string | number | LocationFilterParams | undefined)[],
       number // pageParam type
     >,
     | "queryKey"
@@ -37,13 +43,14 @@ export const eventsList = (
     | "initialPageParam"
     | "getPreviousPageParam"
   >,
+  locationFilter?: LocationFilterParams,
 ) => {
   const fromInt = Math.floor(fromUnixSec);
   const toInt = Math.floor(toUnixSec);
   const limitInt = Math.floor(limit);
 
   return infiniteQueryOptions({
-    queryKey: ["events", fromInt, toInt, limitInt],
+    queryKey: ["events", fromInt, toInt, limitInt, locationFilter],
     initialPageParam: 0,
     queryFn: async ({ pageParam = 0 }) => {
       return withSpan(`query:backend:events`, async () => {
@@ -53,6 +60,13 @@ export const eventsList = (
           from: BigInt(fromInt),
           to: BigInt(toInt),
           discoverableFilter: DiscoverableFilter.DISCOVERABLE,
+          locationFilter: locationFilter
+            ? {
+                lat: locationFilter.lat,
+                lng: locationFilter.lng,
+                radiusKm: locationFilter.radiusKm,
+              } as LocationFilter
+            : undefined,
         });
 
         return z.array(eventInfoSchema).parse(res.events);

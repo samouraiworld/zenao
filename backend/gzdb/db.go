@@ -320,7 +320,7 @@ func (g *gormZenaoDB) GetEvent(id string) (*zeni.Event, error) {
 }
 
 // ListEvents implements zeni.DB.
-func (g *gormZenaoDB) ListEvents(limit int, offset int, from int64, to int64, discoverable zenaov1.DiscoverableFilter) ([]*zeni.Event, error) {
+func (g *gormZenaoDB) ListEvents(limit int, offset int, from int64, to int64, discoverable zenaov1.DiscoverableFilter, locationFilter *zeni.LocationFilter) ([]*zeni.Event, error) {
 	g, span := g.trace("gzdb.ListEvents")
 	defer span.End()
 
@@ -347,6 +347,21 @@ func (g *gormZenaoDB) ListEvents(limit int, offset int, from int64, to int64, di
 	if discoverable != zenaov1.DiscoverableFilter_DISCOVERABLE_FILTER_UNSPECIFIED {
 		d := discoverable == zenaov1.DiscoverableFilter_DISCOVERABLE_FILTER_DISCOVERABLE
 		query = query.Where("discoverable = ?", d)
+	}
+
+	// Filter by location if provided
+	// Uses Haversine formula to calculate distance between two points on Earth
+	// Only applies to events with geo location (loc_kind = 'geo')
+	if locationFilter != nil && locationFilter.RadiusKm > 0 {
+		// Earth's radius in kilometers
+		const earthRadiusKm = 6371.0
+		query = query.Where(`loc_kind = 'geo' AND (
+			? * 2 * ASIN(SQRT(
+				POWER(SIN((RADIANS(loc_lat) - RADIANS(?)) / 2), 2) +
+				COS(RADIANS(?)) * COS(RADIANS(loc_lat)) *
+				POWER(SIN((RADIANS(loc_lng) - RADIANS(?)) / 2), 2)
+			))
+		) <= ?`, earthRadiusKm, locationFilter.Lat, locationFilter.Lat, locationFilter.Lng, locationFilter.RadiusKm)
 	}
 
 	if err := query.Limit(limit).Offset(offset).Find(&dbEvts).Error; err != nil {
