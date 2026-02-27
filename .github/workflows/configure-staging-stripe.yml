@@ -22,7 +22,7 @@ jobs:
             sort -u -o ~/.ssh/authorized_keys ~/.ssh/authorized_keys
             chmod 600 ~/.ssh/authorized_keys
 
-            # Add Stripe config to backend.env (idempotent)
+            # Add Stripe + app config to backend.env (idempotent)
             cd zenao
             grep -q 'ZENAO_STRIPE_SECRET_KEY' backend.env 2>/dev/null && \
               sed -i 's|^ZENAO_STRIPE_SECRET_KEY=.*|ZENAO_STRIPE_SECRET_KEY=${{ secrets.STRIPE_TEST_SECRET_KEY }}|' backend.env || \
@@ -32,7 +32,12 @@ jobs:
               sed -i 's|^ZENAO_PAID_EVENTS_ENABLED=.*|ZENAO_PAID_EVENTS_ENABLED=true|' backend.env || \
               echo 'ZENAO_PAID_EVENTS_ENABLED=true' >> backend.env
 
-            # Restart backend with new env
+            grep -q 'ZENAO_APP_BASE_URL' backend.env 2>/dev/null && \
+              sed -i 's|^ZENAO_APP_BASE_URL=.*|ZENAO_APP_BASE_URL=https://zenao.io|' backend.env || \
+              echo 'ZENAO_APP_BASE_URL=https://zenao.io' >> backend.env
+
+            # Force recreate backend container to pick up new env
+            docker compose -f staging.docker-compose.yml down backend
             docker compose -f staging.docker-compose.yml up -d --build backend
 
             echo "✅ Stripe configured and backend restarted"
