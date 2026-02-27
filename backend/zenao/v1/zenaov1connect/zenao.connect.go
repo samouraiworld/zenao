@@ -59,12 +59,24 @@ const (
 	// ZenaoServiceParticipateProcedure is the fully-qualified name of the ZenaoService's Participate
 	// RPC.
 	ZenaoServiceParticipateProcedure = "/zenao.v1.ZenaoService/Participate"
+	// ZenaoServiceStartTicketPaymentProcedure is the fully-qualified name of the ZenaoService's
+	// StartTicketPayment RPC.
+	ZenaoServiceStartTicketPaymentProcedure = "/zenao.v1.ZenaoService/StartTicketPayment"
+	// ZenaoServiceConfirmTicketPaymentProcedure is the fully-qualified name of the ZenaoService's
+	// ConfirmTicketPayment RPC.
+	ZenaoServiceConfirmTicketPaymentProcedure = "/zenao.v1.ZenaoService/ConfirmTicketPayment"
 	// ZenaoServiceCancelParticipationProcedure is the fully-qualified name of the ZenaoService's
 	// CancelParticipation RPC.
 	ZenaoServiceCancelParticipationProcedure = "/zenao.v1.ZenaoService/CancelParticipation"
 	// ZenaoServiceGetEventTicketsProcedure is the fully-qualified name of the ZenaoService's
 	// GetEventTickets RPC.
 	ZenaoServiceGetEventTicketsProcedure = "/zenao.v1.ZenaoService/GetEventTickets"
+	// ZenaoServiceGetUserOrdersProcedure is the fully-qualified name of the ZenaoService's
+	// GetUserOrders RPC.
+	ZenaoServiceGetUserOrdersProcedure = "/zenao.v1.ZenaoService/GetUserOrders"
+	// ZenaoServiceGetOrderDetailsProcedure is the fully-qualified name of the ZenaoService's
+	// GetOrderDetails RPC.
+	ZenaoServiceGetOrderDetailsProcedure = "/zenao.v1.ZenaoService/GetOrderDetails"
 	// ZenaoServiceCheckinProcedure is the fully-qualified name of the ZenaoService's Checkin RPC.
 	ZenaoServiceCheckinProcedure = "/zenao.v1.ZenaoService/Checkin"
 	// ZenaoServiceExportParticipantsProcedure is the fully-qualified name of the ZenaoService's
@@ -178,8 +190,12 @@ type ZenaoServiceClient interface {
 	ValidatePassword(context.Context, *connect.Request[v1.ValidatePasswordRequest]) (*connect.Response[v1.ValidatePasswordResponse], error)
 	BroadcastEvent(context.Context, *connect.Request[v1.BroadcastEventRequest]) (*connect.Response[v1.BroadcastEventResponse], error)
 	Participate(context.Context, *connect.Request[v1.ParticipateRequest]) (*connect.Response[v1.ParticipateResponse], error)
+	StartTicketPayment(context.Context, *connect.Request[v1.StartTicketPaymentRequest]) (*connect.Response[v1.StartTicketPaymentResponse], error)
+	ConfirmTicketPayment(context.Context, *connect.Request[v1.ConfirmTicketPaymentRequest]) (*connect.Response[v1.ConfirmTicketPaymentResponse], error)
 	CancelParticipation(context.Context, *connect.Request[v1.CancelParticipationRequest]) (*connect.Response[v1.CancelParticipationResponse], error)
 	GetEventTickets(context.Context, *connect.Request[v1.GetEventTicketsRequest]) (*connect.Response[v1.GetEventTicketsResponse], error)
+	GetUserOrders(context.Context, *connect.Request[v1.GetUserOrdersRequest]) (*connect.Response[v1.GetUserOrdersResponse], error)
+	GetOrderDetails(context.Context, *connect.Request[v1.GetOrderDetailsRequest]) (*connect.Response[v1.GetOrderDetailsResponse], error)
 	Checkin(context.Context, *connect.Request[v1.CheckinRequest]) (*connect.Response[v1.CheckinResponse], error)
 	ExportParticipants(context.Context, *connect.Request[v1.ExportParticipantsRequest]) (*connect.Response[v1.ExportParticipantsResponse], error)
 	// COMMUNITY
@@ -290,6 +306,18 @@ func NewZenaoServiceClient(httpClient connect.HTTPClient, baseURL string, opts .
 			connect.WithSchema(zenaoServiceMethods.ByName("Participate")),
 			connect.WithClientOptions(opts...),
 		),
+		startTicketPayment: connect.NewClient[v1.StartTicketPaymentRequest, v1.StartTicketPaymentResponse](
+			httpClient,
+			baseURL+ZenaoServiceStartTicketPaymentProcedure,
+			connect.WithSchema(zenaoServiceMethods.ByName("StartTicketPayment")),
+			connect.WithClientOptions(opts...),
+		),
+		confirmTicketPayment: connect.NewClient[v1.ConfirmTicketPaymentRequest, v1.ConfirmTicketPaymentResponse](
+			httpClient,
+			baseURL+ZenaoServiceConfirmTicketPaymentProcedure,
+			connect.WithSchema(zenaoServiceMethods.ByName("ConfirmTicketPayment")),
+			connect.WithClientOptions(opts...),
+		),
 		cancelParticipation: connect.NewClient[v1.CancelParticipationRequest, v1.CancelParticipationResponse](
 			httpClient,
 			baseURL+ZenaoServiceCancelParticipationProcedure,
@@ -300,6 +328,18 @@ func NewZenaoServiceClient(httpClient connect.HTTPClient, baseURL string, opts .
 			httpClient,
 			baseURL+ZenaoServiceGetEventTicketsProcedure,
 			connect.WithSchema(zenaoServiceMethods.ByName("GetEventTickets")),
+			connect.WithClientOptions(opts...),
+		),
+		getUserOrders: connect.NewClient[v1.GetUserOrdersRequest, v1.GetUserOrdersResponse](
+			httpClient,
+			baseURL+ZenaoServiceGetUserOrdersProcedure,
+			connect.WithSchema(zenaoServiceMethods.ByName("GetUserOrders")),
+			connect.WithClientOptions(opts...),
+		),
+		getOrderDetails: connect.NewClient[v1.GetOrderDetailsRequest, v1.GetOrderDetailsResponse](
+			httpClient,
+			baseURL+ZenaoServiceGetOrderDetailsProcedure,
+			connect.WithSchema(zenaoServiceMethods.ByName("GetOrderDetails")),
 			connect.WithClientOptions(opts...),
 		),
 		checkin: connect.NewClient[v1.CheckinRequest, v1.CheckinResponse](
@@ -544,8 +584,12 @@ type zenaoServiceClient struct {
 	validatePassword               *connect.Client[v1.ValidatePasswordRequest, v1.ValidatePasswordResponse]
 	broadcastEvent                 *connect.Client[v1.BroadcastEventRequest, v1.BroadcastEventResponse]
 	participate                    *connect.Client[v1.ParticipateRequest, v1.ParticipateResponse]
+	startTicketPayment             *connect.Client[v1.StartTicketPaymentRequest, v1.StartTicketPaymentResponse]
+	confirmTicketPayment           *connect.Client[v1.ConfirmTicketPaymentRequest, v1.ConfirmTicketPaymentResponse]
 	cancelParticipation            *connect.Client[v1.CancelParticipationRequest, v1.CancelParticipationResponse]
 	getEventTickets                *connect.Client[v1.GetEventTicketsRequest, v1.GetEventTicketsResponse]
+	getUserOrders                  *connect.Client[v1.GetUserOrdersRequest, v1.GetUserOrdersResponse]
+	getOrderDetails                *connect.Client[v1.GetOrderDetailsRequest, v1.GetOrderDetailsResponse]
 	checkin                        *connect.Client[v1.CheckinRequest, v1.CheckinResponse]
 	exportParticipants             *connect.Client[v1.ExportParticipantsRequest, v1.ExportParticipantsResponse]
 	createCommunity                *connect.Client[v1.CreateCommunityRequest, v1.CreateCommunityResponse]
@@ -631,6 +675,16 @@ func (c *zenaoServiceClient) Participate(ctx context.Context, req *connect.Reque
 	return c.participate.CallUnary(ctx, req)
 }
 
+// StartTicketPayment calls zenao.v1.ZenaoService.StartTicketPayment.
+func (c *zenaoServiceClient) StartTicketPayment(ctx context.Context, req *connect.Request[v1.StartTicketPaymentRequest]) (*connect.Response[v1.StartTicketPaymentResponse], error) {
+	return c.startTicketPayment.CallUnary(ctx, req)
+}
+
+// ConfirmTicketPayment calls zenao.v1.ZenaoService.ConfirmTicketPayment.
+func (c *zenaoServiceClient) ConfirmTicketPayment(ctx context.Context, req *connect.Request[v1.ConfirmTicketPaymentRequest]) (*connect.Response[v1.ConfirmTicketPaymentResponse], error) {
+	return c.confirmTicketPayment.CallUnary(ctx, req)
+}
+
 // CancelParticipation calls zenao.v1.ZenaoService.CancelParticipation.
 func (c *zenaoServiceClient) CancelParticipation(ctx context.Context, req *connect.Request[v1.CancelParticipationRequest]) (*connect.Response[v1.CancelParticipationResponse], error) {
 	return c.cancelParticipation.CallUnary(ctx, req)
@@ -639,6 +693,16 @@ func (c *zenaoServiceClient) CancelParticipation(ctx context.Context, req *conne
 // GetEventTickets calls zenao.v1.ZenaoService.GetEventTickets.
 func (c *zenaoServiceClient) GetEventTickets(ctx context.Context, req *connect.Request[v1.GetEventTicketsRequest]) (*connect.Response[v1.GetEventTicketsResponse], error) {
 	return c.getEventTickets.CallUnary(ctx, req)
+}
+
+// GetUserOrders calls zenao.v1.ZenaoService.GetUserOrders.
+func (c *zenaoServiceClient) GetUserOrders(ctx context.Context, req *connect.Request[v1.GetUserOrdersRequest]) (*connect.Response[v1.GetUserOrdersResponse], error) {
+	return c.getUserOrders.CallUnary(ctx, req)
+}
+
+// GetOrderDetails calls zenao.v1.ZenaoService.GetOrderDetails.
+func (c *zenaoServiceClient) GetOrderDetails(ctx context.Context, req *connect.Request[v1.GetOrderDetailsRequest]) (*connect.Response[v1.GetOrderDetailsResponse], error) {
+	return c.getOrderDetails.CallUnary(ctx, req)
 }
 
 // Checkin calls zenao.v1.ZenaoService.Checkin.
@@ -844,8 +908,12 @@ type ZenaoServiceHandler interface {
 	ValidatePassword(context.Context, *connect.Request[v1.ValidatePasswordRequest]) (*connect.Response[v1.ValidatePasswordResponse], error)
 	BroadcastEvent(context.Context, *connect.Request[v1.BroadcastEventRequest]) (*connect.Response[v1.BroadcastEventResponse], error)
 	Participate(context.Context, *connect.Request[v1.ParticipateRequest]) (*connect.Response[v1.ParticipateResponse], error)
+	StartTicketPayment(context.Context, *connect.Request[v1.StartTicketPaymentRequest]) (*connect.Response[v1.StartTicketPaymentResponse], error)
+	ConfirmTicketPayment(context.Context, *connect.Request[v1.ConfirmTicketPaymentRequest]) (*connect.Response[v1.ConfirmTicketPaymentResponse], error)
 	CancelParticipation(context.Context, *connect.Request[v1.CancelParticipationRequest]) (*connect.Response[v1.CancelParticipationResponse], error)
 	GetEventTickets(context.Context, *connect.Request[v1.GetEventTicketsRequest]) (*connect.Response[v1.GetEventTicketsResponse], error)
+	GetUserOrders(context.Context, *connect.Request[v1.GetUserOrdersRequest]) (*connect.Response[v1.GetUserOrdersResponse], error)
+	GetOrderDetails(context.Context, *connect.Request[v1.GetOrderDetailsRequest]) (*connect.Response[v1.GetOrderDetailsResponse], error)
 	Checkin(context.Context, *connect.Request[v1.CheckinRequest]) (*connect.Response[v1.CheckinResponse], error)
 	ExportParticipants(context.Context, *connect.Request[v1.ExportParticipantsRequest]) (*connect.Response[v1.ExportParticipantsResponse], error)
 	// COMMUNITY
@@ -952,6 +1020,18 @@ func NewZenaoServiceHandler(svc ZenaoServiceHandler, opts ...connect.HandlerOpti
 		connect.WithSchema(zenaoServiceMethods.ByName("Participate")),
 		connect.WithHandlerOptions(opts...),
 	)
+	zenaoServiceStartTicketPaymentHandler := connect.NewUnaryHandler(
+		ZenaoServiceStartTicketPaymentProcedure,
+		svc.StartTicketPayment,
+		connect.WithSchema(zenaoServiceMethods.ByName("StartTicketPayment")),
+		connect.WithHandlerOptions(opts...),
+	)
+	zenaoServiceConfirmTicketPaymentHandler := connect.NewUnaryHandler(
+		ZenaoServiceConfirmTicketPaymentProcedure,
+		svc.ConfirmTicketPayment,
+		connect.WithSchema(zenaoServiceMethods.ByName("ConfirmTicketPayment")),
+		connect.WithHandlerOptions(opts...),
+	)
 	zenaoServiceCancelParticipationHandler := connect.NewUnaryHandler(
 		ZenaoServiceCancelParticipationProcedure,
 		svc.CancelParticipation,
@@ -962,6 +1042,18 @@ func NewZenaoServiceHandler(svc ZenaoServiceHandler, opts ...connect.HandlerOpti
 		ZenaoServiceGetEventTicketsProcedure,
 		svc.GetEventTickets,
 		connect.WithSchema(zenaoServiceMethods.ByName("GetEventTickets")),
+		connect.WithHandlerOptions(opts...),
+	)
+	zenaoServiceGetUserOrdersHandler := connect.NewUnaryHandler(
+		ZenaoServiceGetUserOrdersProcedure,
+		svc.GetUserOrders,
+		connect.WithSchema(zenaoServiceMethods.ByName("GetUserOrders")),
+		connect.WithHandlerOptions(opts...),
+	)
+	zenaoServiceGetOrderDetailsHandler := connect.NewUnaryHandler(
+		ZenaoServiceGetOrderDetailsProcedure,
+		svc.GetOrderDetails,
+		connect.WithSchema(zenaoServiceMethods.ByName("GetOrderDetails")),
 		connect.WithHandlerOptions(opts...),
 	)
 	zenaoServiceCheckinHandler := connect.NewUnaryHandler(
@@ -1212,10 +1304,18 @@ func NewZenaoServiceHandler(svc ZenaoServiceHandler, opts ...connect.HandlerOpti
 			zenaoServiceBroadcastEventHandler.ServeHTTP(w, r)
 		case ZenaoServiceParticipateProcedure:
 			zenaoServiceParticipateHandler.ServeHTTP(w, r)
+		case ZenaoServiceStartTicketPaymentProcedure:
+			zenaoServiceStartTicketPaymentHandler.ServeHTTP(w, r)
+		case ZenaoServiceConfirmTicketPaymentProcedure:
+			zenaoServiceConfirmTicketPaymentHandler.ServeHTTP(w, r)
 		case ZenaoServiceCancelParticipationProcedure:
 			zenaoServiceCancelParticipationHandler.ServeHTTP(w, r)
 		case ZenaoServiceGetEventTicketsProcedure:
 			zenaoServiceGetEventTicketsHandler.ServeHTTP(w, r)
+		case ZenaoServiceGetUserOrdersProcedure:
+			zenaoServiceGetUserOrdersHandler.ServeHTTP(w, r)
+		case ZenaoServiceGetOrderDetailsProcedure:
+			zenaoServiceGetOrderDetailsHandler.ServeHTTP(w, r)
 		case ZenaoServiceCheckinProcedure:
 			zenaoServiceCheckinHandler.ServeHTTP(w, r)
 		case ZenaoServiceExportParticipantsProcedure:
@@ -1337,12 +1437,28 @@ func (UnimplementedZenaoServiceHandler) Participate(context.Context, *connect.Re
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("zenao.v1.ZenaoService.Participate is not implemented"))
 }
 
+func (UnimplementedZenaoServiceHandler) StartTicketPayment(context.Context, *connect.Request[v1.StartTicketPaymentRequest]) (*connect.Response[v1.StartTicketPaymentResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("zenao.v1.ZenaoService.StartTicketPayment is not implemented"))
+}
+
+func (UnimplementedZenaoServiceHandler) ConfirmTicketPayment(context.Context, *connect.Request[v1.ConfirmTicketPaymentRequest]) (*connect.Response[v1.ConfirmTicketPaymentResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("zenao.v1.ZenaoService.ConfirmTicketPayment is not implemented"))
+}
+
 func (UnimplementedZenaoServiceHandler) CancelParticipation(context.Context, *connect.Request[v1.CancelParticipationRequest]) (*connect.Response[v1.CancelParticipationResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("zenao.v1.ZenaoService.CancelParticipation is not implemented"))
 }
 
 func (UnimplementedZenaoServiceHandler) GetEventTickets(context.Context, *connect.Request[v1.GetEventTicketsRequest]) (*connect.Response[v1.GetEventTicketsResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("zenao.v1.ZenaoService.GetEventTickets is not implemented"))
+}
+
+func (UnimplementedZenaoServiceHandler) GetUserOrders(context.Context, *connect.Request[v1.GetUserOrdersRequest]) (*connect.Response[v1.GetUserOrdersResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("zenao.v1.ZenaoService.GetUserOrders is not implemented"))
+}
+
+func (UnimplementedZenaoServiceHandler) GetOrderDetails(context.Context, *connect.Request[v1.GetOrderDetailsRequest]) (*connect.Response[v1.GetOrderDetailsResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("zenao.v1.ZenaoService.GetOrderDetails is not implemented"))
 }
 
 func (UnimplementedZenaoServiceHandler) Checkin(context.Context, *connect.Request[v1.CheckinRequest]) (*connect.Response[v1.CheckinResponse], error) {

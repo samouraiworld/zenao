@@ -35,9 +35,11 @@ export function TicketsInfo({ id }: TicketsInfoProps) {
   const t = useTranslations("tickets");
 
   if (tickets.ticketsInfo.length === 0) {
-    <div>
-      <p>{t("no-tickets-event")}</p>
-    </div>;
+    return (
+      <div>
+        <p>{t("no-tickets-event")}</p>
+      </div>
+    );
   }
 
   return (

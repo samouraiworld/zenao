@@ -21,9 +21,15 @@ service ZenaoService {
       returns (ValidatePasswordResponse);
   rpc BroadcastEvent(BroadcastEventRequest) returns (BroadcastEventResponse);
   rpc Participate(ParticipateRequest) returns (ParticipateResponse);
+  rpc StartTicketPayment(StartTicketPaymentRequest)
+      returns (StartTicketPaymentResponse);
+  rpc ConfirmTicketPayment(ConfirmTicketPaymentRequest)
+      returns (ConfirmTicketPaymentResponse);
   rpc CancelParticipation(CancelParticipationRequest)
       returns (CancelParticipationResponse);
   rpc GetEventTickets(GetEventTicketsRequest) returns (GetEventTicketsResponse);
+  rpc GetUserOrders(GetUserOrdersRequest) returns (GetUserOrdersResponse);
+  rpc GetOrderDetails(GetOrderDetailsRequest) returns (GetOrderDetailsResponse);
   rpc Checkin(CheckinRequest) returns (CheckinResponse);
   rpc ExportParticipants(ExportParticipantsRequest)
       returns (ExportParticipantsResponse);
@@ -229,6 +235,35 @@ message CancelParticipationResponse {}
 
 message ParticipateResponse { string ticket_secret = 1; }
 
+message StartTicketPaymentLineItem {
+  string price_id = 1;
+  string attendee_email = 2;
+}
+
+message StartTicketPaymentRequest {
+  string event_id = 1;
+  repeated StartTicketPaymentLineItem line_items = 2;
+  string password = 3;
+  string success_path = 4;
+  string cancel_path = 5;
+}
+
+message StartTicketPaymentResponse {
+  string checkout_url = 1;
+  string order_id = 2;
+}
+
+message ConfirmTicketPaymentRequest {
+  string order_id = 1;
+  string checkout_session_id = 2;
+}
+
+message ConfirmTicketPaymentResponse {
+  string order_id = 1;
+  string status = 2;
+  string receipt_reference = 3;
+}
+
 message BroadcastEventRequest {
   string event_id = 1;
   string message = 2;
@@ -425,6 +460,31 @@ message TicketInfo {
   string ticket_secret = 1;
   string user_email = 2;
 }
+
+message GetOrderDetailsRequest { string order_id = 1; }
+
+message OrderSummary {
+  string order_id = 1;
+  string event_id = 2;
+  string buyer_id = 3;
+  int64 amount_minor = 4;
+  string currency_code = 5;
+  int64 created_at = 6;
+}
+
+message OrderTicketInfo {
+  string ticket_secret = 1;
+  string user_email = 2;
+}
+
+message GetOrderDetailsResponse {
+  OrderSummary order = 1;
+  repeated OrderTicketInfo tickets = 2;
+}
+
+message GetUserOrdersRequest {}
+
+message GetUserOrdersResponse { repeated OrderSummary orders = 1; }
 
 message CheckinRequest {
   string ticket_pubkey = 1;

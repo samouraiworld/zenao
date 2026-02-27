@@ -2,19 +2,21 @@ package main
 
 import (
 	"github.com/resend/resend-go/v2"
+	"github.com/samouraiworld/zenao/backend/payment"
 	"github.com/samouraiworld/zenao/backend/zeni"
 	"go.uber.org/zap"
 )
 
 type ZenaoServer struct {
-	AppBaseURL        string
-	Logger            *zap.Logger
-	Auth              zeni.Auth
-	DB                zeni.DB
-	MailClient        *resend.Client
-	MailSender        string
-	DiscordToken      string
-	Maintenance       bool
-	StripeSecretKey   string
-	PaidEventsEnabled bool
+AppBaseURL        string
+Logger            *zap.Logger
+Auth              zeni.Auth
+DB                zeni.DB
+MailClient        *resend.Client
+MailSender        string
+DiscordToken      string
+Maintenance       bool
+StripeSecretKey   string
+PaidEventsEnabled bool
+PaymentProviders  map[string]payment.Payment
 }

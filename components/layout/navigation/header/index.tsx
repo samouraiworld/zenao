@@ -9,6 +9,7 @@ import {
   BookOpenText,
   BoxesIcon,
   CompassIcon,
+  FileText,
   LucideProps,
   RssIcon,
   Tickets,
@@ -70,6 +71,13 @@ const HeaderLinks = () => {
         icon: Tickets,
         needsAuth: true,
         children: t("your-tickets"),
+      },
+      {
+        key: "orders",
+        to: "/orders",
+        icon: FileText,
+        needsAuth: true,
+        children: t("orders"),
       },
       {
         key: "manifesto",

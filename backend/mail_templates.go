@@ -17,6 +17,14 @@ var ticketsConfirmationTmplHTML *template.Template
 var ticketsConfirmationTmplTextSrc string
 var ticketsConfirmationTmplText *template.Template
 
+//go:embed mails/html/purchase-confirmation.tmpl.html
+var purchaseConfirmationTmplHTMLSrc string
+var purchaseConfirmationTmplHTML *template.Template
+
+//go:embed mails/text/purchase-confirmation.tmpl.txt
+var purchaseConfirmationTmplTextSrc string
+var purchaseConfirmationTmplText *template.Template
+
 //go:embed mails/html/event-broadcast-message.tmpl.html
 var eventBroadcastMessageTmplHTMLSrc string
 var eventBroadcastMessageTmplHTML *template.Template
@@ -53,6 +61,18 @@ func init() {
 		panic(err)
 	}
 	ticketsConfirmationTmplText = tmpl
+
+	tmpl, err = template.New("purchaseConfirmationHTML").Parse(purchaseConfirmationTmplHTMLSrc)
+	if err != nil {
+		panic(err)
+	}
+	purchaseConfirmationTmplHTML = tmpl
+
+	tmpl, err = template.New("purchaseConfirmationText").Parse(purchaseConfirmationTmplTextSrc)
+	if err != nil {
+		panic(err)
+	}
+	purchaseConfirmationTmplText = tmpl
 
 	tmpl, err = template.New("eventBroadcastMessageHTML").Parse(eventBroadcastMessageTmplHTMLSrc)
 	if err != nil {
@@ -129,6 +149,41 @@ func ticketsConfirmationMailContent(event *zeni.Event, welcomeText string) (stri
 
 	buf = &strings.Builder{}
 	if err := ticketsConfirmationTmplText.Execute(buf, data); err != nil {
+		return "", "", err
+	}
+	textContent := buf.String()
+
+	return htmlContent, textContent, nil
+}
+
+func purchaseConfirmationMailContent(event *zeni.Event, welcomeText string) (string, string, error) {
+	locStr, err := zeni.LocationToString(event.Location)
+	if err != nil {
+		return "", "", err
+	}
+	tz, err := event.Timezone()
+	if err != nil {
+		return "", "", err
+	}
+	data := ticketsConfirmation{
+		ImageURL:        web2URL(event.ImageURI) + "?img-width=960&img-height=540&img-fit=cover&dpr=2",
+		CalendarIconURL: web2URL("ipfs://bafkreiaknq3mxzx5ulryv5tnikjkntmckvz3h4mhjyjle4zbtqkwhyb5xa"),
+		PinIconURL:      web2URL("ipfs://bafkreidfskfo2ld3i75s3d2uf6asiena3jletbz5cy7ostihwoyjclceqa"),
+		EventName:       event.Title,
+		TimeText:        event.StartDate.In(tz).Format(time.ANSIC) + " - " + event.EndDate.In(tz).Format(time.ANSIC),
+		LocationText:    locStr,
+		EventURL:        eventPublicURL(event.ID),
+		WelcomeText:     welcomeText,
+	}
+
+	buf := &strings.Builder{}
+	if err := purchaseConfirmationTmplHTML.Execute(buf, data); err != nil {
+		return "", "", err
+	}
+	htmlContent := buf.String()
+
+	buf = &strings.Builder{}
+	if err := purchaseConfirmationTmplText.Execute(buf, data); err != nil {
 		return "", "", err
 	}
 	textContent := buf.String()

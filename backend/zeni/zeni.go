@@ -70,6 +70,21 @@ const (
 	PaymentVerificationStateMissingAccount = "missing_account"
 )
 
+type OrderStatus string
+
+const (
+	OrderStatusSuccess OrderStatus = "success"
+	OrderStatusPending OrderStatus = "pending"
+	OrderStatusFailed  OrderStatus = "failed"
+)
+
+type TicketIssueStatus string
+
+const (
+	TicketIssueStatusIssued TicketIssueStatus = "issued"
+	TicketIssueStatusFailed TicketIssueStatus = "failed"
+)
+
 func IsValidEventRole(role string) bool {
 	return role == RoleOrganizer || role == RoleGatekeeper || role == RoleParticipant
 }
@@ -149,6 +164,48 @@ type Price struct {
 	CurrencyCode     string
 	PaymentAccount   *PaymentAccount
 	PaymentAccountID string
+}
+
+type Order struct {
+	CreatedAt         int64
+	ID                string
+	EventID           string
+	BuyerID           string
+	CurrencyCode      string
+	AmountMinor       int64
+	Status            OrderStatus
+	PaymentStatus     string
+	PaymentAccountID  string
+	PaymentAccount    *PaymentAccount
+	PaymentProvider   string
+	PaymentSessionID  string
+	PaymentIntentID   string
+	ConfirmedAt       *int64
+	InvoiceID         string
+	InvoiceURL        string
+	TicketIssueStatus TicketIssueStatus
+	TicketIssueError  string
+}
+
+type OrderAttendee struct {
+	ID           string
+	CreatedAt    int64
+	OrderID      string
+	PriceID      string
+	PriceGroupID string
+	UserID       string
+	AmountMinor  int64
+	CurrencyCode string
+}
+
+type TicketHold struct {
+	CreatedAt    int64
+	ID           string
+	EventID      string
+	PriceGroupID string
+	OrderID      string
+	Quantity     uint32
+	ExpiresAt    int64
 }
 
 type EventWithRoles struct {
@@ -239,13 +296,20 @@ type Reaction struct {
 }
 
 type SoldTicket struct {
-	DeletedAt time.Time
-	CreatedAt time.Time
-	Ticket    *Ticket
-	BuyerID   string
-	UserID    string
-	User      *User
-	Checkin   *Checkin
+	DeletedAt       time.Time
+	CreatedAt       time.Time
+	Ticket          *Ticket
+	EventID         string
+	BuyerID         string
+	UserID          string
+	OrderID         string
+	PriceID         string
+	PriceGroupID    string
+	OrderAttendeeID string
+	AmountMinor     int64
+	CurrencyCode    string
+	User            *User
+	Checkin         *Checkin
 }
 
 type Checkin struct {
@@ -317,6 +381,24 @@ type DB interface {
 	UpdatePriceGroupCapacity(priceGroupID string, capacity uint32) error
 	CreatePrice(paymentAccount *PaymentAccount, price *Price) (*Price, error)
 	UpdatePrice(paymentAccount *PaymentAccount, price *Price) error
+	CreateOrder(order *Order, attendees []*OrderAttendee) (*Order, error)
+	GetOrder(orderID string) (*Order, error)
+	ListOrdersByBuyer(buyerID string) ([]*Order, error)
+	GetOrderAttendees(orderID string) ([]*OrderAttendee, error)
+	GetOrderTickets(orderID string) ([]*SoldTicket, error)
+	GetOrderPaymentAccount(orderID string) (*PaymentAccount, error)
+	UpdateOrderSetPaymentSession(orderID string, provider string, sessionID string) error
+	UpdateOrderSetStatus(orderID string, status OrderStatus) error
+	UpdateOrderConfirmation(orderID string, status OrderStatus, paymentIntentID string, confirmedAt int64) error
+	UpdateOrderConfirmationOnce(orderID string, status OrderStatus, paymentIntentID string, confirmedAt int64) (bool, error)
+	UpdateOrderTicketIssue(orderID string, status TicketIssueStatus, errMsg string) error
+	CreateTicketHold(hold *TicketHold) (*TicketHold, error)
+	DeleteTicketHoldsByOrderID(orderID string) error
+	DeleteExpiredTicketHolds(eventID string, nowUnix int64) error
+	CountEventSoldTickets(eventID string, priceGroupID string) (uint32, error)
+	CountActiveTicketHolds(eventID string, priceGroupID string, nowUnix int64) (uint32, error)
+	ListOrderAttendeeTicketIDs(orderID string) ([]string, error)
+	CreateSoldTickets(tickets []*SoldTicket) error
 	GetEventCommunity(eventID string) (*Community, error)
 	GetEventUserTicket(eventID string, userID string) (*SoldTicket, error)
 	GetEventUserOrBuyerTickets(eventID string, userID string) ([]*SoldTicket, error)

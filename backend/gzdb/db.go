@@ -51,14 +51,19 @@ type EntityRole struct {
 
 type SoldTicket struct {
 	gorm.Model
-	EventID uint `gorm:"index"`
-	BuyerID uint
-	UserID  uint
-	User    *User
-	Price   float64
-	Secret  string `gorm:"uniqueIndex;not null"`
-	Pubkey  string `gorm:"uniqueIndex;not null"`
-	Checkin *Checkin
+	EventID         uint `gorm:"index"`
+	BuyerID         uint
+	UserID          uint
+	OrderID         *string `gorm:"index"`
+	PriceID         *uint   `gorm:"index"`
+	PriceGroupID    *uint   `gorm:"index"`
+	OrderAttendeeID *string `gorm:"index"`
+	User            *User
+	AmountMinor     *int64
+	CurrencyCode    string
+	Secret          string `gorm:"uniqueIndex;not null"`
+	Pubkey          string `gorm:"uniqueIndex;not null"`
+	Checkin         *Checkin
 }
 
 type Checkin struct {
@@ -962,7 +967,24 @@ func (g *gormZenaoDB) CreateUser(authID string) (*zeni.User, error) {
 // and insert the ticket + role. This prevents race conditions where concurrent
 // requests could both pass the capacity check and cause overbooking.
 func (g *gormZenaoDB) Participate(eventID string, buyerID string, userID string, ticketSecret string, password string, needPassword bool) error {
-	g, span := g.trace("gzdb.Participate")
+	return g.participate(eventID, buyerID, userID, ticketSecret, password, needPassword, nil, nil, nil, nil, "", nil)
+}
+
+func (g *gormZenaoDB) participate(
+	eventID string,
+	buyerID string,
+	userID string,
+	ticketSecret string,
+	password string,
+	needPassword bool,
+	orderID *string,
+	priceID *uint,
+	priceGroupID *uint,
+	orderAttendeeID *string,
+	currencyCode string,
+	amountMinor *int64,
+) error {
+	g, span := g.trace("gzdb.participate")
 	defer span.End()
 
 	buyerIDint, err := strconv.ParseUint(buyerID, 10, 32)
@@ -1018,15 +1040,52 @@ func (g *gormZenaoDB) Participate(eventID string, buyerID string, userID string,
 			return errors.New("user is already participant for this event")
 		}
 
-		if err := tx.Create(&SoldTicket{
-			EventID: evt.ID,
-			BuyerID: uint(buyerIDint),
-			UserID:  uint(userIDint),
-			Secret:  ticket.Secret(),
-			Pubkey:  ticket.Pubkey(),
+		if strings.TrimSpace(currencyCode) != "" {
+			currencyCode = strings.ToUpper(strings.TrimSpace(currencyCode))
+		}
+
+		var resolvedPriceGroupID *uint
+		if priceGroupID != nil {
+			resolvedPriceGroupID = priceGroupID
+		} else {
+			var group PriceGroup
+			err := tx.
+				Select("id").
+				Where("event_id = ?", evt.ID).
+				Order("id ASC").
+				First(&group).Error
+			if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+				return err
+			}
+			if group.ID != 0 {
+				resolvedPriceGroupID = &group.ID
+			}
+		}
+
+		createDB := tx
+		if orderAttendeeID != nil && strings.TrimSpace(*orderAttendeeID) != "" {
+			createDB = createDB.Clauses(clause.OnConflict{
+				Columns:   []clause.Column{{Name: "order_attendee_id"}},
+				DoNothing: true,
+			})
+		}
+
+		if err := createDB.Create(&SoldTicket{
+			EventID:         evt.ID,
+			BuyerID:         uint(buyerIDint),
+			UserID:          uint(userIDint),
+			OrderID:         orderID,
+			PriceID:         priceID,
+			PriceGroupID:    resolvedPriceGroupID,
+			OrderAttendeeID: orderAttendeeID,
+			AmountMinor:     amountMinor,
+			CurrencyCode:    currencyCode,
+			Secret:          ticket.Secret(),
+			Pubkey:          ticket.Pubkey(),
 		}).Error; err != nil {
 			return err
 		}
+
 
 		participant := &EntityRole{
 			EntityType: zeni.EntityTypeUser,
@@ -2661,13 +2720,26 @@ func dbSoldTicketToZeniSoldTicket(dbtick *SoldTicket) (*zeni.SoldTicket, error) 
 	if dbtick.User != nil {
 		user = dbUserToZeniDBUser(dbtick.User)
 	}
+
+	amountMinor := int64(0)
+	if dbtick.AmountMinor != nil {
+		amountMinor = *dbtick.AmountMinor
+	}
+
 	ticket := &zeni.SoldTicket{
-		Ticket:    tickobj,
-		BuyerID:   fmt.Sprint(dbtick.BuyerID),
-		UserID:    fmt.Sprint(dbtick.UserID),
-		Checkin:   checkin,
-		User:      user,
-		CreatedAt: dbtick.CreatedAt,
+		Ticket:          tickobj,
+		EventID:         fmt.Sprint(dbtick.EventID),
+		BuyerID:         fmt.Sprint(dbtick.BuyerID),
+		UserID:          fmt.Sprint(dbtick.UserID),
+		OrderID:         stringPtrToString(dbtick.OrderID),
+		PriceID:         uintPtrToString(dbtick.PriceID),
+		PriceGroupID:    uintPtrToString(dbtick.PriceGroupID),
+		OrderAttendeeID: stringPtrToString(dbtick.OrderAttendeeID),
+		AmountMinor:     amountMinor,
+		CurrencyCode:    dbtick.CurrencyCode,
+		Checkin:         checkin,
+		User:            user,
+		CreatedAt:       dbtick.CreatedAt,
 	}
 	if dbtick.DeletedAt.Valid {
 		ticket.DeletedAt = dbtick.DeletedAt.Time

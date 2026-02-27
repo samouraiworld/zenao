@@ -3,6 +3,9 @@ package main
 import (
 	"context"
 	"errors"
+	"fmt"
+	"slices"
+	"strings"
 
 	"github.com/samouraiworld/zenao/backend/zeni"
 	"go.opentelemetry.io/otel"
@@ -49,4 +52,35 @@ func (s *ZenaoServer) EnsureUserExists(
 	}
 
 	return zUser, nil
+}
+
+func (s *ZenaoServer) EnsureUsersFromEmails(
+	ctx context.Context,
+	emails []string,
+) (map[string]*zeni.User, error) {
+	authUsers, err := s.Auth.EnsureUsersExists(ctx, emails)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(slices.Compact(authUsers)) != len(emails) {
+		return nil, errors.New("duplicate email")
+	}
+
+	userIDs := make(map[string]*zeni.User, len(authUsers))
+	for _, authUser := range authUsers {
+		if authUser.Banned {
+			return nil, fmt.Errorf("user %s is banned", authUser.Email)
+		}
+		user, err := s.EnsureUserExists(ctx, authUser)
+		if err != nil {
+			return nil, err
+		}
+		if user == nil {
+			return nil, errors.New("failed to create user")
+		}
+		normalizedEmail := strings.ToLower(strings.TrimSpace(authUser.Email))
+		userIDs[normalizedEmail] = user
+	}
+	return userIDs, nil
 }

@@ -1,70 +1,18 @@
-package gzdb
+package gzdb_test
 
 import (
-	"database/sql"
-	"os"
-	"path/filepath"
-	"sort"
-	"strings"
 	"testing"
 	"time"
 
 	_ "github.com/mattn/go-sqlite3"
 	zenaov1 "github.com/samouraiworld/zenao/backend/zenao/v1"
 	"github.com/samouraiworld/zenao/backend/zeni"
+	"github.com/samouraiworld/zenao/backend/ztesting"
 	"github.com/stretchr/testify/require"
 )
 
-func applyMigrationsForPriceGroupTests(t *testing.T, migrationsDir string, db *sql.DB) {
-	t.Helper()
-
-	entries, err := os.ReadDir(migrationsDir)
-	require.NoError(t, err)
-
-	var files []string
-	for _, entry := range entries {
-		if entry.IsDir() {
-			continue
-		}
-		if filepath.Ext(entry.Name()) != ".sql" {
-			continue
-		}
-		files = append(files, filepath.Join(migrationsDir, entry.Name()))
-	}
-	sort.Strings(files)
-
-	for _, path := range files {
-		contents, err := os.ReadFile(path)
-		require.NoError(t, err)
-		if strings.TrimSpace(string(contents)) == "" {
-			continue
-		}
-		_, err = db.Exec(string(contents))
-		require.NoErrorf(t, err, "apply migration %s", path)
-	}
-}
-
-func setupPriceGroupTestDB(t *testing.T) zeni.DB {
-	t.Helper()
-
-	dbPath := filepath.Join(t.TempDir(), "test.db")
-	sqlDB, err := sql.Open("sqlite3", dbPath)
-	require.NoError(t, err)
-	t.Cleanup(func() { _ = sqlDB.Close() })
-
-	migrationsDir := filepath.Join("..", "..", "migrations")
-	if _, err := os.Stat(migrationsDir); err != nil {
-		migrationsDir = "migrations"
-	}
-	applyMigrationsForPriceGroupTests(t, migrationsDir, sqlDB)
-
-	db, err := SetupDB(dbPath)
-	require.NoError(t, err)
-	return db
-}
-
 func TestPriceGroupAndPricePersistence(t *testing.T) {
-	db := setupPriceGroupTestDB(t)
+	db, _ := ztesting.SetupTestDB(t)
 	now := time.Now()
 
 	user, err := db.CreateUser("auth-user")
@@ -161,7 +109,7 @@ func TestPriceGroupAndPricePersistence(t *testing.T) {
 }
 
 func TestGetPriceGroupsByEventPrefetchesPricesAndPaymentAccount(t *testing.T) {
-	db := setupPriceGroupTestDB(t)
+	db, _ := ztesting.SetupTestDB(t)
 
 	user, err := db.CreateUser("auth-user")
 	require.NoError(t, err)
@@ -234,7 +182,7 @@ func TestGetPriceGroupsByEventPrefetchesPricesAndPaymentAccount(t *testing.T) {
 }
 
 func TestCreatePriceRejectsMismatchedCommunityPaymentAccount(t *testing.T) {
-	db := setupPriceGroupTestDB(t)
+	db, _ := ztesting.SetupTestDB(t)
 
 	user, err := db.CreateUser("auth-user")
 	require.NoError(t, err)
@@ -314,7 +262,7 @@ func TestCreatePriceRejectsMismatchedCommunityPaymentAccount(t *testing.T) {
 }
 
 func TestCreatePriceRejectsUnsupportedCurrencyForProvider(t *testing.T) {
-	db := setupPriceGroupTestDB(t)
+	db, _ := ztesting.SetupTestDB(t)
 
 	user, err := db.CreateUser("auth-user")
 	require.NoError(t, err)

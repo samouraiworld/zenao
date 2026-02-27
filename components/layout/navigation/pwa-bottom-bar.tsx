@@ -1,10 +1,17 @@
 "use client";
 
-import { BookOpenText, BoxesIcon, CompassIcon, Tickets } from "lucide-react";
+import {
+  BookOpenText,
+  BoxesIcon,
+  CompassIcon,
+  FileText,
+  Tickets,
+} from "lucide-react";
 import { useTranslations } from "next-intl";
 import { usePathname } from "next/navigation";
 import { useMemo } from "react";
 import Link from "next/link";
+import { SignedIn } from "@clerk/nextjs";
 import { NavItem } from "./header";
 import { usePwaContext } from "@/components/providers/pwa-state-provider";
 import { cn } from "@/lib/tailwind";
@@ -39,6 +46,13 @@ function PwaBottomBar() {
         children: t("your-tickets"),
       },
       {
+        key: "orders",
+        to: "/orders",
+        icon: FileText,
+        needsAuth: true,
+        children: t("orders"),
+      },
+      {
         key: "manifesto",
         to: "/manifesto",
         icon: BookOpenText,
@@ -60,6 +74,13 @@ function PwaBottomBar() {
       )}
     >
       {navItems.map((item) => {
+        if (item.needsAuth) {
+          return (
+            <SignedIn key={item.key}>
+              <PwaNavLink item={item} pathname={pathname} />
+            </SignedIn>
+          );
+        }
         return <PwaNavLink key={item.key} item={item} pathname={pathname} />;
       })}
     </div>
