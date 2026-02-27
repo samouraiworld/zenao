@@ -18,6 +18,8 @@ import { cn } from "@/lib/tailwind";
 import { ScreenContainerCentered } from "@/components/layout/screen-container";
 import getActor from "@/lib/utils/actor";
 
+export const dynamic = "force-dynamic";
+
 export default async function DashboardRootLayout({
   children,
 }: {

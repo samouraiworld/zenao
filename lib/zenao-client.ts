@@ -9,7 +9,8 @@ import { ZenaoService } from "@/app/gen/zenao/v1/zenao_pb";
 // If your endpoint only supports gRPC-web, make sure to use
 // `createGrpcWebTransport` instead.
 const transport = createConnectTransport({
-  baseUrl: process.env.NEXT_PUBLIC_ZENAO_BACKEND_ENDPOINT || "",
+  baseUrl:
+    process.env.NEXT_PUBLIC_ZENAO_BACKEND_ENDPOINT || "http://localhost:4242",
 });
 
 // Here we make the client itself, combining the service

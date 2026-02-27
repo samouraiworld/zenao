@@ -229,8 +229,14 @@ export default async function RootLayout({
   // to update the client to latest now, use `useLayoutNow`
   const contextNow = new Date();
 
-  const health = await zenaoClient.health({});
-  if (health.maintenance) {
+  let maintenance = false;
+  try {
+    const health = await zenaoClient.health({});
+    maintenance = !!health.maintenance;
+  } catch {
+    // Backend unreachable (build time or transient failure) — assume non-maintenance
+  }
+  if (maintenance) {
     return (
       <html suppressHydrationWarning lang={locale}>
         <body

@@ -6,6 +6,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [Unreleased] — Security & Build Hardening
+
+### Fixed
+- **Critical CVE**: Upgrade Next.js 15.5.7 → 15.5.12 (RCE, source exposure, DoS)
+- **npm audit fix**: Resolved 15 dependency vulnerabilities (Sentry, axios, minimatch, rollup, webpack, etc.)
+- **Build resilience**: Root layout Health check wrapped in try-catch (build no longer requires running backend)
+- **SEOBOT fallback**: Blog pages gracefully degrade when `SEOBOT_API_KEY` is unset
+- **ConnectRPC transport**: Default `baseUrl` to `localhost:4242` (prevents invalid relative URL at build time)
+- **Dashboard SSR**: Added `force-dynamic` to dashboard layout (auth pages require runtime rendering)
+
+---
+
 ## [Unreleased] — Paid Events v1
 
 ### Added — Phase 2: Ticket Purchase (PR #1025)
