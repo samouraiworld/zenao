@@ -958,6 +958,9 @@ func (g *gormZenaoDB) CreateUser(authID string) (*zeni.User, error) {
 }
 
 // Participate implements zeni.DB.
+// Uses a GORM transaction to atomically check capacity, prevent duplicates,
+// and insert the ticket + role. This prevents race conditions where concurrent
+// requests could both pass the capacity check and cause overbooking.
 func (g *gormZenaoDB) Participate(eventID string, buyerID string, userID string, ticketSecret string, password string, needPassword bool) error {
 	g, span := g.trace("gzdb.Participate")
 	defer span.End()
@@ -992,47 +995,53 @@ func (g *gormZenaoDB) Participate(eventID string, buyerID string, userID string,
 		}
 	}
 
-	var participantsCount int64
-	if err := g.db.Model(&SoldTicket{}).Where("event_id = ?", evt.ID).Count(&participantsCount).Error; err != nil {
-		return err
-	}
+	// Wrap capacity check + ticket insert + role assignment in a single
+	// GORM transaction. SQLite acquires an EXCLUSIVE lock on the first write
+	// within a transaction, which serializes concurrent Participate calls
+	// and prevents the TOCTOU race on the capacity check.
+	return g.db.Transaction(func(tx *gorm.DB) error {
+		var participantsCount int64
+		if err := tx.Model(&SoldTicket{}).Where("event_id = ?", evt.ID).Count(&participantsCount).Error; err != nil {
+			return err
+		}
 
-	remaining := int64(evt.Capacity) - participantsCount
-	if remaining <= 0 {
-		return errors.New("sold out")
-	}
+		remaining := int64(evt.Capacity) - participantsCount
+		if remaining <= 0 {
+			return errors.New("sold out")
+		}
 
-	var count int64
-	if err := g.db.Model(&SoldTicket{}).Where("event_id = ? AND user_id = ?", evt.ID, userIDint).Count(&count).Error; err != nil {
-		return err
-	}
-	if count != 0 {
-		return errors.New("user is already participant for this event")
-	}
+		var count int64
+		if err := tx.Model(&SoldTicket{}).Where("event_id = ? AND user_id = ?", evt.ID, userIDint).Count(&count).Error; err != nil {
+			return err
+		}
+		if count != 0 {
+			return errors.New("user is already participant for this event")
+		}
 
-	if err := g.db.Create(&SoldTicket{
-		EventID: evt.ID,
-		BuyerID: uint(buyerIDint),
-		UserID:  uint(userIDint),
-		Secret:  ticket.Secret(),
-		Pubkey:  ticket.Pubkey(),
-	}).Error; err != nil {
-		return err
-	}
+		if err := tx.Create(&SoldTicket{
+			EventID: evt.ID,
+			BuyerID: uint(buyerIDint),
+			UserID:  uint(userIDint),
+			Secret:  ticket.Secret(),
+			Pubkey:  ticket.Pubkey(),
+		}).Error; err != nil {
+			return err
+		}
 
-	participant := &EntityRole{
-		EntityType: zeni.EntityTypeUser,
-		EntityID:   uint(userIDint),
-		OrgType:    zeni.EntityTypeEvent,
-		OrgID:      evt.ID,
-		Role:       zeni.RoleParticipant,
-	}
+		participant := &EntityRole{
+			EntityType: zeni.EntityTypeUser,
+			EntityID:   uint(userIDint),
+			OrgType:    zeni.EntityTypeEvent,
+			OrgID:      evt.ID,
+			Role:       zeni.RoleParticipant,
+		}
 
-	if err := g.db.Save(participant).Error; err != nil {
-		return err
-	}
+		if err := tx.Save(participant).Error; err != nil {
+			return err
+		}
 
-	return nil
+		return nil
+	})
 }
 
 // CancelParticipation implements zeni.DB.

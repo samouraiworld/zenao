@@ -52,22 +52,23 @@ func main() {
 }
 
 type config struct {
-	appBaseURL      string
-	allowedOrigins  string
-	clerkSecretKey  string
-	bindAddr        string
-	dbPath          string
-	mailSender      string
-	resendSecretKey string
-	discordtoken    string
-	maintenance     bool
-	stripeSecretKey string
+	appBaseURL        string
+	allowedOrigins    string
+	clerkSecretKey    string
+	bindAddr          string
+	dbPath            string
+	mailSender        string
+	resendSecretKey   string
+	discordtoken      string
+	maintenance       bool
+	stripeSecretKey   string
+	paidEventsEnabled bool
 }
 
 func (conf *config) RegisterFlags(flset *flag.FlagSet) {
 	flset.StringVar(&conf.appBaseURL, "app-base-url", "https://zenao.io/", "App base URL")
 	flset.StringVar(&conf.allowedOrigins, "allowed-origins", "*", "CORS allowed origin")
-	flset.StringVar(&conf.clerkSecretKey, "clerk-secret-key", "sk_test_cZI9RwUcgLMfd6HPsQgX898hSthNjnNGKRcaVGvUCK", "Clerk secret key")
+	flset.StringVar(&conf.clerkSecretKey, "clerk-secret-key", "", "Clerk secret key")
 	flset.StringVar(&conf.bindAddr, "bind-addr", "localhost:4242", "Address to bind to")
 	flset.StringVar(&conf.dbPath, "db", "dev.db", "DB, can be a file or a libsql dsn")
 	flset.StringVar(&conf.mailSender, "mail-sender", "contact@mail.zenao.io", "Mail sender address")
@@ -75,6 +76,7 @@ func (conf *config) RegisterFlags(flset *flag.FlagSet) {
 	flset.StringVar(&conf.discordtoken, "discord-token", "", "Discord Token")
 	flset.BoolVar(&conf.maintenance, "maintenance", false, "Maintenance mode, disable all API calls except healthcheck")
 	flset.StringVar(&conf.stripeSecretKey, "stripe-secret-key", "", "Stripe secret key")
+	flset.BoolVar(&conf.paidEventsEnabled, "paid-events", false, "Enable paid events feature")
 }
 
 var conf config
@@ -110,6 +112,11 @@ func injectStartEnv() {
 		if val != "" {
 			*ps = val
 		}
+	}
+
+	// Bool env vars
+	if val := os.Getenv("ZENAO_PAID_EVENTS_ENABLED"); val == "true" || val == "1" {
+		conf.paidEventsEnabled = true
 	}
 }
 
@@ -157,15 +164,16 @@ func execStart(ctx context.Context) (retErr error) {
 	}
 
 	zenao := &ZenaoServer{
-		Logger:          logger,
-		Auth:            auth,
-		DB:              db,
-		AppBaseURL:      conf.appBaseURL,
-		MailClient:      mailClient,
-		MailSender:      conf.mailSender,
-		DiscordToken:    conf.discordtoken,
-		Maintenance:     conf.maintenance,
-		StripeSecretKey: conf.stripeSecretKey,
+		Logger:            logger,
+		Auth:              auth,
+		DB:                db,
+		AppBaseURL:        conf.appBaseURL,
+		MailClient:        mailClient,
+		MailSender:        conf.mailSender,
+		DiscordToken:      conf.discordtoken,
+		Maintenance:       conf.maintenance,
+		StripeSecretKey:   conf.stripeSecretKey,
+		PaidEventsEnabled: conf.paidEventsEnabled,
 	}
 	if conf.stripeSecretKey != "" {
 		stripe.Key = conf.stripeSecretKey
@@ -173,8 +181,12 @@ func execStart(ctx context.Context) (retErr error) {
 
 	allowedOrigins := strings.Split(conf.allowedOrigins, ",")
 
+	// Per-IP rate limiter: 10 requests/second, burst of 20, entries expire after 5 minutes
+	rateLimiter := NewRateLimiter(10, 20, 5*time.Minute)
+
 	path, handler := zenaov1connect.NewZenaoServiceHandler(zenao,
 		connect.WithInterceptors(
+			NewRateLimitInterceptor(rateLimiter),
 			NewLoggingInterceptor(logger),
 			NewMaintenanceInterceptor(conf.maintenance),
 		),
@@ -237,10 +249,12 @@ func NewLoggingInterceptor(logger *zap.Logger) connect.UnaryInterceptorFunc {
 			ctx context.Context,
 			req connect.AnyRequest,
 		) (connect.AnyResponse, error) {
-			logger.Info(req.Spec().Procedure, zap.Any("payload", req.Any()), zap.Any("peer", req.Peer()))
+			// Log procedure and peer only — never log request payloads
+			// which may contain passwords, emails, or payment data
+			logger.Info(req.Spec().Procedure, zap.Any("peer", req.Peer()))
 			res, err := next(ctx, req)
 			if err != nil {
-				logger.Error(req.Spec().Procedure, zap.Any("payload", req.Any()), zap.Any("peer", req.Peer()), zap.Error(err))
+				logger.Error(req.Spec().Procedure, zap.Any("peer", req.Peer()), zap.Error(err))
 			}
 			return res, err
 		})
