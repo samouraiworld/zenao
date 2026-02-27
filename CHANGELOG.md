@@ -6,7 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
-## [Unreleased] — Security & Build Hardening
+## [Unreleased] — Security, Build & CI Hardening
 
 ### Fixed
 - **Critical CVE**: Upgrade Next.js 15.5.7 → 15.5.12 (RCE, source exposure, DoS)
@@ -15,6 +15,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **SEOBOT fallback**: Blog pages gracefully degrade when `SEOBOT_API_KEY` is unset
 - **ConnectRPC transport**: Default `baseUrl` to `localhost:4242` (prevents invalid relative URL at build time)
 - **Dashboard SSR**: Added `force-dynamic` to dashboard layout (auth pages require runtime rendering)
+
+### CI/CD
+- **Makefile**: Added missing `install-atlas` target (direct binary download to `$GOPATH/bin`)
+- **Atlas installer**: Switched from `go install` (broken with Go 1.24) to official binary download
+- **Cache keys**: Updated CI cache keys for atlas binary in `schema.yml` and `deploy-staging.yml`
+- **Proto regen**: Fixed import ordering in generated ConnectRPC code
+- **go mod tidy**: Cleaned stale `alecthomas/kong` entries from `go.sum`
+- **gofmt**: Fixed struct field alignment in backend files
+
+### Staging Deployment
+- Manual migration `20260116120000_orders_ticketing` via Turso shell (FK constraint workaround for libsql)
+- Migration `20260121190000_ticket_issue_status` applied automatically by Atlas
+- Deploy workflow `22489738311` — **SUCCESS** (maintenance → backup → migrate → rebuild)
 
 ---
 
