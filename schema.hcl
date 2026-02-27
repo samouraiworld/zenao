@@ -1,3 +1,7 @@
+Notice: Skipping triggers, functions, stored procedures and other advanced objects.
+Upgrade to Pro to enable these features and more. See: https://atlasgo.io/features.
+
+To upgrade run: atlas login
 table "checkins" {
   schema = schema.main
   column "created_at" {
@@ -398,7 +402,7 @@ table "payment_accounts" {
 table "orders" {
   schema = schema.main
   column "id" {
-    null = false
+    null = true
     type = text
   }
   column "created_at" {
@@ -586,7 +590,7 @@ table "prices" {
 table "order_attendees" {
   schema = schema.main
   column "id" {
-    null = false
+    null = true
     type = text
   }
   column "created_at" {
@@ -741,15 +745,15 @@ table "posts" {
   primary_key {
     columns = [column.id]
   }
-  foreign_key "fk_posts_user" {
-    columns     = [column.user_id]
-    ref_columns = [table.users.column.id]
-    on_update   = NO_ACTION
-    on_delete   = NO_ACTION
-  }
   foreign_key "fk_posts_feed" {
     columns     = [column.feed_id]
     ref_columns = [table.feeds.column.id]
+    on_update   = NO_ACTION
+    on_delete   = NO_ACTION
+  }
+  foreign_key "fk_posts_user" {
+    columns     = [column.user_id]
+    ref_columns = [table.users.column.id]
     on_update   = NO_ACTION
     on_delete   = NO_ACTION
   }
@@ -997,30 +1001,6 @@ table "sold_tickets" {
     on_update   = NO_ACTION
     on_delete   = NO_ACTION
   }
-  foreign_key "fk_sold_tickets_order" {
-    columns     = [column.order_id]
-    ref_columns = [table.orders.column.id]
-    on_update   = NO_ACTION
-    on_delete   = NO_ACTION
-  }
-  foreign_key "fk_sold_tickets_price" {
-    columns     = [column.price_id]
-    ref_columns = [table.prices.column.id]
-    on_update   = NO_ACTION
-    on_delete   = NO_ACTION
-  }
-  foreign_key "fk_sold_tickets_price_group" {
-    columns     = [column.price_group_id]
-    ref_columns = [table.price_groups.column.id]
-    on_update   = NO_ACTION
-    on_delete   = NO_ACTION
-  }
-  foreign_key "fk_sold_tickets_order_attendee" {
-    columns     = [column.order_attendee_id]
-    ref_columns = [table.order_attendees.column.id]
-    on_update   = NO_ACTION
-    on_delete   = NO_ACTION
-  }
   index "idx_sold_tickets_pubkey" {
     unique  = true
     columns = [column.pubkey]
@@ -1030,7 +1010,6 @@ table "sold_tickets" {
     columns = [column.secret]
   }
   index "idx_sold_tickets_order_attendee_id" {
-    unique  = true
     columns = [column.order_attendee_id]
   }
   index "idx_sold_tickets_price_group_id" {
@@ -1103,6 +1082,12 @@ table "ticket_holds" {
   primary_key {
     columns = [column.id]
   }
+  foreign_key "fk_ticket_holds_order" {
+    columns     = [column.order_id]
+    ref_columns = [table.orders.column.id]
+    on_update   = NO_ACTION
+    on_delete   = NO_ACTION
+  }
   foreign_key "fk_ticket_holds_price_group" {
     columns     = [column.price_group_id]
     ref_columns = [table.price_groups.column.id]
@@ -1112,12 +1097,6 @@ table "ticket_holds" {
   foreign_key "fk_ticket_holds_event" {
     columns     = [column.event_id]
     ref_columns = [table.events.column.id]
-    on_update   = NO_ACTION
-    on_delete   = NO_ACTION
-  }
-  foreign_key "fk_ticket_holds_order" {
-    columns     = [column.order_id]
-    ref_columns = [table.orders.column.id]
     on_update   = NO_ACTION
     on_delete   = NO_ACTION
   }

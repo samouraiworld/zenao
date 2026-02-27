@@ -175,7 +175,7 @@ func execStart(ctx context.Context) (retErr error) {
 		Maintenance:       conf.maintenance,
 		StripeSecretKey:   conf.stripeSecretKey,
 		PaidEventsEnabled: conf.paidEventsEnabled,
-		PaymentProviders: map[string]payment.Payment{},
+		PaymentProviders:  map[string]payment.Payment{},
 	}
 
 	if conf.stripeSecretKey != "" {

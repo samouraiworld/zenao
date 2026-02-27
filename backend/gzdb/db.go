@@ -1086,7 +1086,6 @@ func (g *gormZenaoDB) participate(
 			return err
 		}
 
-
 		participant := &EntityRole{
 			EntityType: zeni.EntityTypeUser,
 			EntityID:   uint(userIDint),
