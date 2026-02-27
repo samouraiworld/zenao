@@ -464,15 +464,15 @@ table "orders" {
   primary_key {
     columns = [column.id]
   }
-  foreign_key "fk_orders_payment_account" {
-    columns     = [column.payment_account_id]
-    ref_columns = [table.payment_accounts.column.id]
-    on_update   = NO_ACTION
-    on_delete   = NO_ACTION
-  }
   foreign_key "fk_orders_event" {
     columns     = [column.event_id]
     ref_columns = [table.events.column.id]
+    on_update   = NO_ACTION
+    on_delete   = NO_ACTION
+  }
+  foreign_key "fk_orders_payment_account" {
+    columns     = [column.payment_account_id]
+    ref_columns = [table.payment_accounts.column.id]
     on_update   = NO_ACTION
     on_delete   = NO_ACTION
   }
@@ -626,15 +626,15 @@ table "order_attendees" {
     on_update   = NO_ACTION
     on_delete   = NO_ACTION
   }
-  foreign_key "fk_order_attendees_price_group" {
-    columns     = [column.price_group_id]
-    ref_columns = [table.price_groups.column.id]
-    on_update   = NO_ACTION
-    on_delete   = NO_ACTION
-  }
   foreign_key "fk_order_attendees_price" {
     columns     = [column.price_id]
     ref_columns = [table.prices.column.id]
+    on_update   = NO_ACTION
+    on_delete   = NO_ACTION
+  }
+  foreign_key "fk_order_attendees_price_group" {
+    columns     = [column.price_group_id]
+    ref_columns = [table.price_groups.column.id]
     on_update   = NO_ACTION
     on_delete   = NO_ACTION
   }
@@ -909,15 +909,15 @@ table "reactions" {
   primary_key {
     columns = [column.id]
   }
-  foreign_key "fk_reactions_user" {
-    columns     = [column.user_id]
-    ref_columns = [table.users.column.id]
-    on_update   = NO_ACTION
-    on_delete   = NO_ACTION
-  }
   foreign_key "fk_posts_reactions" {
     columns     = [column.post_id]
     ref_columns = [table.posts.column.id]
+    on_update   = NO_ACTION
+    on_delete   = NO_ACTION
+  }
+  foreign_key "fk_reactions_user" {
+    columns     = [column.user_id]
+    ref_columns = [table.users.column.id]
     on_update   = NO_ACTION
     on_delete   = NO_ACTION
   }

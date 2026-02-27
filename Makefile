@@ -99,15 +99,18 @@ lint-buf:
 lint-fix:
 	npx next lint --fix
 
+ATLAS_VERSION ?= v0.31.0
+
 .PHONY: install-atlas
 install-atlas:
 	@mkdir -p "$$(go env GOPATH)/bin"
-	curl -sSf -L -o "$$(go env GOPATH)/bin/atlas" https://atlasbinaries.com/atlas/atlas-$$(go env GOOS)-$$(go env GOARCH)-latest
+	curl -sSf -L -o "$$(go env GOPATH)/bin/atlas" https://release.ariga.io/atlas/atlas-$$(go env GOOS)-$$(go env GOARCH)-$(ATLAS_VERSION)
 	chmod +x "$$(go env GOPATH)/bin/atlas"
 
 .PHONY: update-schema
 update-schema:
 	atlas schema inspect --env gorm --url "env://src" > schema.hcl
+	./scripts/normalize-schema.sh schema.hcl
 
 .PHONY: migrate-local
 migrate-local:
