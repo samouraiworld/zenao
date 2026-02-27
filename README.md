@@ -13,6 +13,7 @@ An event management and community platform featuring event creation, community m
 - [Testing](#testing)
 - [Clerk Authentication Setup](#clerk-authentication-setup)
 - [File Uploads with Pinata](#file-uploads-with-pinata)
+- [Paid Events & Stripe](#paid-events--stripe)
 - [Development Workflows](#development-workflows)
 - [Observability (Optional)](#observability-optional)
 - [Working with Staging/Production](#working-with-stagingproduction)
@@ -26,6 +27,7 @@ An event management and community platform featuring event creation, community m
 - **Backend**: Go, Connect-RPC (gRPC-web)
 - **Database**: SQLite/LibSQL (Turso), GORM, Atlas migrations
 - **Auth**: Clerk
+- **Payments**: Stripe (checkout sessions, webhooks)
 - **Testing**: Cypress (E2E)
 - **Observability**: OpenTelemetry, Sentry
 
@@ -173,7 +175,8 @@ ZENAO_DB=dev.db                                       # Default: dev.db
 ZENAO_ALLOWED_ORIGINS=*                               # Default: * (all origins)
 ZENAO_MAIL_SENDER=contact@mail.zenao.io               # Default: contact@mail.zenao.io
 ZENAO_RESEND_SECRET_KEY=                              # Default: empty (emails disabled)
-ZENAO_STRIPE_SECRET_KEY=                              # Default: empty (stripe disabled)
+ZENAO_STRIPE_SECRET_KEY=sk_test_...                   # Default: empty (stripe disabled)
+ZENAO_PAID_EVENTS_ENABLED=false                       # Default: false (paid events disabled)
 ZENAO_APP_BASE_URL=                                   # Default: https://zenao.io/
 DISCORD_TOKEN=                                        # Default: empty (Discord disabled)
 ```
@@ -301,6 +304,64 @@ PINATA_GROUP=your-group-id  # Optional
 **Upload fails:**
 - Check you haven't exceeded 1GB free tier limit
 - Restart dev server after changing `.env.local`
+
+## Paid Events & Stripe
+
+Zenao supports paid events with Stripe checkout. This feature is behind a feature flag and disabled by default.
+
+### Enabling Paid Events
+
+**1. Set the feature flag** in `.env.local`:
+```bash
+# Frontend flag — shows price UI in event creation/editing
+NEXT_PUBLIC_PAID_EVENTS_ENABLED=true
+
+# Backend flag — enables payment endpoints
+ZENAO_PAID_EVENTS_ENABLED=true
+```
+
+> **⚠️ Important:** Both flags must be set. The backend flag is read as an environment variable (not from `.env.local`), so export it before starting the server:
+> ```bash
+> export ZENAO_PAID_EVENTS_ENABLED=true
+> ```
+
+**2. Configure Stripe test keys:**
+```bash
+# In .env.local
+ZENAO_STRIPE_SECRET_KEY=sk_test_your_stripe_test_key
+NEXT_PUBLIC_STRIPE_DASHBOARD_URL=https://dashboard.stripe.com/test
+```
+
+Get test keys from [Stripe Dashboard → Developers → API keys](https://dashboard.stripe.com/test/apikeys).
+
+**3. (For payment confirmation) Start the Stripe webhook listener:**
+```bash
+# Install the Stripe CLI: https://stripe.com/docs/stripe-cli
+stripe listen --forward-to localhost:4242/webhook/stripe
+```
+
+This forwards Stripe webhook events (e.g., `checkout.session.completed`) to your local backend for order confirmation and ticket issuance.
+
+### How It Works
+
+1. **Organizer** creates an event with price groups (e.g., "General Admission — €15")
+2. **Participant** clicks "Get Tickets" → redirected to Stripe Checkout
+3. **Stripe** processes payment → sends webhook to backend
+4. **Backend** confirms order, issues tickets, sends confirmation email
+5. **Participant** sees tickets in their orders page
+
+### Security
+
+- Prices are validated server-side (`validatePriceGroups` rejects negatives, validates currency)
+- Stripe idempotency keys prevent double charges
+- Atomic order updates prevent double-confirmation
+- Ticket issuance is idempotent with `ON CONFLICT DO NOTHING`
+- Capacity control uses sold count + active holds vs capacity
+- Expired holds are cleaned before capacity checks
+
+### Rate Limiting
+
+The backend includes per-IP rate limiting (10 requests/second, burst of 20) on all mutation endpoints. This protects against abuse of payment, event creation, and participation endpoints.
 
 ## Development Workflows
 
