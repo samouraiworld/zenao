@@ -1,7 +1,3 @@
-Notice: Skipping triggers, functions, stored procedures and other advanced objects.
-Upgrade to Pro to enable these features and more. See: https://atlasgo.io/features.
-
-To upgrade run: atlas login
 table "checkins" {
   schema = schema.main
   column "created_at" {
@@ -565,15 +561,15 @@ table "prices" {
   primary_key {
     columns = [column.id]
   }
-  foreign_key "fk_price_groups_prices" {
-    columns     = [column.price_group_id]
-    ref_columns = [table.price_groups.column.id]
-    on_update   = NO_ACTION
-    on_delete   = NO_ACTION
-  }
   foreign_key "fk_prices_payment_account" {
     columns     = [column.payment_account_id]
     ref_columns = [table.payment_accounts.column.id]
+    on_update   = NO_ACTION
+    on_delete   = NO_ACTION
+  }
+  foreign_key "fk_price_groups_prices" {
+    columns     = [column.price_group_id]
+    ref_columns = [table.price_groups.column.id]
     on_update   = NO_ACTION
     on_delete   = NO_ACTION
   }
@@ -913,15 +909,15 @@ table "reactions" {
   primary_key {
     columns = [column.id]
   }
-  foreign_key "fk_posts_reactions" {
-    columns     = [column.post_id]
-    ref_columns = [table.posts.column.id]
-    on_update   = NO_ACTION
-    on_delete   = NO_ACTION
-  }
   foreign_key "fk_reactions_user" {
     columns     = [column.user_id]
     ref_columns = [table.users.column.id]
+    on_update   = NO_ACTION
+    on_delete   = NO_ACTION
+  }
+  foreign_key "fk_posts_reactions" {
+    columns     = [column.post_id]
+    ref_columns = [table.posts.column.id]
     on_update   = NO_ACTION
     on_delete   = NO_ACTION
   }
@@ -1082,6 +1078,12 @@ table "ticket_holds" {
   primary_key {
     columns = [column.id]
   }
+  foreign_key "fk_ticket_holds_event" {
+    columns     = [column.event_id]
+    ref_columns = [table.events.column.id]
+    on_update   = NO_ACTION
+    on_delete   = NO_ACTION
+  }
   foreign_key "fk_ticket_holds_order" {
     columns     = [column.order_id]
     ref_columns = [table.orders.column.id]
@@ -1091,12 +1093,6 @@ table "ticket_holds" {
   foreign_key "fk_ticket_holds_price_group" {
     columns     = [column.price_group_id]
     ref_columns = [table.price_groups.column.id]
-    on_update   = NO_ACTION
-    on_delete   = NO_ACTION
-  }
-  foreign_key "fk_ticket_holds_event" {
-    columns     = [column.event_id]
-    ref_columns = [table.events.column.id]
     on_update   = NO_ACTION
     on_delete   = NO_ACTION
   }
