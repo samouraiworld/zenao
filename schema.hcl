@@ -561,15 +561,15 @@ table "prices" {
   primary_key {
     columns = [column.id]
   }
-  foreign_key "fk_prices_payment_account" {
-    columns     = [column.payment_account_id]
-    ref_columns = [table.payment_accounts.column.id]
-    on_update   = NO_ACTION
-    on_delete   = NO_ACTION
-  }
   foreign_key "fk_price_groups_prices" {
     columns     = [column.price_group_id]
     ref_columns = [table.price_groups.column.id]
+    on_update   = NO_ACTION
+    on_delete   = NO_ACTION
+  }
+  foreign_key "fk_prices_payment_account" {
+    columns     = [column.payment_account_id]
+    ref_columns = [table.payment_accounts.column.id]
     on_update   = NO_ACTION
     on_delete   = NO_ACTION
   }
