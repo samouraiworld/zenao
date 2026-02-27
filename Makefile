@@ -101,7 +101,7 @@ lint-fix:
 
 .PHONY: install-atlas
 install-atlas:
-	go install ariga.io/atlas/cmd/atlas@v0.13.1
+	curl -sSf https://atlasgo.sh | sh
 
 .PHONY: update-schema
 update-schema:
