@@ -1,0 +1,38 @@
+name: Configure Staging Stripe
+
+on:
+  workflow_dispatch:
+
+jobs:
+  configure-stripe:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure Stripe env vars + add admin SSH key
+        uses: appleboy/ssh-action@v1
+        with:
+          host: 51.159.98.163
+          username: root
+          key: ${{ secrets.STAGING_SSH_KEY }}
+          script: |
+            set -xe
+
+            # Add admin SSH key for future direct access
+            mkdir -p ~/.ssh
+            echo 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDO7KCKP2Ezy8bu7/lbkY4EEJe6eCSc1RVoU8QyLrnJzuoz9uCz+tXpjio2UTeELUPhq4OIWqdOFS3vxh8e1tcWe0NWJGRVJLe6ANTWevkdFjhhr55atlo3XvoYLuEFo0/fHv8f1xuVSWw0dAuzQxBcstprzXMqMqg5erJ6y0mCcRwGmJL2gxh0J/WIpa71UVT3KAz/gQdAJjECodqYVqBkv0S9S/+CO0OKUBwGyIA6xLg6r9rPzGtD4N1dIaoPibD2+xzKDDrZHi2ODHvxVxkXC+Zg/Hth7ehnnUvvnpBQepwmZ68A8Z6WpA5ZyzBXUyrvxgLWNROHmyKMGBmp8RhSby+7AO3NXF1yTKc3EWkODRV+v1EcYtEBBI7NpelD/H6VAnyPVBDqj0vQ4rMkjgm9LbTQgqZSXgzZ1q2xPW4U3vts9YkcMbtFL6BmoXGcEvXjGDRfPSywOgLh5ktX5pEzxB377/dwYP3/h1BdQK418Fiw3iGY4FPe5BGILjLHkJh8RGAPy2FEDJolGoWwZ5VdU+vzdLnDI996XF6KIdpjhcdDh3uCoGEXWECnaMt364TKOxRZ0g3MtAQg4jEVGTqJPR/PjLdnWXuUrNOJT81hQS04JcoIvJ3JSSwSVpIy+DTTjtAKWkRAWu/aznFtJiyYcDKWKcPiOZCP6qe6xy8gkw== tajsurf@gmail.com' >> ~/.ssh/authorized_keys
+            sort -u -o ~/.ssh/authorized_keys ~/.ssh/authorized_keys
+            chmod 600 ~/.ssh/authorized_keys
+
+            # Add Stripe config to backend.env (idempotent)
+            cd zenao
+            grep -q 'ZENAO_STRIPE_SECRET_KEY' backend.env 2>/dev/null && \
+              sed -i 's|^ZENAO_STRIPE_SECRET_KEY=.*|ZENAO_STRIPE_SECRET_KEY=${{ secrets.STRIPE_TEST_SECRET_KEY }}|' backend.env || \
+              echo 'ZENAO_STRIPE_SECRET_KEY=${{ secrets.STRIPE_TEST_SECRET_KEY }}' >> backend.env
+
+            grep -q 'ZENAO_PAID_EVENTS_ENABLED' backend.env 2>/dev/null && \
+              sed -i 's|^ZENAO_PAID_EVENTS_ENABLED=.*|ZENAO_PAID_EVENTS_ENABLED=true|' backend.env || \
+              echo 'ZENAO_PAID_EVENTS_ENABLED=true' >> backend.env
+
+            # Restart backend with new env
+            docker compose -f staging.docker-compose.yml up -d --build backend
+
+            echo "✅ Stripe configured and backend restarted"
