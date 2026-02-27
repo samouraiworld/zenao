@@ -125,8 +125,8 @@ export default function PayoutsConfiguration() {
     !!payoutStatus?.refreshError && !isStripeAccountMissingError;
   const payoutStatusLabel =
     VerificationState[
-    (payoutStatus?.verificationState as unknown as keyof typeof VerificationState) ??
-    VerificationState.unknown
+      (payoutStatus?.verificationState as unknown as keyof typeof VerificationState) ??
+        VerificationState.unknown
     ] ?? VerificationState.unknown;
   const payoutStatusText: Record<VerificationState, string> = {
     [VerificationState.verified]: t("payout-status-verified"),
