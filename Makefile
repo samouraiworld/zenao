@@ -101,7 +101,9 @@ lint-fix:
 
 .PHONY: install-atlas
 install-atlas:
-	curl -sSf https://atlasgo.sh | sh
+	@mkdir -p "$$(go env GOPATH)/bin"
+	curl -sSf -L -o "$$(go env GOPATH)/bin/atlas" https://atlasbinaries.com/atlas/atlas-$$(go env GOOS)-$$(go env GOARCH)-latest
+	chmod +x "$$(go env GOPATH)/bin/atlas"
 
 .PHONY: update-schema
 update-schema:
