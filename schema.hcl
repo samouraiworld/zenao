@@ -620,6 +620,12 @@ table "order_attendees" {
   primary_key {
     columns = [column.id]
   }
+  foreign_key "fk_order_attendees_order" {
+    columns     = [column.order_id]
+    ref_columns = [table.orders.column.id]
+    on_update   = NO_ACTION
+    on_delete   = NO_ACTION
+  }
   foreign_key "fk_order_attendees_price_group" {
     columns     = [column.price_group_id]
     ref_columns = [table.price_groups.column.id]
@@ -629,12 +635,6 @@ table "order_attendees" {
   foreign_key "fk_order_attendees_price" {
     columns     = [column.price_id]
     ref_columns = [table.prices.column.id]
-    on_update   = NO_ACTION
-    on_delete   = NO_ACTION
-  }
-  foreign_key "fk_order_attendees_order" {
-    columns     = [column.order_id]
-    ref_columns = [table.orders.column.id]
     on_update   = NO_ACTION
     on_delete   = NO_ACTION
   }
