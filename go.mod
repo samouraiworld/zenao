@@ -1,6 +1,6 @@
 module github.com/samouraiworld/zenao
 
-go 1.24.0
+go 1.25.0
 
 require (
 	ariga.io/atlas-provider-gorm v0.5.0
@@ -34,8 +34,8 @@ require (
 	go.opentelemetry.io/otel/sdk v1.38.0
 	go.opentelemetry.io/otel/trace v1.38.0
 	go.uber.org/zap v1.27.0
-	golang.org/x/crypto v0.46.0
-	golang.org/x/net v0.48.0
+	golang.org/x/crypto v0.48.0
+	golang.org/x/net v0.51.0
 	golang.org/x/time v0.12.0
 	google.golang.org/protobuf v1.36.10
 	gorm.io/driver/sqlite v1.5.7
@@ -68,7 +68,7 @@ require (
 	cloud.google.com/go/secretmanager v1.14.2 // indirect
 	connectrpc.com/otelconnect v0.8.0 // indirect
 	entgo.io/ent v0.12.4-0.20230726082433-91c7fcc68504 // indirect
-	filippo.io/edwards25519 v1.1.0 // indirect
+	filippo.io/edwards25519 v1.2.0 // indirect
 	github.com/1lann/promptui v0.8.1-0.20220708222609-81fad96dd5e1 // indirect
 	github.com/4meepo/tagalign v1.4.2 // indirect
 	github.com/Abirdcfly/dupword v0.1.3 // indirect
@@ -312,8 +312,8 @@ require (
 	github.com/quasilyte/gogrep v0.5.0 // indirect
 	github.com/quasilyte/regex/syntax v0.0.0-20210819130434-b3f0c404a727 // indirect
 	github.com/quasilyte/stdinfo v0.0.0-20220114132959-f7386bf02567 // indirect
-	github.com/quic-go/qpack v0.5.1 // indirect
-	github.com/quic-go/quic-go v0.55.0 // indirect
+	github.com/quic-go/qpack v0.6.0 // indirect
+	github.com/quic-go/quic-go v0.59.0 // indirect
 	github.com/raeperd/recvcheck v0.2.0 // indirect
 	github.com/remyoudompheng/bigfft v0.0.0-20200410134404-eec4a21b6bb0 // indirect
 	github.com/ringsaturn/tzf-rel-lite v0.0.2025-a // indirect
@@ -365,7 +365,7 @@ require (
 	github.com/uudashr/iface v1.3.1 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/vbatts/tar-split v0.12.2 // indirect
-	github.com/vektah/gqlparser/v2 v2.5.1 // indirect
+	github.com/vektah/gqlparser/v2 v2.5.32 // indirect
 	github.com/xen0n/gosmopolitan v1.2.2 // indirect
 	github.com/yagipy/maintidx v1.0.0 // indirect
 	github.com/yeya24/promlinter v0.3.0 // indirect
@@ -392,13 +392,13 @@ require (
 	gocloud.dev v0.27.0 // indirect
 	golang.org/x/exp v0.0.0-20251017212417-90e834f514db // indirect
 	golang.org/x/exp/typeparams v0.0.0-20250210185358-939b2ce775ac // indirect
-	golang.org/x/mod v0.31.0 // indirect
+	golang.org/x/mod v0.32.0 // indirect
 	golang.org/x/oauth2 v0.30.0 // indirect
 	golang.org/x/sync v0.19.0 // indirect
-	golang.org/x/sys v0.39.0 // indirect
-	golang.org/x/term v0.38.0 // indirect
-	golang.org/x/text v0.32.0 // indirect
-	golang.org/x/tools v0.40.0 // indirect
+	golang.org/x/sys v0.41.0 // indirect
+	golang.org/x/term v0.40.0 // indirect
+	golang.org/x/text v0.34.0 // indirect
+	golang.org/x/tools v0.41.0 // indirect
 	golang.org/x/xerrors v0.0.0-20220609144429-65e65417b02f // indirect
 	google.golang.org/api v0.223.0 // indirect
 	google.golang.org/genproto v0.0.0-20241118233622-e639e219e697 // indirect

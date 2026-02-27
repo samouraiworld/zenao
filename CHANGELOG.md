@@ -9,6 +9,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ## [Unreleased] — Security, Build & CI Hardening
 
 ### Fixed
+- **Schema CI**: Pin atlas binary to `v0.31.0` via `release.ariga.io` (was floating `-latest` from `atlasbinaries.com`)
+- **Schema CI**: Add `scripts/normalize-schema.sh` to sort FK blocks alphabetically (deterministic output)
+- **Schema CI**: Regenerate `schema.hcl` with deterministic FK ordering (fixes pre-existing CI failure since Jan 24)
+- **Dependabot (12 alerts)**: Upgrade `react-email` v4→v5 + `@react-email/components` v0.5→v1.0 (4 Next.js CVEs)
+- **Dependabot**: Upgrade `@eslint/json` v0.9→v1.0 in `packages/i18n-check` (minimatch + ajv + plugin-kit ReDoS)
+- **Dependabot**: Upgrade Go indirect deps: `edwards25519` v1.2.0, `quic-go` v0.59.0, `gqlparser` v2.5.32
 - **Critical CVE**: Upgrade Next.js 15.5.7 → 15.5.12 (RCE, source exposure, DoS)
 - **npm audit fix**: Resolved 15 dependency vulnerabilities (Sentry, axios, minimatch, rollup, webpack, etc.)
 - **Build resilience**: Root layout Health check wrapped in try-catch (build no longer requires running backend)
