@@ -99,6 +99,10 @@ lint-buf:
 lint-fix:
 	npx next lint --fix
 
+.PHONY: install-atlas
+install-atlas:
+	go install ariga.io/atlas/cmd/atlas@v0.13.1
+
 .PHONY: update-schema
 update-schema:
 	atlas schema inspect --env gorm --url "env://src" > schema.hcl
