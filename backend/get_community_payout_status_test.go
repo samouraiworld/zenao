@@ -190,7 +190,7 @@ func TestGetCommunityPayoutStatusStripeErrorPreservesState(t *testing.T) {
 	require.NoError(t, err)
 
 	lastVerifiedAt := time.Date(2026, 1, 8, 9, 0, 0, 0, time.UTC)
-	err = db.UpsertPaymentAccount(&zeni.PaymentAccount{
+	_, err = db.UpsertPaymentAccount(&zeni.PaymentAccount{
 		CommunityID:       community.ID,
 		PlatformType:      zeni.PaymentPlatformStripeConnect,
 		PlatformAccountID: "acct_123",
@@ -220,6 +220,7 @@ func TestGetCommunityPayoutStatusStripeErrorPreservesState(t *testing.T) {
 	require.Contains(t, resp.Msg.RefreshError, "stripe unavailable")
 	require.Equal(t, zeni.PaymentOnboardingStateStarted, resp.Msg.OnboardingState)
 	require.Equal(t, "acct_123", resp.Msg.PlatformAccountId)
+	require.ElementsMatch(t, zeni.ListSupportedStripeCurrencies(), resp.Msg.Currencies)
 }
 
 func TestGetCommunityPayoutStatusStripeSuccessUpdatesState(t *testing.T) {
@@ -245,7 +246,7 @@ func TestGetCommunityPayoutStatusStripeSuccessUpdatesState(t *testing.T) {
 	require.NoError(t, err)
 
 	staleVerifiedAt := time.Date(2026, 1, 8, 7, 0, 0, 0, time.UTC)
-	err = db.UpsertPaymentAccount(&zeni.PaymentAccount{
+	_, err = db.UpsertPaymentAccount(&zeni.PaymentAccount{
 		CommunityID:       community.ID,
 		PlatformType:      zeni.PaymentPlatformStripeConnect,
 		PlatformAccountID: "acct_123",
@@ -278,4 +279,5 @@ func TestGetCommunityPayoutStatusStripeSuccessUpdatesState(t *testing.T) {
 	require.Equal(t, zeni.PaymentOnboardingStateCompleted, resp.Msg.OnboardingState)
 	require.True(t, resp.Msg.LastVerifiedAt > 0)
 	require.Equal(t, "acct_123", resp.Msg.PlatformAccountId)
+	require.ElementsMatch(t, zeni.ListSupportedStripeCurrencies(), resp.Msg.Currencies)
 }

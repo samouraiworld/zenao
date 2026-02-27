@@ -81,6 +81,19 @@ export const emailSchema = z.object({
 });
 export type EmailSchemaType = z.infer<typeof emailSchema>;
 
+export const eventFormPriceSchema = z.object({
+  amountMinor: z.coerce.bigint().default(BigInt(0)),
+  currencyCode: z.string().default(""),
+  paymentAccountId: z.string().optional().default(""),
+  id: z.string().optional().default(""),
+});
+
+export const eventFormPriceGroupSchema = z.object({
+  id: z.string().optional().default(""),
+  name: z.string().optional().default(""),
+  prices: z.array(eventFormPriceSchema).default([]),
+});
+
 export const eventFormSchema = z.object({
   title: z.string().trim().min(2).max(140),
   description: z.string().trim().min(10).max(10000),
@@ -88,8 +101,18 @@ export const eventFormSchema = z.object({
   startDate: z.coerce.bigint(),
   endDate: z.coerce.bigint(),
   location: locationSchema,
-  // TODO: re-enable it after mvp
-  // ticketPrice: z.coerce.number(),
+  pricesGroups: z.array(eventFormPriceGroupSchema).default([
+    {
+      prices: [
+        {
+          amountMinor: BigInt(0),
+          currencyCode: "",
+          paymentAccountId: "",
+          id: "",
+        },
+      ],
+    },
+  ]),
   capacity: z.coerce.number().min(1),
   exclusive: z.boolean(),
   password: z.string().optional(),
@@ -419,6 +442,26 @@ export const eventInfoLocationSchema = z.object({
 
 export type SafeEventLocation = z.infer<typeof eventInfoLocationSchema>;
 
+export const eventPriceSchema = z
+  .object({
+    amountMinor: z.bigint(),
+    currencyCode: z.string(),
+    paymentAccountId: z.string(),
+    paymentAccountType: z.string().optional().default(""),
+    id: z.string().optional().default(""),
+  })
+  .transform((arg) => ({
+    ...arg,
+  }));
+
+export const eventPriceGroupSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  prices: z.array(eventPriceSchema).default([]),
+});
+
+export type SafeEventPriceGroup = z.infer<typeof eventPriceGroupSchema>;
+
 export const eventInfoSchema = z.object({
   id: z.string(),
   title: z.string(),
@@ -434,6 +477,7 @@ export const eventInfoSchema = z.object({
   location: eventInfoLocationSchema,
   privacy: eventInfoPrivacySchema.optional(),
   discoverable: z.boolean(),
+  pricesGroups: z.array(eventPriceGroupSchema).default([]),
 });
 
 export type SafeEventInfo = z.infer<typeof eventInfoSchema>;

@@ -129,6 +129,28 @@ type Event struct {
 	Discoverable      bool
 }
 
+type PriceGroup struct {
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	DeletedAt time.Time
+	ID        string
+	EventID   string
+	Capacity  uint32
+	Prices    []*Price
+}
+
+type Price struct {
+	CreatedAt        time.Time
+	UpdatedAt        time.Time
+	DeletedAt        time.Time
+	ID               string
+	PriceGroupID     string
+	AmountMinor      int64
+	CurrencyCode     string
+	PaymentAccount   *PaymentAccount
+	PaymentAccountID string
+}
+
 type EventWithRoles struct {
 	Event *Event
 	Roles []string
@@ -290,6 +312,11 @@ type DB interface {
 	CancelParticipation(eventID string, userID string) error
 	GetAllEvents() ([]*Event, error)
 	GetEventTickets(eventID string) ([]*SoldTicket, error)
+	CreatePriceGroup(eventID string, capacity uint32) (*PriceGroup, error)
+	GetPriceGroupsByEvent(eventID string) ([]*PriceGroup, error)
+	UpdatePriceGroupCapacity(priceGroupID string, capacity uint32) error
+	CreatePrice(paymentAccount *PaymentAccount, price *Price) (*Price, error)
+	UpdatePrice(paymentAccount *PaymentAccount, price *Price) error
 	GetEventCommunity(eventID string) (*Community, error)
 	GetEventUserTicket(eventID string, userID string) (*SoldTicket, error)
 	GetEventUserOrBuyerTickets(eventID string, userID string) ([]*SoldTicket, error)
@@ -312,7 +339,7 @@ type DB interface {
 	RemoveUserFromAllCommunities(userID string) error
 
 	GetPaymentAccountByCommunityPlatform(communityID string, platformType string) (*PaymentAccount, error)
-	UpsertPaymentAccount(account *PaymentAccount) error
+	UpsertPaymentAccount(account *PaymentAccount) (*PaymentAccount, error)
 
 	CreateTeam(ownerID string, displayName string) (*User, error)
 	EditTeam(teamID string, memberIDs []string, req *zenaov1.EditTeamRequest) error

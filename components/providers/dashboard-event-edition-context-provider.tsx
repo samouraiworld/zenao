@@ -107,6 +107,7 @@ export default function DashboardEventEditionContextProvider({
     })),
     exclusive: eventInfo.privacy?.eventPrivacy.case === "guarded",
     password: "",
+    pricesGroups: eventInfo.pricesGroups ?? [],
     communityId: communityId || null,
   };
 

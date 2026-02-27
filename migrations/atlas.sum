@@ -1,4 +1,4 @@
-h1:wApPpgPTIDY7cZgFu5wWT7riExA8PK7/BP+eTjSrd0I=
+h1:/MEoveBQgltFid4MDE1wWFZgCpiHVz9AxeoBAO/LoxM=
 20250201004233_baseline.sql h1:vh+22aQ0RkVcidkcvAmHDsy0RivAqq6w7mRH5H5YZT8=
 20250201033955_user-roles.sql h1:rk6MPhG28YYWHhvp6Wry1km++UoAtTcV9D4pIjTY1XU=
 20250212023048_location-kinds.sql h1:1v870KFyrSoUOlLq4SFAcJuXyfvdNjQ9dFWJqRiFr6s=
@@ -25,3 +25,4 @@ h1:wApPpgPTIDY7cZgFu5wWT7riExA8PK7/BP+eTjSrd0I=
 20260106152806_add_is_team_to_users.sql h1:YPgsvE1CimMjhxgP3wAzSxdvJozX8hN+5qPZFPqHZ64=
 20260107160000_payment_accounts.sql h1:mGg/alr7L+EP5GvQT6242+sLw1+NmGd+PyzPC5d15OI=
 20260108180000_payment_accounts_verification_state.sql h1:BodKTpGC6EIik0iAVA1Fbf/iqCehHsakAXYriYOsHuA=
+20260112190000_price_groups_prices.sql h1:aqL+X0ScXS5//ogrMgQnmM3gXnMUBUOSmOvyqOr1fdA=

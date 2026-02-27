@@ -101,6 +101,7 @@ export function GatekeepersEditionContextProvider({
       })),
       exclusive: eventInfo.privacy?.eventPrivacy.case === "guarded",
       password: "",
+      pricesGroups: eventInfo.pricesGroups ?? [],
       communityId: communityId || null,
     };
 

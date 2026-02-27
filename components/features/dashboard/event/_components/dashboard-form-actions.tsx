@@ -2,7 +2,6 @@ import { CircleX, Eye, Save } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useFormContext } from "react-hook-form";
 import { useMemo, useState } from "react";
-import { fromUnixTime } from "date-fns";
 import Link from "next/link";
 import { Button } from "@/components/shadcn/button";
 import { useDashboardEventEditionContext } from "@/components/providers/dashboard-event-edition-context-provider";
@@ -23,7 +22,7 @@ export default function DashboardFormActions() {
   const isMobile = useIsMobile();
 
   const hasStarted = useMemo(() => {
-    return new Date() >= fromUnixTime(Number(startDate) / 1000);
+    return Date.now() / 1000 >= Number(startDate);
   }, [startDate]);
 
   if (isMobile) {

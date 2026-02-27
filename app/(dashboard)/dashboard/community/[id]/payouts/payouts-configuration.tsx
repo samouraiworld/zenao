@@ -20,15 +20,14 @@ import { Button } from "@/components/shadcn/button";
 import { DateTimeText } from "@/components/widgets/date-time-text";
 import { useDashboardCommunityContext } from "@/components/providers/dashboard-community-context-provider";
 import useActor from "@/hooks/use-actor";
+import { PayoutState, VerificationState } from "@/lib/pricing";
 
 const payoutStatusBadge = {
-  verified: "secondary",
-  failed: "destructive",
-  pending: "outline",
-  unknown: "outline",
+  [VerificationState.verified]: "secondary",
+  [VerificationState.failed]: "destructive",
+  [VerificationState.pending]: "outline",
+  [VerificationState.unknown]: "outline",
 } as const;
-
-export type PayoutStatus = keyof typeof payoutStatusBadge;
 
 export default function PayoutsConfiguration() {
   const { communityId } = useDashboardCommunityContext();
@@ -116,25 +115,28 @@ export default function PayoutsConfiguration() {
   const hasLastVerifiedAt =
     payoutStatus?.lastVerifiedAt != null && lastVerifiedAtSeconds > 0;
   const isOnboardingComplete =
-    payoutStatus?.onboardingState === "completed" ||
-    payoutStatus?.verificationState === "verified";
+    payoutStatus?.onboardingState === PayoutState.completed ||
+    payoutStatus?.verificationState === VerificationState.verified;
   const isMissingStripeAccountId =
     isOnboardingComplete && !payoutStatus?.platformAccountId;
   const isStripeAccountMissingError =
     payoutStatus?.verificationState === statusMissingAccount;
   const shouldShowRefreshError =
     !!payoutStatus?.refreshError && !isStripeAccountMissingError;
-  const payoutStatusLabel = (payoutStatus?.verificationState ??
-    "unknown") as PayoutStatus;
-  const payoutStatusText: Record<PayoutStatus, string> = {
-    verified: t("payout-status-verified"),
-    failed: t("payout-status-failed"),
-    pending: t("payout-status-pending"),
-    unknown: t("payout-status-unknown"),
+  const payoutStatusLabel =
+    VerificationState[
+    (payoutStatus?.verificationState as unknown as keyof typeof VerificationState) ??
+    VerificationState.unknown
+    ] ?? VerificationState.unknown;
+  const payoutStatusText: Record<VerificationState, string> = {
+    [VerificationState.verified]: t("payout-status-verified"),
+    [VerificationState.failed]: t("payout-status-failed"),
+    [VerificationState.pending]: t("payout-status-pending"),
+    [VerificationState.unknown]: t("payout-status-unknown"),
   };
   const payoutStatusKey = payoutStatusText[payoutStatusLabel ?? ""]
     ? payoutStatusLabel
-    : "unknown";
+    : VerificationState.unknown;
 
   return (
     <SettingsSection
@@ -154,10 +156,7 @@ export default function PayoutsConfiguration() {
                 <Badge variant="outline">{t("payout-status-loading")}</Badge>
               ) : (
                 <Badge
-                  variant={
-                    payoutStatusBadge[payoutStatusKey as PayoutStatus] ??
-                    "outline"
-                  }
+                  variant={payoutStatusBadge[payoutStatusKey] ?? "outline"}
                 >
                   {payoutStatusText[payoutStatusKey]}
                 </Badge>

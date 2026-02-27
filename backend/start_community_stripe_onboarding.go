@@ -149,7 +149,7 @@ func (s *ZenaoServer) StartCommunityStripeOnboarding(
 	}
 
 	if err := s.DB.TxWithSpan(ctx, "db.UpsertPaymentAccount", func(tx zeni.DB) error {
-		return tx.UpsertPaymentAccount(&zeni.PaymentAccount{
+		_, err = tx.UpsertPaymentAccount(&zeni.PaymentAccount{
 			CommunityID:       req.Msg.CommunityId,
 			PlatformType:      zeni.PaymentPlatformStripeConnect,
 			PlatformAccountID: accountID,
@@ -157,6 +157,8 @@ func (s *ZenaoServer) StartCommunityStripeOnboarding(
 			StartedAt:         time.Now().UTC(),
 			VerificationState: zeni.PaymentVerificationStatePending,
 		})
+
+		return err
 	}); err != nil {
 		return nil, err
 	}

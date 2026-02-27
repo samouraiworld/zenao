@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"errors"
+	"sort"
 
 	"connectrpc.com/connect"
 	"github.com/samouraiworld/zenao/backend/mapsl"
@@ -21,6 +22,7 @@ func (s *ZenaoServer) GetEvent(ctx context.Context, req *connect.Request[zenaov1
 		gatekeepers  []*zeni.User
 		participants uint32
 		checkedIn    uint32
+		priceGroups  []*zeni.PriceGroup
 	)
 
 	if err := s.DB.TxWithSpan(ctx, "GetEvent", func(tx zeni.DB) error {
@@ -45,6 +47,13 @@ func (s *ZenaoServer) GetEvent(ctx context.Context, req *connect.Request[zenaov1
 		if err != nil {
 			return err
 		}
+
+		groups, err := tx.GetPriceGroupsByEvent(req.Msg.EventId)
+		if err != nil {
+			return err
+		}
+		priceGroups = groups
+
 		return nil
 	}); err != nil {
 		return nil, err
@@ -78,6 +87,39 @@ func (s *ZenaoServer) GetEvent(ctx context.Context, req *connect.Request[zenaov1
 		CheckedIn:    checkedIn,
 		Discoverable: evt.Discoverable,
 		Privacy:      privacy,
+	}
+	if len(priceGroups) > 0 {
+		info.PricesGroups = make([]*zenaov1.EventPriceGroup, 0, len(priceGroups))
+		for _, group := range priceGroups {
+			groupPrices := group.Prices
+			sort.Slice(groupPrices, func(i, j int) bool {
+				if groupPrices[i].AmountMinor == groupPrices[j].AmountMinor {
+					return groupPrices[i].CurrencyCode < groupPrices[j].CurrencyCode
+				}
+				return groupPrices[i].AmountMinor < groupPrices[j].AmountMinor
+			})
+
+			eventGroup := &zenaov1.EventPriceGroup{
+				Id:   group.ID,
+				Name: "",
+			}
+			if len(groupPrices) > 0 {
+				eventGroup.Prices = make([]*zenaov1.EventPrice, 0, len(groupPrices))
+				for _, price := range groupPrices {
+					eventPrice := &zenaov1.EventPrice{
+						AmountMinor:      price.AmountMinor,
+						CurrencyCode:     price.CurrencyCode,
+						PaymentAccountId: price.PaymentAccountID,
+						Id:               price.ID,
+					}
+					if price.PaymentAccount != nil {
+						eventPrice.PaymentAccountType = price.PaymentAccount.PlatformType
+					}
+					eventGroup.Prices = append(eventGroup.Prices, eventPrice)
+				}
+			}
+			info.PricesGroups = append(info.PricesGroups, eventGroup)
+		}
 	}
 
 	return connect.NewResponse(&zenaov1.GetEventResponse{Event: &info}), nil
