@@ -53,6 +53,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Fixed
 - **/discover page 404**: Added missing `page.tsx` redirect to `/discover/upcoming` — the route broke during file structure refactoring (#918)
+- **Production DB migration**: Manually applied `20260116120000_orders_ticketing` on Turso prod — `PRAGMA foreign_keys = off` is ignored by Turso/LibSQL, required manual `checkins` FK handling before `sold_tickets` table swap (1302 tickets + 235 checkins preserved)
 
 ---
 
