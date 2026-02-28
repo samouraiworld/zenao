@@ -208,6 +208,13 @@ type TicketHold struct {
 	ExpiresAt    int64
 }
 
+// LocationFilter is used to filter events by geographical location.
+type LocationFilter struct {
+	Lat      float64 // latitude of the center point
+	Lng      float64 // longitude of the center point
+	RadiusKm float64 // radius in kilometers
+}
+
 type EventWithRoles struct {
 	Event *Event
 	Roles []string
@@ -369,7 +376,7 @@ type DB interface {
 	EditEvent(eventID string, organizersIDs []string, gatekeepersIDs []string, req *zenaov1.EditEventRequest) (*Event, error)
 	ValidatePassword(req *zenaov1.ValidatePasswordRequest) (bool, error)
 	GetEvent(eventID string) (*Event, error)
-	ListEvents(limit int, offset int, from int64, to int64, discoverable zenaov1.DiscoverableFilter) ([]*Event, error)
+	ListEvents(limit int, offset int, from int64, to int64, discoverable zenaov1.DiscoverableFilter, locationFilter *LocationFilter) ([]*Event, error)
 	ListEventsByUserRoles(userID string, roles []string, limit int, offset int, from int64, to int64, discoverable zenaov1.DiscoverableFilter) ([]*EventWithRoles, error)
 	CountCheckedIn(eventID string) (uint32, error)
 	Participate(eventID string, buyerID string, userID string, ticketSecret string, password string, needPassword bool) error

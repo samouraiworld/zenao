@@ -399,7 +399,23 @@
   },
   "discover": {
     "title": "Descubrir eventos",
-    "description": "Sumérgete en el pulso de eventos tribales, fiestas rave, hackathons, avant-premières de cine privado y más."
+    "description": "Sumérgete en el pulso de eventos tribales, fiestas rave, hackathons, avant-premières de cine privado y más.",
+    "location-filter": {
+      "title": "Filtrar por ubicación",
+      "description": "Mostrar eventos cerca de tu ubicación",
+      "filter-by-location": "Filtrar por ubicación",
+      "nearby": "Dentro de {radius} km",
+      "use-my-location": "Usar mi ubicación",
+      "locating": "Obteniendo ubicación...",
+      "location-set": "Ubicación establecida",
+      "radius": "Radio",
+      "clear-filter": "Quitar filtro",
+      "geolocation-not-supported": "La geolocalización no es compatible con tu navegador",
+      "permission-denied": "Permiso de ubicación denegado. Por favor, habilítalo en la configuración de tu navegador.",
+      "position-unavailable": "La información de ubicación no está disponible",
+      "timeout": "La solicitud de ubicación ha expirado",
+      "unknown-error": "Ocurrió un error desconocido al obtener tu ubicación"
+    }
   },
   "tickets": {
     "title": "Tus entradas",
