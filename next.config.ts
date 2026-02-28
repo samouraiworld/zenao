@@ -27,10 +27,6 @@ const nextConfig: NextConfig = {
   async rewrites() {
     return [
       {
-        source: "/discover",
-        destination: "/discover/upcoming",
-      },
-      {
         source: "/tickets",
         destination: "/tickets/upcoming",
       },

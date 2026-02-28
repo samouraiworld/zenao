@@ -1,8 +1,9 @@
 "use client";
 
-import { useSuspenseInfiniteQuery } from "@tanstack/react-query";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import { useMemo, useState, useCallback } from "react";
 import { format, fromUnixTime } from "date-fns";
+import { Loader2 } from "lucide-react";
 import {
   DEFAULT_EVENTS_LIMIT,
   eventsList,
@@ -39,8 +40,9 @@ export function DiscoverEventsList({
     isFetchingNextPage,
     hasNextPage,
     isFetching,
+    isLoading,
     fetchNextPage,
-  } = useSuspenseInfiniteQuery(
+  } = useInfiniteQuery(
     from === "upcoming"
       ? eventsList(
           now,
@@ -60,7 +62,7 @@ export function DiscoverEventsList({
         ),
   );
 
-  const events = useMemo(() => eventsPages.pages.flat(), [eventsPages]);
+  const events = useMemo(() => eventsPages?.pages.flat() ?? [], [eventsPages]);
 
   const eventsByDay = useMemo(() => {
     return events.reduce(
@@ -89,7 +91,11 @@ export function DiscoverEventsList({
         />
       </div>
 
-      {events.length === 0 ? (
+      {isLoading ? (
+        <div className="flex justify-center py-12">
+          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        </div>
+      ) : events.length === 0 ? (
         <div className="my-5">
           <EmptyEventsList />
         </div>
