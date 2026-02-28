@@ -30,12 +30,12 @@ An event management and community platform featuring event creation, community m
 - **Payments**: Stripe (checkout sessions, webhooks)
 - **Testing**: Cypress (E2E)
 - **Observability**: OpenTelemetry, Sentry
-- **i18n**: next-intl (English, French, Spanish scaffold)
+- **i18n**: next-intl (English, French, Spanish — 690 keys each)
 
 ## Prerequisites
 
 - **Node.js 20.13.1+** ([download](https://nodejs.org/))
-- **Go 1.21+** ([download](https://go.dev/doc/install))
+- **Go 1.25+** ([download](https://go.dev/doc/install))
 
 > **⚠️ Important:** This project uses **Node.js 20.13.1** (see `.nvmrc`), which is not the latest version. Using a different Node version may cause package-lock.json conflicts and CI failures. We strongly recommend using a Node version manager like [nvm](https://github.com/nvm-sh/nvm) or [fnm](https://github.com/Schniz/fnm) to switch to the correct version:
 > ```bash
@@ -385,7 +385,7 @@ This will:
 
 ### Database Schema Updates
 
-**1. Edit GORM models** in `./backend/gzdb` (models must embed `gorm.Model` or have gorm annotations)
+**1. Edit GORM models** in `./backend/gzdb` (domain-split files: `db_events.go`, `db_communities.go`, `db_users.go`, `db_tickets.go`, `db_feeds.go`, `db_pricing.go`, `db_roles.go`)
 
 **2. Update Atlas schema:**
 ```bash
@@ -517,6 +517,7 @@ The database is created at `dev.db` in the project root after running `make migr
 ├── app/              # Next.js app router pages
 │   └── i18n/         # Internationalization (en.json, fr.json, es.json)
 ├── backend/          # Go backend (Connect-RPC handlers)
+│   └── gzdb/         # Database layer (domain-split: events, communities, users, tickets, feeds, pricing, roles)
 ├── components/       # React components
 ├── cypress/          # E2E tests
 ├── migrations/       # Atlas database migrations
