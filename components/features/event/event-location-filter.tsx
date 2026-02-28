@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { MapPin, X, Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/shadcn/button";
@@ -197,7 +197,11 @@ export function EventLocationFilter({
                     </SelectContent>
                   </Select>
                 </div>
-                <Button variant="outline" onClick={clearFilter} className="w-full">
+                <Button
+                  variant="outline"
+                  onClick={clearFilter}
+                  className="w-full"
+                >
                   {t("clear-filter")}
                 </Button>
               </>

@@ -104,7 +104,11 @@ export function DiscoverEventsList({
 
                 <EventCardListLayout>
                   {eventsOfTheDay.map((evt) => (
-                    <EventCard key={evt.id} evt={evt} href={`/event/${evt.id}`} />
+                    <EventCard
+                      key={evt.id}
+                      evt={evt}
+                      href={`/event/${evt.id}`}
+                    />
                   ))}
                 </EventCardListLayout>
               </div>
