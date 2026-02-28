@@ -19,6 +19,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 - **Locale switching**: Cookie-based language switcher (EN/FR/ES) with `Accept-Language` auto-detection and globe icon in header/footer
+- **`db.go` domain split**: Refactored 2817-line monolith into 8 domain-specific files (events, communities, users, tickets, feeds, pricing, roles)
 
 ### Fixed
 - **Sentry Apdex fix**: Added numeric ID validation in `event/[id]` and `profile/[userId]` layouts — prevents `strconv.ParseUint` errors from bot traffic (70% of top Sentry issues)
