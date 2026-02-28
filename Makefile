@@ -99,7 +99,7 @@ lint-buf:
 lint-fix:
 	npx next lint --fix
 
-ATLAS_VERSION ?= v0.31.0
+ATLAS_VERSION ?= v1.1.0
 
 .PHONY: install-atlas
 install-atlas:
