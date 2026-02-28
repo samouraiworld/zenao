@@ -19,6 +19,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 - **Locale switching**: Cookie-based language switcher (EN/FR/ES) with `Accept-Language` auto-detection and globe icon in header/footer
+- **Location filter** (#1026, @nitinog10): Filter events by geographic proximity on Discover page — Haversine formula, browser Geolocation API, radius selection (10-250km), privacy-respecting (no data stored)
 - **`db.go` domain split**: Refactored 2817-line monolith into 8 domain-specific files (events, communities, users, tickets, feeds, pricing, roles)
 
 ### Fixed
