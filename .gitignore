@@ -10,8 +10,11 @@
 !.yarn/releases
 !.yarn/versions
 
-# scripts
-*.sh
+# scripts (ad-hoc in root only; scripts/ dir stays tracked)
+/*.sh
+
+# nested node_modules
+packages/*/node_modules/
 
 # testing
 /coverage

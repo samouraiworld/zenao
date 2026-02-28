@@ -6,6 +6,24 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [Unreleased] — Repository Hygiene Sprint
+
+### Security
+- **npm audit clean**: Resolved all 5 high-severity vulnerabilities via `serialize-javascript` override (`6.0.2 → 7.0.3`)
+- **Sentry upgrade**: `@sentry/nextjs` `10.20.0 → 10.40.0` (latest stable minor)
+- **`.gitignore` fix**: `*.sh` blanket rule → `/*.sh` (root only) — prevents accidental script exclusion
+- **`.gitignore` fix**: Added `packages/*/node_modules/` to prevent dependency leak
+
+### Changed
+- **Sentry config migration**: `disableLogger` → `webpack.treeshake.removeDebugLogging`, `automaticVercelMonitors` → `webpack.automaticVercelMonitors`, `unstable_sentryWebpackPluginOptions.disable` → `sourcemaps.disable`
+- **Removed dead code**: Cleaned up duplicate commented-out `tunnelRoute` in `next.config.ts`
+
+### Repository Maintenance
+- **Branch cleanup**: Deleted 380 stale remote branches (385 → 9 total)
+- **PR housekeeping**: Closed PR #908 (superseded by #915) and PR #992 (stale CI testing draft)
+
+---
+
 ## [Unreleased] — Security, Build & CI Hardening
 
 ### Fixed
