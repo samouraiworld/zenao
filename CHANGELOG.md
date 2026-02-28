@@ -11,6 +11,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ### Security
 - **npm audit clean**: Resolved all 5 high-severity vulnerabilities via `serialize-javascript` override (`6.0.2 → 7.0.3`)
 - **Sentry upgrade**: `@sentry/nextjs` `10.20.0 → 10.40.0` (latest stable minor)
+- **Go OTel SDK CVE**: Upgraded `go.opentelemetry.io/otel/sdk` `v1.38.0 → v1.40.0` — fixes CVE-2026-24051 (PATH hijacking ACE on macOS)
+- **Sentry Allowed Domains**: Restricted from `*` (wildcard) to `zenao.io`, `*.zenao.io`, `localhost`
 - **`.gitignore` fix**: `*.sh` blanket rule → `/*.sh` (root only) — prevents accidental script exclusion
 - **`.gitignore` fix**: Added `packages/*/node_modules/` to prevent dependency leak
 - **CSP fix**: Added `sentry.samourai.pro` to `connect-src` for self-hosted Sentry instance

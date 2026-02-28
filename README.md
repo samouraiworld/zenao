@@ -30,6 +30,7 @@ An event management and community platform featuring event creation, community m
 - **Payments**: Stripe (checkout sessions, webhooks)
 - **Testing**: Cypress (E2E)
 - **Observability**: OpenTelemetry, Sentry
+- **i18n**: next-intl (English, French, Spanish scaffold)
 
 ## Prerequisites
 
@@ -160,6 +161,10 @@ PINATA_JWT="" # Required for uploading images (e.g., to create events)
 # Observability (optional)
 OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318
 SEOBOT_API_KEY=a8c58738-7b98-4597-b20a-0bb1c2fe5772
+
+# Sentry (optional — error monitoring)
+NEXT_PUBLIC_SENTRY_DSN= # Your Sentry DSN (leave empty to disable)
+NEXT_PUBLIC_ENV=development # Controls sourcemap upload and Sentry behavior
 ```
 
 ### Backend (Environment Variables)
@@ -510,12 +515,14 @@ The database is created at `dev.db` in the project root after running `make migr
 
 ```
 ├── app/              # Next.js app router pages
+│   └── i18n/         # Internationalization (en.json, fr.json, es.json)
 ├── backend/          # Go backend (Connect-RPC handlers)
 ├── components/       # React components
 ├── cypress/          # E2E tests
 ├── migrations/       # Atlas database migrations
 ├── api/              # Protobuf definitions
 ├── lib/              # Shared utilities
+├── packages/         # Internal packages (i18n-check)
 ├── public/           # Static assets
 ├── dev.db            # Local SQLite database (created after setup)
 └── .env.local        # Environment variables (create from .env.example)
