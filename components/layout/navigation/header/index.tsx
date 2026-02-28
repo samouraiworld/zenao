@@ -18,6 +18,7 @@ import { SignedIn, SignedOut, SignInButton } from "@clerk/nextjs";
 import { usePathname } from "next/navigation";
 import QuickCreateMenu from "./quick-create-menu";
 import { ToggleThemeButton } from "@/components/widgets/buttons/toggle-theme-button";
+import { LocaleSwitcher } from "@/components/layout/navigation/locale-switcher";
 import { Button } from "@/components/shadcn/button";
 import { cn } from "@/lib/tailwind";
 import useSmartBack from "@/hooks/use-smart-back";
@@ -206,6 +207,9 @@ export function Header() {
       <div className="flex gap-2 items-center">
         <SoonOnBase className="hidden sm:flex" />
         <QuickCreateMenu />
+        <div className="max-md:hidden">
+          <LocaleSwitcher />
+        </div>
         <div className="max-md:hidden">
           <ToggleThemeButton />
         </div>

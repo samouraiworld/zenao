@@ -17,6 +17,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **`.gitignore` fix**: Added `packages/*/node_modules/` to prevent dependency leak
 - **CSP fix**: Added `sentry.samourai.pro` to `connect-src` for self-hosted Sentry instance
 
+### Added
+- **Locale switching**: Cookie-based language switcher (EN/FR/ES) with `Accept-Language` auto-detection and globe icon in header/footer
+
 ### Fixed
 - **Sentry Apdex fix**: Added numeric ID validation in `event/[id]` and `profile/[userId]` layouts — prevents `strconv.ParseUint` errors from bot traffic (70% of top Sentry issues)
 - **404 for bots**: `/event/create`, `/event/sitemap.xml`, and hex user IDs now return 404 instead of crashing

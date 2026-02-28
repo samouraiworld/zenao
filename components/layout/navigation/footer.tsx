@@ -9,6 +9,7 @@ import Text from "@/components/widgets/texts/text";
 import { Button } from "@/components/shadcn/button";
 import SoonOnBase from "@/components/widgets/soon-on-base";
 import { Discord } from "@/components/widgets/icons";
+import { LocaleSwitcher } from "@/components/layout/navigation/locale-switcher";
 
 export const Footer = () => {
   const t = useTranslations("navigation");
@@ -58,6 +59,7 @@ export const Footer = () => {
         <Link href="https://discord.gg/TkpJgp9zjK" target="_blank">
           <Discord className="text-secondary-color hover:text-primary-color h-5 w-5" />
         </Link>
+        <LocaleSwitcher />
       </div>
     </footer>
   );
