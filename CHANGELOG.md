@@ -23,6 +23,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Fixed
 - **Sentry Apdex fix**: Added numeric ID validation in `event/[id]` and `profile/[userId]` layouts — prevents `strconv.ParseUint` errors from bot traffic (70% of top Sentry issues)
+- **Atlas upgrade**: v0.31.0 → v1.1.0 — fixes `unsupported dialect "libsql"` deploy failure across all CI workflows
+- **Dockerfile Go version**: 1.24 → 1.25 to match `go.mod` requirement — fixes Docker build failure on staging VPS
 - **404 for bots**: `/event/create`, `/event/sitemap.xml`, and hex user IDs now return 404 instead of crashing
 
 ### Changed
