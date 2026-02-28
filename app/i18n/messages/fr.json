@@ -1,10 +1,10 @@
 {
   "a11y": {
-    "toggle-sidebar": "trigger",
-    "quick-menu": "quick menu create",
-    "set-post-type": "set type post",
-    "submit-post": "submit post",
-    "pick-date": "Pick date",
+    "toggle-sidebar": "basculer",
+    "quick-menu": "menu rapide créer",
+    "set-post-type": "définir type publication",
+    "submit-post": "publier",
+    "pick-date": "Choisir une date",
     "switch-language": "Changer de langue"
   },
   "images": {
@@ -48,7 +48,7 @@
     "dashboard-view": "Vue tableau de bord",
     "customer-view": "Vue client",
     "create-event": "Créer un événement",
-    "quick-menu-aria-label": "quick menu create",
+    "quick-menu-aria-label": "menu rapide créer",
     "footer": {
       "tagline": "Fait avec ❤️ par l'équipe Samourai.world",
       "report-bug": "Signaler un bug"
@@ -83,7 +83,15 @@
     "password-label": "Mot de passe",
     "no-changes-password-placeholder": "Laissez vide pour ne pas modifier",
     "capacity-label": "Limite de capacité de l'événement",
+    "capacity-price-label": "Billets à ce prix",
     "capacity-placeholder": "Capacité...",
+    "price-label": "Prix du billet",
+    "price-placeholder": "0,00",
+    "currency-label": "Devise",
+    "currency-free-option": "Gratuit / Sans prix",
+    "price-free": "Gratuit",
+    "price-helper": "Laissez 0 pour un événement gratuit.",
+    "price-community-required": "Sélectionnez une communauté pour définir un prix.",
     "discoverable-label": "Rendre l'événement visible publiquement (Visible dans Découvrir)",
     "exclusive-label": "Exclusif",
     "pick-a-start-date-placeholder": "Choisir une date de début...",
@@ -122,7 +130,18 @@
     "too-late": "Il est trop tard pour s'inscrire.",
     "join-desc": "Bienvenue ! Pour rejoindre l'événement, veuillez vous inscrire ci-dessous.",
     "register-button": "S'inscrire",
+    "checkout-button": "Procéder au paiement",
+    "checkout-total-label": "Total",
+    "checkout-buyer-label": "Acheteur et participant",
+    "checkout-guest-label": "Invité",
+    "checkout-buyer-fallback": "Participant connecté",
+    "checkout-quantity-decrease": "Diminuer la quantité",
+    "checkout-quantity-increase": "Augmenter la quantité",
     "about-event": "À propos de l'événement",
+    "price-label": "Prix",
+    "price-free": "Gratuit",
+    "price-free-with-paid": "Gratuit · Options payantes disponibles",
+    "price-from": "À partir de {price}",
     "discussion": "Discussions",
     "votes": "Votes",
     "your-email": "Votre email",
@@ -133,6 +152,8 @@
     "toast-confirmation": "Vous participez à l'événement !",
     "toast-already-registered-error": "Email(s) déjà inscrit(s) pour cet événement !",
     "toast-default-error": "Erreur lors de l'inscription des participants",
+    "checkout-error-title": "Impossible de lancer le paiement",
+    "checkout-error-note": "Aucun débit n'a été effectué.",
     "participants-list": "Liste des participants",
     "see-ticket": "Voir le billet",
     "login-to-see-tickets": "Connectez-vous pour voir le(s) billet(s)",
@@ -151,6 +172,24 @@
       "organizer": "Vous êtes l'organisateur de cet événement. Gérez les paramètres et les participants de votre événement.",
       "start-scanning": "Commencer à scanner les billets",
       "edit-event": "Modifier l'événement"
+    },
+    "payment-status-banner": {
+      "processing-title": "Traitement de votre paiement",
+      "processing-description": "Nous confirmons votre achat. Cela peut prendre environ 20 secondes.",
+      "checking-title": "Vérification du statut de votre paiement",
+      "checking-description": "Nous vérifions le dernier statut du paiement.",
+      "success-title": "Achat confirmé",
+      "success-description": "Votre confirmation est terminée. Vous recevrez un email de confirmation sous peu.",
+      "pending-title": "Paiement en attente",
+      "pending-description": "Votre paiement est toujours en cours de traitement. Nous vous enverrons un email de confirmation lorsqu'il sera terminé.",
+      "pending-button": "Vérifier à nouveau",
+      "canceled-title": "Paiement annulé",
+      "canceled-description": "Aucun débit n'a été effectué. Vous pouvez réessayer quand vous le souhaitez.",
+      "error-title": "Impossible de confirmer votre paiement",
+      "error-description": "Nous n'avons pas pu confirmer l'achat. Veuillez réessayer.",
+      "error-button": "Réessayer",
+      "receipt-reference": "Référence du reçu",
+      "view-order": "Voir les détails de la commande"
     }
   },
   "profile-info": {
@@ -368,6 +407,17 @@
     "no-tickets-event": "Aucun billet disponible pour cet événement",
     "description": "Événements auxquels vous participez.",
     "see-event-details": "Voir les détails de l'événement"
+  },
+  "order": {
+    "title": "Votre commande",
+    "subtitle": "Voici les billets et le récapitulatif d'achat de cette commande.",
+    "log-in": "Connectez-vous pour voir votre commande",
+    "order-id-label": "ID de commande",
+    "quantity-label": "Billets",
+    "total-label": "Total",
+    "ticket-label": "Billet #{index}",
+    "no-tickets": "Aucun billet associé à cette commande pour l'instant.",
+    "free": "Gratuit"
   },
   "orders": {
     "title": "Vos commandes",
@@ -592,7 +642,6 @@
     "toast-cancel-event-success": "L'événement a été annulé",
     "toast-cancel-event-error": "Erreur lors de l'annulation de l'événement",
     "event-starting-soon-error": "Les événements déjà commencés ou commençant dans moins de 24h ne peuvent pas être annulés",
-    "toast-only-organizers-can-cancel-error": "Seuls les organisateurs peuvent annuler un événement",
     "toast-only-organizer-can-cancel-error": "Seuls les organisateurs peuvent annuler un événement"
   },
   "delete-post-confirmation-dialog": {
@@ -736,7 +785,6 @@
       "upcoming": "À venir",
       "past": "Passés",
       "all": "Tous",
-      "description": "Description",
       "participants": "Participants",
       "gatekeepers": "Portiers",
       "broadcast": "Diffusion",
@@ -747,7 +795,7 @@
       "communities": "Communautés",
       "settings": "Paramètres",
       "coming-soon": "Bientôt",
-      "quick-create": "quick create menu"
+      "quick-create": "menu de création rapide"
     },
     "navUser": {
       "personal-account": "Compte personnel",
@@ -843,7 +891,7 @@
       "cancel-event": "Annuler l'événement",
       "view-event": "Voir l'événement",
       "eventTabs": {
-        "description": "Description",
+        "general": "Général",
         "participants": "Participants",
         "gatekeepers": "Portiers",
         "broadcast": "Diffusion"
@@ -861,6 +909,7 @@
         "location": "Lieu",
         "updateLocation": "Modifier le lieu",
         "capacity": "Capacité",
+        "prices": "Prix",
         "noPlaces": "Aucune place",
         "attendees": "{count} participants",
         "updateCapacity": "Modifier la capacité",
