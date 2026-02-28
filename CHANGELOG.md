@@ -40,6 +40,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **i18n: 3-locale support**: Updated `i18n-check` tool to validate EN/FR/ES
 - **i18n: Unused key audit**: Analyzed 195 reported unused keys — all confirmed as false positives (checker limitation with namespace-scoped `useTranslations()` calls)
 
+### Fixed
+- **Dashboard hydration error (#1014)**: `SidebarMenuSkeleton` used `Math.random()` in `useMemo()` producing different skeleton widths on SSR vs CSR — replaced with deterministic 70% width
+- **Prettier fix**: Fixed pre-existing indentation error in `sidebar.tsx` line 638
+
+### Repository Maintenance
+- **PR #1017 closed**: Draft "Add langage button" superseded by locale switching (`bd4bb88e`)
+
 ---
 
 ## [Unreleased] — Security, Build & CI Hardening
