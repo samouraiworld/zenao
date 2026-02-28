@@ -25,7 +25,7 @@ const EventDateTime = ({
   timezone,
   fullDate,
 }: {
-  startDate: bigint;
+  startDate: number;
   timezone: string;
   fullDate: boolean;
 }) => {
