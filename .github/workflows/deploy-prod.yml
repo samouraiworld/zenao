@@ -74,6 +74,16 @@ jobs:
           script: |
             set -xe
             cd zenao
+
+            # Inject Stripe env vars into backend.env (idempotent)
+            grep -q '^ZENAO_STRIPE_SECRET_KEY=' backend.env 2>/dev/null && \
+              sed -i 's|^ZENAO_STRIPE_SECRET_KEY=.*|ZENAO_STRIPE_SECRET_KEY=${{ secrets.STRIPE_LIVE_SECRET_KEY }}|' backend.env || \
+              echo 'ZENAO_STRIPE_SECRET_KEY=${{ secrets.STRIPE_LIVE_SECRET_KEY }}' >> backend.env
+
+            grep -q '^ZENAO_PAID_EVENTS_ENABLED=' backend.env 2>/dev/null && \
+              sed -i 's|^ZENAO_PAID_EVENTS_ENABLED=.*|ZENAO_PAID_EVENTS_ENABLED=true|' backend.env || \
+              echo 'ZENAO_PAID_EVENTS_ENABLED=true' >> backend.env
+
             docker compose -f prod.backend.docker-compose.yml up -d --wait otel-collector jaeger
             git restore prod.backend.docker-compose.yml
             docker compose -f prod.backend.docker-compose.yml up -d --build backend

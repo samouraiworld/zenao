@@ -24,7 +24,7 @@ export default async function DiscoverPage({ params }: PageProps) {
   const now = Date.now() / 1000;
 
   if (from !== "upcoming" && from !== "past") {
-    redirect("/discover", RedirectType.replace);
+    redirect("/discover/upcoming", RedirectType.replace);
   }
 
   queryClient.prefetchInfiniteQuery(
