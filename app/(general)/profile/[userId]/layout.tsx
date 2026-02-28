@@ -25,6 +25,12 @@ export async function generateMetadata({
   params,
 }: PageProps): Promise<Metadata> {
   const { userId } = await params;
+
+  // Validate userId is numeric before calling backend (prevents strconv.ParseUint errors)
+  if (!/^\d+$/.test(userId)) {
+    notFound();
+  }
+
   const queryClient = getQueryClient();
 
   try {
@@ -83,7 +89,8 @@ export default async function ProfilePageLayout({
   const queryClient = getQueryClient();
   const { userId } = await params;
 
-  if (!userId) {
+  // Validate userId is numeric before calling backend
+  if (!userId || !/^\d+$/.test(userId)) {
     notFound();
   }
 

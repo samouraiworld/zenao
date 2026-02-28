@@ -53,7 +53,7 @@ const nextConfig: NextConfig = {
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://unpkg.com",
       "img-src 'self' data: blob: https: http:",
       "font-src 'self' https://fonts.gstatic.com",
-      "connect-src 'self' https://*.clerk.accounts.dev https://*.clerk.com https://*.sentry.io https://*.ingest.sentry.io https://*.pinata.cloud https://pinata.zenao.io https://api.stripe.com https://plausible.io wss://*.clerk.accounts.dev https://tile.openstreetmap.org https://nominatim.openstreetmap.org",
+      "connect-src 'self' https://*.clerk.accounts.dev https://*.clerk.com https://*.sentry.io https://*.ingest.sentry.io https://sentry.samourai.pro https://*.pinata.cloud https://pinata.zenao.io https://api.stripe.com https://plausible.io wss://*.clerk.accounts.dev https://tile.openstreetmap.org https://nominatim.openstreetmap.org",
       "frame-src 'self' https://js.stripe.com https://*.clerk.accounts.dev https://challenges.cloudflare.com",
       "worker-src 'self' blob:",
       "media-src 'self' blob:",

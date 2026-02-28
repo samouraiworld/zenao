@@ -13,6 +13,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **Sentry upgrade**: `@sentry/nextjs` `10.20.0 → 10.40.0` (latest stable minor)
 - **`.gitignore` fix**: `*.sh` blanket rule → `/*.sh` (root only) — prevents accidental script exclusion
 - **`.gitignore` fix**: Added `packages/*/node_modules/` to prevent dependency leak
+- **CSP fix**: Added `sentry.samourai.pro` to `connect-src` for self-hosted Sentry instance
+
+### Fixed
+- **Sentry Apdex fix**: Added numeric ID validation in `event/[id]` and `profile/[userId]` layouts — prevents `strconv.ParseUint` errors from bot traffic (70% of top Sentry issues)
+- **404 for bots**: `/event/create`, `/event/sitemap.xml`, and hex user IDs now return 404 instead of crashing
 
 ### Changed
 - **Sentry config migration**: `disableLogger` → `webpack.treeshake.removeDebugLogging`, `automaticVercelMonitors` → `webpack.automaticVercelMonitors`, `unstable_sentryWebpackPluginOptions.disable` → `sourcemaps.disable`

@@ -16,6 +16,11 @@ type Props = {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
 
+  // Validate ID is numeric before calling backend (prevents bot-triggered strconv.ParseUint errors)
+  if (!/^\d+$/.test(id)) {
+    notFound();
+  }
+
   let event;
 
   try {
@@ -34,6 +39,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function EventLayout({ params, children }: Props) {
   const p = await params;
+
+  // Validate ID is numeric before calling backend
+  if (!/^\d+$/.test(p.id)) {
+    notFound();
+  }
 
   let event;
 
