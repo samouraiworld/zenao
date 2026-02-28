@@ -6,6 +6,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [Unreleased] — Production Incident Fix & Deploy Hardening
+
+### Fixed
+- **Production outage (2026-02-28)**: Backend stuck in `--maintenance` mode after deploy #22523329085 failed at migration step — `git restore` in "Upgrade backend" never ran, leaving all RPC endpoints returning `CodeUnavailable`
+- **Deploy workflow safety net**: Added "Rollback maintenance on migration failure" step to both `deploy-prod.yml` and `deploy-staging.yml` — if migration fails, `git restore` + container rebuild runs automatically via `if: failure()`
+- **Emergency recovery workflow**: New `emergency-clear-maintenance.yml` — one-click workflow_dispatch to clear stuck maintenance mode on prod or staging via SSH
+
+---
+
 ## [Unreleased] — Repository Hygiene Sprint
 
 ### Security

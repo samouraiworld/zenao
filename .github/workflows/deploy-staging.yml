@@ -62,7 +62,22 @@ jobs:
           fi
 
       - name: Migrate DB
+        id: migrate
         run: TURSO_TOKEN=${{ secrets.STAGING_TURSO_TOKEN }} atlas migrate apply --dir "file://migrations" --env staging
+
+      - name: Rollback maintenance on migration failure
+        if: failure() && steps.migrate.outcome == 'failure'
+        uses: appleboy/ssh-action@v1
+        with:
+          host: 51.159.98.163
+          username: root
+          key: ${{ secrets.STAGING_SSH_KEY }}
+          script: |
+            set -xe
+            cd zenao
+            git restore staging.docker-compose.yml
+            docker compose -f staging.docker-compose.yml up -d --build backend
+
       - name: Upgrade services
         uses: appleboy/ssh-action@v1
         with:

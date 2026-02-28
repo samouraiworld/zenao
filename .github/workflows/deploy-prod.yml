@@ -62,7 +62,21 @@ jobs:
           fi
 
       - name: Migrate DB
+        id: migrate
         run: TURSO_TOKEN=${{ secrets.PROD_TURSO_TOKEN }} atlas migrate apply --dir "file://migrations" --env prod
+
+      - name: Rollback maintenance on migration failure
+        if: failure() && steps.migrate.outcome == 'failure'
+        uses: appleboy/ssh-action@v1
+        with:
+          host: 62.210.92.144
+          username: root
+          key: ${{ secrets.PROD_SSH_KEY }}
+          script: |
+            set -xe
+            cd zenao
+            git restore prod.backend.docker-compose.yml
+            docker compose -f prod.backend.docker-compose.yml up -d --build backend
 
       - name: Upgrade backend
         uses: appleboy/ssh-action@v1
