@@ -4,7 +4,8 @@
     "quick-menu": "quick menu create",
     "set-post-type": "set type post",
     "submit-post": "submit post",
-    "pick-date": "Pick date"
+    "pick-date": "Pick date",
+    "switch-language": "Changer de langue"
   },
   "images": {
     "community-banner": "Image de bannière de la communauté",
@@ -640,9 +641,11 @@
     "stripe-onboarding-failure": "Échec du démarrage de l'intégration Stripe",
     "stripe-onboarding-return": "Intégration Stripe terminée.",
     "stripe-onboarding-refresh": "L'intégration Stripe n'a pas été complétée. Veuillez réessayer."
-  },  "communityForm": {
+  },
+  "communityForm": {
     "log-in": "Connectez-vous pour gérer les communautés"
-  },  "community-form": {
+  },
+  "community-form": {
     "edit-button": "Modifier la communauté",
     "upload-avatar": "Télécharger une image d'avatar",
     "upload-banner": "Télécharger une image de bannière",

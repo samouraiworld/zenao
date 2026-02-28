@@ -1,6 +1,6 @@
 "use client";
 
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { useTransition } from "react";
 import { Globe } from "lucide-react";
@@ -23,6 +23,7 @@ export function LocaleSwitcher() {
   const currentLocale = useLocale() as Locale;
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
+  const t = useTranslations("a11y");
 
   function handleLocaleChange(locale: Locale) {
     startTransition(async () => {
@@ -39,7 +40,7 @@ export function LocaleSwitcher() {
           size="icon"
           className="h-9 w-9"
           disabled={isPending}
-          aria-label="Switch language"
+          aria-label={t("switch-language")}
         >
           <Globe className="h-[1.2rem] w-[1.2rem] text-secondary-color hover:text-primary-color" />
         </Button>
