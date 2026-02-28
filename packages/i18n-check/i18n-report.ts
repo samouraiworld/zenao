@@ -18,7 +18,7 @@ interface Config {
 
 const parseArgs = (): Config => {
   const config: Config = {
-    locales: ["en", "fr"],
+    locales: ["en", "fr", "es"],
     appName: "Zenao",
     localesPath: "app/i18n/messages",
     eslintConfig: "packages/i18n-check/eslint.config.json.mjs",

@@ -1,0 +1,948 @@
+{
+  "a11y": {
+    "toggle-sidebar": "trigger",
+    "quick-menu": "quick menu create",
+    "set-post-type": "set type post",
+    "submit-post": "submit post",
+    "pick-date": "Pick date"
+  },
+  "images": {
+    "community-banner": "Community banner image",
+    "community-profile": "Community profile image",
+    "zenao-logo": "zenao logo",
+    "zenao-arch": "Zenao architecture diagram",
+    "event": "Event image",
+    "event-presentation": "Event presentation image",
+    "profile-banner": "Profile banner",
+    "profile-picture": "Profile picture",
+    "avatar": "Avatar",
+    "background": "Background image"
+  },
+  "forms": {
+    "select-view": "Select a view",
+    "month": "Month",
+    "year": "Year",
+    "timezones": "Timezones",
+    "upload-image": "Upload image"
+  },
+  "maintenance": "Zenao is under maintenance, try again in few minutes...",
+  "community-card": {
+    "members": "{count, plural, =0 {no members yet} =1 {1 member} other {# members}}",
+    "no-description": "No description yet"
+  },
+  "navigation": {
+    "zenao": "ZENAO",
+    "your-events": "Your events",
+    "your-tickets": "Your tickets",
+    "orders": "Orders",
+    "sign-in": "Sign in",
+    "sign-out": "Sign out",
+    "edit-profile": "Edit my profile",
+    "discover": "Discover",
+    "communities": "Communities",
+    "features": "Features",
+    "manifesto": "Manifesto",
+    "blog": "Blog",
+    "view-profile": "View my profile",
+    "dashboard-view": "Dashboard view",
+    "customer-view": "Customer view",
+    "create-event": "Create Event",
+    "quick-menu-aria-label": "quick menu create",
+    "footer": {
+      "tagline": "Made with ❤️ by Samourai.world crew",
+      "report-bug": "Report a bug"
+    }
+  },
+  "home": {
+    "base-news": "News & Updates: We are arriving soon on",
+    "main-text": "Organize event(s) in seconds",
+    "secondary-text": "\"Anything that happens, arrives or appears, can give birth to an autonomous community, or a new tribe.\"",
+    "placeholder": "Event name...",
+    "button": "Create your event"
+  },
+  "eventForm": {
+    "create-event-button": "Create event",
+    "edit-event-button": "Edit event",
+    "image-uri-placeholder": "Image URL...",
+    "virtual-uri-placeholder": "Virtual event link (Zoom, Meet, etc.)...",
+    "title-placeholder": "Event name...",
+    "add-image-tooltip": "Add image",
+    "add-image-aria-label": "Add image",
+    "add-audio-tooltip": "Add audio",
+    "add-audio-aria-label": "Add audio",
+    "description-label": "Description",
+    "write-tab": "Write",
+    "log-in": "Log in to create an event",
+    "preview-tab": "Preview",
+    "change-image": "Change image",
+    "description-placeholder": "Description...",
+    "preview-empty": "Nothing to preview",
+    "location-placeholder": "Add an address...",
+    "password-placeholder": "Password...",
+    "password-label": "Password",
+    "no-changes-password-placeholder": "No changes if empty",
+    "capacity-label": "Event capacity limit",
+    "capacity-price-label": "Tickets at this price",
+    "capacity-placeholder": "Capacity...",
+    "price-label": "Ticket price",
+    "price-placeholder": "0.00",
+    "currency-label": "Currency",
+    "currency-free-option": "Free / No price",
+    "price-free": "Free",
+    "price-helper": "Leave 0 for a free event.",
+    "price-community-required": "Select a community to set a price.",
+    "discoverable-label": "Make event discoverable (Visible in Discover)",
+    "exclusive-label": "Exclusive",
+    "pick-a-start-date-placeholder": "Pick a start date...",
+    "pick-a-end-date-placeholder": "Pick a end date...",
+    "from": "From",
+    "to": "To",
+    "displayed-timezone": "Displayed time corresponds to {timeZone}",
+    "no-file-selected-error": "No file selected.",
+    "error-file-uploading-img": "Error while uploading image",
+    "error-file-uploading-audio": "Error while uploading audio",
+    "error-filesize-exceeds-limit": "File size exceeds limit of {size} MB.",
+    "custom-timezone-select": "You choose a custom location, so please select a timezone.",
+    "no-timezone-found": "No timezones found.",
+    "no-address-found": "No address found.",
+    "onlineEvent": "Online event",
+    "community-selector-label": "Link event to one of your communities (optional)",
+    "community-selector-placeholder": "Select community...",
+    "no-communities-found": "No communities found.",
+    "community-selector-clear": "Clear",
+    "not-organizer-message": "You can't edit this event because you are not one of the organizer.",
+    "toast-creation-success": "Event created!",
+    "toast-creation-error": "Error on creating event!",
+    "toast-edit-success": "Event edited!",
+    "toast-edit-error": "Error on editing event!"
+  },
+  "event": {
+    "going": "{count} going",
+    "nobody-going-yet": "Nobody's going yet",
+    "hosted-by": "Hosted by:",
+    "register-address": "Register to see address",
+    "in": "You're in!",
+    "start": "Start in {count} days",
+    "cancel-desc": "No longer able to attend? Notify the host by canceling your registration.",
+    "registration": "Registration",
+    "already-begun": "Event already begun!",
+    "too-late": "It's too late to register.",
+    "join-desc": "Welcome! To join the event, please register below.",
+    "register-button": "Register",
+    "checkout-button": "Continue to payment",
+    "checkout-total-label": "Total",
+    "checkout-buyer-label": "Buyer and participant",
+    "checkout-guest-label": "Guest",
+    "checkout-buyer-fallback": "Logged-in attendee",
+    "checkout-quantity-decrease": "Decrease quantity",
+    "checkout-quantity-increase": "Increase quantity",
+    "about-event": "About event",
+    "price-label": "Price",
+    "price-free": "Free",
+    "price-free-with-paid": "Free · Paid options available",
+    "price-from": "From {price}",
+    "discussion": "Discussions",
+    "votes": "Votes",
+    "your-email": "Your email",
+    "guests": "Guests",
+    "cancel-my-participation": "Cancel my participation",
+    "sold-out-msg": "The event is now sold out !",
+    "email-placeholder": "Email...",
+    "toast-confirmation": "You take part in the event!",
+    "toast-already-registered-error": "Email(s) already registered for this event!",
+    "toast-default-error": "Error whille trying to register participants",
+    "checkout-error-title": "Payment couldn't start",
+    "checkout-error-note": "No charge was made.",
+    "participants-list": "Participants list",
+    "see-ticket": "See ticket",
+    "login-to-see-tickets": "Login to see ticket(s)",
+    "invitee-form": {
+      "add-a-friend": "Add a friend",
+      "email-placeholder": "Email...",
+      "guests": "Guests"
+    },
+    "gatekeeper-button": "Open ticket scanner",
+    "view-more": "View more",
+    "view-less": "View less",
+    "export-participant-list": "Export participants list",
+    "manage-gatekeepers-button": "Manage gatekeepers",
+    "event-dashboard-banners": {
+      "gatekeeper": "You have the gatekeeper role for this event. See list of attendees and start scanning tickets.",
+      "organizer": "You are the organizer of this event. Manage your event settings and attendees.",
+      "start-scanning": "Start scanning tickets",
+      "edit-event": "Edit event"
+    },
+    "payment-status-banner": {
+      "processing-title": "Processing your payment",
+      "processing-description": "We are confirming your purchase. This can take about 20 seconds.",
+      "checking-title": "Checking your payment status",
+      "checking-description": "We are checking the latest payment status now.",
+      "success-title": "Purchase confirmed",
+      "success-description": "Your confirmation is complete. A confirmation email will arrive shortly.",
+      "pending-title": "Payment pending",
+      "pending-description": "Your payment is still processing. We will email confirmation once it is complete.",
+      "pending-button": "Check again",
+      "canceled-title": "Payment canceled",
+      "canceled-description": "No charge was made. You can try again whenever you are ready.",
+      "error-title": "We couldn't confirm your payment",
+      "error-description": "We could not confirm the purchase yet. Please try again.",
+      "error-button": "Try again",
+      "receipt-reference": "Receipt reference",
+      "view-order": "View order details"
+    }
+  },
+  "profile-info": {
+    "profile-header": {
+      "dashboard-access": "Go to dashboard",
+      "edit-profile": "Edit my profile"
+    },
+    "profile-not-exist": "Profile doesn't exist",
+    "hosting-events": "Hosting events",
+    "past-events": "Past events",
+    "events": "Events",
+    "portfolio": "Portfolio"
+  },
+  "guest-registration-success-dialog": {
+    "registration-title": "You're in!",
+    "thank-you": "Thank you for joining {title} !",
+    "tickets-explanation": "A confirmation and your ticket have been sent to:",
+    "view-on-account": "You can also view it by logging into your account.",
+    "profile-completion-invitation": "Use the same email to log in and complete your profile.",
+    "profile-completion-incentive": "It’s quick and will be useful to interact with community !",
+    "sign-in": "Sign in"
+  },
+  "gatekeeper-management-dialog": {
+    "title": "Manage gatekeepers",
+    "description": "Assign and manage gatekeepers responsible for controlling access to the event.",
+    "input-placeholder": "Email...",
+    "gatekeeper-email-placeholder": "Enter gatekeeper email to add...",
+    "add-gatekeeper-button": "Add",
+    "error-gatekeeper-already-exists": "This gatekeeper is already assigned to the event!",
+    "default": "Default (You)",
+    "toast-gatekeeper-management-success": "Gatekeepers successfully updated!",
+    "toast-gatekeeper-management-error": "Error while updating gatekeepers!",
+    "done": "Done",
+    "click-add-hint": "Click + to add this gatekeeper"
+  },
+  "manifesto": {
+    "title": "MANIFESTO",
+    "means": "means",
+    "p1": "Our mission is to allow humans to organize common projects (physical or online) in a resilient, safe, and transparent way, using radically simple tools.",
+    "p2": "We believe the world needs powerful, open-source, and decentralized tools to empower humans in their common projects. The time has come to fight back against centralized platforms.",
+    "p3": "We, the Samouraï Coop crew, commit ourselves to building sustainable tools that help people organize whatever they want, with their friends, families, and communities.",
+    "p4": "We believe that an event is something that can change life and society. As we are French, we want to remind everyone that the French Revolution started with a very small group of people, discussing, voting, and gradually creating an entire movement for freedom, equality, and fraternity.",
+    "p5": "Zenao is more than a simple event organization platform. It's designed to let you and your tribe decide together what the future of your community is.",
+    "p6": "Zenao is a machine for creating DAOs* in a zen spirit, powered by",
+    "p6-end": "to build a new CoopNation.",
+    "p6-ref": "(*Decentralized Autonomous Organizations)",
+    "p7": "In case of emergency, stay zen and organize."
+  },
+  "whitepaper": {
+    "title": "WHITEPAPER",
+    "vision-title": "1. The Vision",
+    "vision-p1": "Abstract & context: In today's digital world, all of our social interactions are governed and administered by commercial companies that manage centralised platforms on which we are merely consumers.",
+    "vision-p2": "Zenao aims to gradually build a social and technological experience based on a radically different architecture that is open, modular, interoperable, and transparent.",
+    "vision-p3": "We believe that users should have",
+    "vision-p3-end": "in their relationship with the social organisations they found or join, but also in their relationship with the tool itself.",
+    "vision-p4": "As the Zenao platform and application, the user community will gradually build a layer of governance based on a",
+    "product-title": "2. The Product",
+    "product-p1": "Zenao is a platform centered around communities and designed to progressively evolve toward decentralized governance.",
+    "product-p2": "Today, users can participate in, create, or manage a community and its associated events. Ultimately, each community will become autonomous and decentralized, define its own rules, and control its operations. An individual will simply be a member of a community, with a role assigned by that community.",
+    "product-p3": "The Zenao application itself follows a path toward decentralization, allowing power users to influence the direction and future roadmap of the platform.",
+    "product-features-title": "Features — Beta version (live)",
+    "product-features-list": [
+      "Creation and management of public or private communities & events",
+      "Frictionless digital ticketing (no login required)",
+      "Ticket scanning within the application",
+      "Distributed governance system based on roles",
+      "Discovery of public events",
+      "Social community & events (messages, images, videos, polls, etc.)",
+      "Social profiles enabling users to showcase portfolios"
+    ],
+    "product-upcoming-title": "Upcoming Features",
+    "product-upcoming-list": [
+      "Accept payments (paid events, community subscription thought Stripe payments)",
+      "Accept cryptocurrency payments (Bitcoin, EVM, Stablecoins, etc.)",
+      "Vaults allowing communities to co-manage crypto-funds",
+      "make transactions using a multisig & dao votes",
+      "connect/integration of DAO-vault yield optimization (Morpho)",
+      "DAO Templates for easy and safe organisations configurations",
+      "fitting with simple models (from entrepreneurship to DAOs)",
+      "Connect DAOKit based IAM w/ centralized tools",
+      "ordering centralized services as a DAO",
+      "Private events & ZK-proofs",
+      "allowing private but trustable accounts with zero-knowledge proofs"
+    ],
+    "gov-title": "3. Self-Sovereign Governance Layers & Modularity",
+    "gov-actors-title": "3.1 System Actors",
+    "gov-actors-p1": "Each actor in the system is represented as a DAO:",
+    "gov-actors-list": [
+      "User: a DAO with a single member, corresponding to a user account on the platform",
+      "Event: a DAO with multiple members who can distribute roles (participant, gatekeeper, organizer, etc.)",
+      "Community: a DAO composed of many members and events, with roles such as administrator, moderator, member, etc.",
+      "Zenao: the platform itself will become a community of users able to coordinate, self-fund, and co-administer the product through DAO governance"
+    ],
+    "gov-actors-example": "DAOs operate through a role-based permission system, where each role depends on specific governance rules. For example: an event DAO can grant a gatekeeper role to a user to give him the ability to check in tickets at entrance.",
+    "gov-arch-title": "3.2 Zenao Architecture & Foundations",
+    "gov-arch-p1": "Zenao is designed to integrate with programmable blockchain infrastructures.",
+    "gov-arch-list": [
+      "Blockchain-agnostic DAOKit built in Golang",
+      "Compatible with any Turing-complete VM (EVM, WASM, etc.)"
+    ],
+    "gov-arch-p2": "Zenao integrates a future-proof DAO framework called Daokit, developed in-house and used to represent every entity (community, event, user) as an upgradable DAO.",
+    "gov-arch-p3": "Each DAO implementation can be updated over time, allowing continuous evolution of governance mechanisms.",
+    "gov-arch-doc": "📖 Documentation about DAOKit by Samouraï crew.",
+    "story-title": "4. User Story Example — Hyper Hacktive Festival",
+    "story-p1": "As a first experience, the Samouraï Coop team ( builders behind",
+    "story-p1-end": ") decided to demonstrate the power of Zenao's vision with a concrete use case.",
+    "story-p2": "Context: Hyper Hacktive Festival is a short film festival taking place in Paris, produced by the Samouraï Coop crew with a strong “DAO Culture” approach. The concept is to build an engaged and passionate community around films and audiovisual creations in Paris—connecting, encouraging, and supporting the next generation of young directors.",
+    "story-community-actions-title": "All participants are invited to:",
+    "story-community-actions-list": [
+      "A community meet-up before the event to connect with others",
+      "The main event in a cinema, screening 8 to 10 short films",
+      "A community after-party",
+      "Vote for films and directors they want the community to support",
+      "Serve as jury members for the next event's film selection"
+    ],
+    "story-community-title": "The community is composed of:",
+    "story-community-list": [
+      "Participants (attendees watching films)",
+      "Filmmakers, technicians, creatives, authors, etc.",
+      "Producers, professionals, etc.",
+      "Partners and sponsors",
+      "Organizers (Samouraï crew)"
+    ],
+    "story-tools-title": "Tools:",
+    "story-tools-list": [
+      "Community page: gathering all community information",
+      "Events page: focusing on main event details",
+      "Polls and feeds for community discussion and media sharing"
+    ],
+    "story-organizer-title": "As organizer:",
+    "story-organizer-list": [
+      "Set up community page and create events",
+      "Send newsletters and emails to community members",
+      "Assign organization roles for staff",
+      "Super-admin (C-level)",
+      "Administration / Treasury Manager / Community Manager / Technicians / Developers",
+      "Community moderators",
+      "Gatekeepers and security officers at the entrance (scanning tickets)"
+    ],
+    "story-community-member-title": "As community member:",
+    "story-community-member-list": [
+      "Stay informed about community news and initiatives via email",
+      "Connect and collaborate with other community members",
+      "Create a personal profile and portfolio",
+      "Gain roles based on responsibilities and trust",
+      "Vote on community governance, grant allocations, etc."
+    ],
+    "story-others-title": "As filmmaker, creative, or technician:",
+    "story-others-list": [
+      "Same benefits as community members",
+      "Use profile as a professional portfolio",
+      "Access community networking and opportunities",
+      "Vote on community governance, grant allocations, etc."
+    ],
+    "roadmap-title": "5. Roadmap & Philosophical Position",
+    "roadmap-p1": "At this stage of Zenao, we believe the only focus must remain to address users needs. 99% of the population are not interested about decentralization or distributed protocols values. People are just looking for efficient tools, products and simple apps to fit their needs.",
+    "roadmap-p2": "We consider that Zenao is made for real-life needs and not “Web3 speculation” narratives. The potential of the dApp is very large, both in term of “market”, as a product, but also in term of adoption for decentralized protocols to be used by main stream people.",
+    "roadmap-p3": "We want to spend upcoming phase to make the user experience perfectly fitting with non-tech people, in order to orchestrate an organic, in-real-life,and non-speculative user growth.",
+    "roadmap-p4": "Once we’ll reach an important monthly user base, we’ll progressively present our decentralization roadmap and present it to our power-users as a proposal, fitting perfectly with the DAO culture we want to encourage, support and build with and for the Zenao community."
+  },
+  "settings": {
+    "title": "Settings",
+    "gnoweb-label": "See your profile on gnoweb",
+    "avatar-placeholder": "Avatar URI...",
+    "name-label": "Name",
+    "name-placeholder": "Name...",
+    "banner-placeholder": "Banner...",
+    "bio-label": "Bio",
+    "bio-placeholder": "Bio...",
+    "bio-tooltip": "Tell us about yourself. Markdown is supported.",
+    "location-label": "Location",
+    "location-placeholder": "Location...",
+    "shortbio-label": "Headline ",
+    "shortbio-placeholder": "One-liner about you...",
+    "shortbio-tooltip": "A brief headline that captures your essence in one line.",
+    "write-tab": "Write",
+    "preview-tab": "Preview",
+    "save-button": "Save changes",
+    "change-avatar": "Change avatar",
+    "change-banner": "Change banner",
+    "toast-success": "User correctly edited!",
+    "toast-error": "Error on editing user!",
+    "sign-out": "Sign out",
+    "experience-form": {
+      "title-label": "Title",
+      "title-placeholder": "e.g. Software Engineer",
+      "description-label": "Description",
+      "description-placeholder": "Tell us about your experience",
+      "start-date-label": "Start date",
+      "end-date-label": "End date",
+      "still-ongoing-label": "Still on-going",
+      "organization-label": "Organization (optional)",
+      "organization-placeholder": "e.g. Google",
+      "done-button": "Done",
+      "add-experience-button": "Add experience"
+    },
+    "social-media-links": {
+      "heading": "Social links",
+      "url-placeholder": "Enter URL",
+      "add-link-button": "Add link"
+    },
+    "skills-list": {
+      "heading": "Skills",
+      "skill-placeholder": "e.g. React",
+      "add-skill-button": "Add skill"
+    }
+  },
+  "discover": {
+    "title": "Discover events",
+    "description": "Dive into the pulse of tribes events, rave parties, hacking events, private cinema avant-premieres, and more."
+  },
+  "tickets": {
+    "title": "Your tickets",
+    "log-in": " Log in to see your tickets",
+    "no-tickets-event": "No tickets available for this event",
+    "description": "Events you are attending.",
+    "see-event-details": "See event details"
+  },
+  "order": {
+    "title": "Your order",
+    "subtitle": "Here are the tickets and purchase recap for this order.",
+    "log-in": "Log in to view your order",
+    "order-id-label": "Order ID",
+    "quantity-label": "Tickets",
+    "total-label": "Total",
+    "ticket-label": "Ticket #{index}",
+    "no-tickets": "No tickets are associated with this order yet.",
+    "free": "Free"
+  },
+  "orders": {
+    "title": "Your orders",
+    "subtitle": "A recap of your ticket purchases.",
+    "log-in": "Log in to view your orders",
+    "empty": "No orders yet.",
+    "order-id-label": "Order ID",
+    "date-label": "Date",
+    "date-unknown": "Unknown",
+    "total-label": "Total",
+    "free": "Free"
+  },
+  "event-card": {
+    "exclusive-event": "Exclusive event",
+    "discoverable-tooltip": "This event is discoverable by everyone.",
+    "hidden-tooltip": "This event is only visible for you.",
+    "hosted-by": "Hosted by:"
+  },
+  "event-protection-guard": {
+    "description": "This event is exclusive to certain participants. You need a password to access information.",
+    "password-placeholder": "Enter the password...",
+    "access-button": "Access event",
+    "toast-access-invalid-password": "Invalid password !",
+    "toast-access-error": "Could not grant access to event information!"
+  },
+  "no-events-title": "No events to show.",
+  "no-events-description": "You have no events. Why not create one?",
+  "no-more-events": "No more to show for now.",
+  "no-members-title": "No members to show.",
+  "no-members-description": "Let's change that!",
+  "no-proposals-title": "No proposals to show.",
+  "no-proposals-description": "You have no proposals or votes. Why not create one?",
+  "events-list": {
+    "no-events": "No events to show.",
+    "no-events-desc": "You have no events. Why not create one?",
+    "create-event": "Create event",
+    "upcoming": "Upcoming",
+    "past": "Past"
+  },
+  "error": {
+    "label": "Oups! An error has occured.",
+    "retry-button": "Retry",
+    "oops-something-went-wrong": "Oups! Something went wrong.",
+    "unexpected-error-occurred": "An unexpected error occurred. Please try again later.",
+    "refresh-page": "Refresh the page"
+  },
+  "not-found": {
+    "label": "Page not found.",
+    "button": "Return Home"
+  },
+  "post-menu": {
+    "pin-post": "Pin post",
+    "unpin-post": "Unpin post",
+    "edit-post": "Edit post",
+    "delete-post": "Delete post"
+  },
+  "components": {
+    "modals": {
+      "signed-out-modal": {
+        "title": "Sign In/Sign Up",
+        "description": "You have to sign in or sign up to create an event.",
+        "sign-in": "Sign in",
+        "sign-up": "Sign up"
+      }
+    },
+    "widgets": {
+      "soon-on-base": {
+        "soon-on": "Soon on"
+      },
+      "quick-create-menu": {
+        "create-event": "Create new event",
+        "create-community": "Create new community"
+      },
+      "form": {
+        "form-field-image": {
+          "error-filesize-exceeds-limit": "File size exceeds limit of {size} MB.",
+          "error-no-file-selected": "No file selected.",
+          "error-uploading-file": "Trouble uploading file!"
+        },
+        "form-field-date-picker": {
+          "pick-date-aria-label": "Pick date"
+        }
+      },
+      "time-zones-popover": {
+        "placeholder": "Timezones"
+      }
+    },
+    "toggle-theme-button": {
+      "dropdown-trigger-aria-label": "Theme selector",
+      "toggle-theme-label": "Toggle theme",
+      "light-option": "Light",
+      "light-aria-label": "Light theme",
+      "dark-option": "Dark",
+      "dark-aria-label": "Dark theme",
+      "system-option": "System",
+      "system-aria-label": "System theme"
+    },
+    "sidebar": {
+      "toggle-aria-label": "Toggle Sidebar",
+      "toggle-tooltip": "Toggle Sidebar"
+    },
+    "confirmation-dialog": {
+      "confirm-action-aria-label": "Confirm action"
+    }
+  },
+  "blog": {
+    "pageTitle": "Blog",
+    "pageSubheading": "Explore the exciting updates and innovations of Zenao",
+    "no-blog-posts-title": "No blog posts to show."
+  },
+  "blog-post": {
+    "link-copied-toast": "Link copied to clipboard!",
+    "failed-to-copy-link-toast": "Failed to copy link to clipboard!"
+  },
+  "load-more": "Load more",
+  "no-posts-title": "No posts to show.",
+  "no-posts-description": "You have no posts. Why not create one?",
+  "no-more-posts": "No more to show for now.",
+  "social-feed": {
+    "no-polls-title": "No polls to show.",
+    "no-polls-description": "You have no polls. Why not create one?",
+    "action-buttons": {
+      "set-type-aria-label": "Set post type",
+      "submit-aria-label": "Submit post"
+    },
+    "post-card": {
+      "pinned-badge": "Pinned Post",
+      "location-label": "Location",
+      "cancel-modification-tooltip": "Cancel modification",
+      "show-replies-tooltip": "Show replies"
+    },
+    "poll-form": {
+      "question-placeholder-sm": "Ask a question...",
+      "question-placeholder-lg": "What do you wanna ask to the community ?",
+      "toast-poll-creation-success": "Poll created !",
+      "toast-poll-creation-error": "Error on creating poll !",
+      "label-allow-multiple-answers": "Allow multiple answers",
+      "option-input-placeholder": "Enter an answer",
+      "add-other-answer": "Add another answer",
+      "poll-duration-label": "Duration of the poll",
+      "days": "Days",
+      "minutes": "Minutes",
+      "hours": "Hours"
+    },
+    "standard-post-form": {
+      "write-tab": "Write",
+      "preview-tab": "Preview",
+      "message-placeholder-sm": "Say something...",
+      "message-placeholder-lg": "Don't be shy, say something!",
+      "toast-post-creation-success": "Post created !",
+      "toast-post-creation-error": "Error on creating post !",
+      "toast-post-edit-error": "Error on editing post !",
+      "comment-restricted-to-members": "You must be a member to submit a comment.",
+      "comment-restricted-to-participants": "You must be a participant to submit a comment.",
+      "no-file-selected-error": "No file selected.",
+      "image-upload-error": "Error while uploading image.",
+      "audio-upload-error": "Error while uploading audio.",
+      "error-filesize-exceeds-limit": "File size exceeds limit of {size} MB.",
+      "upload-image-tooltip": "Upload image",
+      "upload-image-aria-label": "Upload image",
+      "upload-audio-tooltip": "Upload audio",
+      "upload-audio-aria-label": "Upload audio"
+    },
+    "vote": {
+      "toast-vote-success": "Vote submitted !",
+      "toast-vote-error": "Error while voting !"
+    },
+    "poll": {
+      "result-count": "{count, plural, one {# vote} other {# votes}}"
+    },
+    "actions": {
+      "toast-post-pin-success": "Post pinned !",
+      "toast-post-pin-error": "Error while pinning the post !",
+      "toast-post-unpin-success": "Post unpinned !",
+      "toast-post-unpin-error": "Error while unpinning the post !"
+    }
+  },
+  "broadcast-email-form": {
+    "title": "Send an email to all participants",
+    "desc": "Broadcasts are a great way to share more information about your event, such as announcing a special guest, an event update, or a logistical change.",
+    "message-input-placeholder": "What's new ?",
+    "message-input-label": "Enter your message",
+    "cancel": "Cancel",
+    "send": "Send email",
+    "attach-ticket-label": "Attach ticket to the message",
+    "toast-email-sent-success": "Email sent !",
+    "toast-email-sent-error": "Error while trying to send the email",
+    "no-participant-error": "You can't send any message because nobody is going to your event yet"
+  },
+  "event-community-section": {
+    "organized-by": "Organized by community"
+  },
+  "event-scanner": {
+    "check-in-confirmation-dialog": {
+      "title-success": "Ticket verified",
+      "description-error": "Error while trying to validate your ticket",
+      "title-error": "Invalid ticket",
+      "description-success": "You can enter the venue",
+      "close": "Close"
+    },
+    "last-ticket-scanned": "Last ticket signed",
+    "checkin-count": "Total tickets checked-in",
+    "history-title": "Scanned tickets for event",
+    "no-tickets-scanned": "No tickets scanned yet",
+    "signature": "Signature"
+  },
+  "cancel-registration-confirmation-dialog": {
+    "title": "Cancel your participation",
+    "desc": "This action is irreversible ! Are you sure ?",
+    "go-back": "Go back",
+    "cancel": "Cancel",
+    "toast-cancel-participation-success": "Your participation has been cancelled",
+    "toast-cancel-participation-error": "Error while canceling participation",
+    "event-already-started-error": "You cannot cancel your participation as the event has already started",
+    "toast-user-already-checked-in-error": "You cannot cancel your participation as you already used your ticket to enter the venue"
+  },
+  "cancel-event-confirmation-dialog": {
+    "title": "Cancel event",
+    "desc": "This action is irreversible ! Are you sure ?",
+    "go-back": "Go back",
+    "cancel": "Cancel",
+    "toast-cancel-event-success": "Event has been cancelled",
+    "toast-cancel-event-error": "Error while cancelling the event",
+    "event-starting-soon-error": "Events already started or starting within 24h cannot be cancelled",
+    "toast-only-organizer-can-cancel-error": "Only organizers can cancel an event"
+  },
+  "delete-post-confirmation-dialog": {
+    "title": "Delete post",
+    "desc": "Are you sure you want to delete this post ?",
+    "delete": "Delete",
+    "cancel": "Cancel"
+  },
+  "toast-delete-post-success": "Your post has been deleted",
+  "toast-delete-post-error": "Error while deleting the post",
+  "community": {
+    "communities": "Communities",
+    "chat": "Chat",
+    "votes": "Votes",
+    "events": "Events",
+    "members": "Members",
+    "proposals": "Proposals",
+    "pinned-events": "Pinned Events",
+    "all-events": "All Events",
+    "event-unpinned": "Event unpinned",
+    "event-pinned": "Event pinned",
+    "portfolio": "Portfolio",
+    "upcoming": "Upcoming",
+    "past": "Past",
+    "leave-community-button": "Leave community",
+    "leaving-state": "Leaving...",
+    "leave-success": "You have left the community.",
+    "leave-success-desc": "You're no longer a member.",
+    "leave-failure": "Failed to leave the community",
+    "leave-failure-desc": "Please try again later.",
+    "leave-only-admin-error": "You cannot leave this community as you are the only administrator.",
+    "sign-in-to-join-button": "Sign in to join",
+    "joining-state": "Joining...",
+    "join-community-button": "Join community",
+    "edit-community-button": "Edit community"
+  },
+  "community-create-form": {
+    "log-in": "Log in to create a community",
+    "create-community-button": "Create community",
+    "toast-creation-success": "Community created!",
+    "toast-creation-failure": "Error on creating community!"
+  },
+  "community-edit-form": {
+    "update-success": "Community updated successfully",
+    "update-failure": "Failed to update community",
+    "stripe-onboarding-failure": "Failed to start Stripe onboarding",
+    "stripe-onboarding-return": "Stripe onboarding completed.",
+    "stripe-onboarding-refresh": "Stripe onboarding was not completed. Please try again."
+  },
+  "communityForm": {
+    "log-in": "Log in to manage communities"
+  },
+  "community-form": {
+    "edit-button": "Edit community",
+    "upload-avatar": "Upload avatar image",
+    "upload-banner": "Upload banner image",
+    "change-avatar": "Change avatar",
+    "change-banner": "Change banner",
+    "name-label": "Community name",
+    "seeAsCustomer": "See as customer",
+    "community-name-section": "Name of the community",
+    "about-section": "About your community",
+    "name-placeholder": "Community name...",
+    "description-label": "Description",
+    "shortDescription-tooltip": "A brief summary of your community (max 100 characters). Will be shown in listings.",
+    "description-tooltip": "Tell us more about your community, its purpose, and what members can expect. Markdown is supported!",
+    "shortDescription-label": "Brief summary",
+    "shortDescription-placeholder": "Short Description...",
+    "description-placeholder": "Description...",
+    "write-tab": "Write",
+    "preview-tab": "Preview",
+    "admin-label": "Administrators",
+    "admin-placeholder": "New administrator email",
+    "visibility-section": "Visibility",
+    "socialLinks": "Social Links",
+    "socialLinks-description": "Add links to your community's social media profiles to enhance visibility",
+    "remove-admin": "Remove",
+    "add-admin": "Add Administrator",
+    "submit-create": "Create Community",
+    "submit-edit": "Update Community",
+    "payments-section": "Payments",
+    "payments-description": "Connect Stripe to receive payouts from your community.",
+    "stripe-connect-label": "Stripe Connect",
+    "stripe-connect-description": "Start onboarding to enable card payments and transfers.",
+    "stripe-connect-cta": "Start Stripe onboarding",
+    "stripe-dashboard-cta": "Open Stripe dashboard",
+    "payout-status-label": "Payout verification status",
+    "payout-status-loading": "Loading",
+    "payout-status-verified": "Verified",
+    "payout-status-failed": "Failed",
+    "payout-status-pending": "Pending",
+    "payout-status-unknown": "Unknown",
+    "payout-status-last-checked": "Last checked",
+    "payout-status-never": "Not checked yet",
+    "payout-status-stale": "Data may be stale",
+    "payout-status-refresh-error": "Unable to refresh from Stripe. Showing last known status.",
+    "stripe-dashboard-missing-account": "No Stripe account connected, please connect one to enable payouts."
+  },
+  "portfolio": {
+    "error-file-uploading": "Error while uploading file",
+    "error-filesize-exceeds-limit": "File size exceeds limit of {size} MB.",
+    "error-file-deleting": "Error while deleting file",
+    "delete-file-success": "Item deleted successfully",
+    "upload-file-success": "File uploaded successfully",
+    "recent-media-uploaded": "Recent media uploaded",
+    "upload-file-btn": "Upload file",
+    "upload-first-file-btn": "Upload your first file",
+    "no-media-title": "No media to show.",
+    "no-media-description": "You have no media in your portfolio. Why not upload some?",
+    "error-saving-portfolio": "Error while saving portfolio",
+    "upload-audio": "Upload audio",
+    "upload-image": "Upload image",
+    "upload-video": "Upload video",
+    "add-video": "Add video",
+    "add-video-description": "Add a video from YouTube, Vimeo",
+    "video-origin-label": "Origin of the video",
+    "video-origin-placeholder": "Video source",
+    "delete": "Delete",
+    "confirm-delete-title": "Are you sure you want to delete this item?",
+    "confirm-delete-desc": "This action cannot be undone.",
+    "confirm-delete-cancel": "Cancel",
+    "confirm-delete-confirm": "Yes, delete it"
+  },
+  "empty-list": {
+    "title": "Nothing listed",
+    "description": "Let's change that!"
+  },
+  "dashboard": {
+    "upgradePlan": {
+      "title": "Upgrade your plan",
+      "subtitle": "You are currently on the {currentPlan} plan. To access this feature, please consider upgrading to a higher plan.",
+      "contact-us": "Contact us for upgrade"
+    },
+    "signout-desc": "Log in to access your dashboard",
+    "sidebar": {
+      "pro": "Pro",
+      "create-btn": "Create",
+      "create-event": "Create Event",
+      "create-community": "Create Community",
+      "events": "Events",
+      "upcoming": "Upcoming",
+      "past": "Past",
+      "all": "All",
+      "participants": "Participants",
+      "gatekeepers": "Gatekeepers",
+      "broadcast": "Broadcast",
+      "general": "General",
+      "members": "Members",
+      "administrators": "Administrators",
+      "payouts": "Payouts",
+      "communities": "Communities",
+      "settings": "Settings",
+      "coming-soon": "Soon",
+      "quick-create": "quick create menu"
+    },
+    "navUser": {
+      "personal-account": "Personal account",
+      "team": "Team",
+      "create-team": "Create a team",
+      "profile": "Profile",
+      "language": "Language",
+      "sign-out": "Sign out"
+    },
+    "createTeam": {
+      "title": "Create a team",
+      "subtitle": "Teams allow you to have multiple people managing events and communities together.",
+      "name-label": "Team name",
+      "name-placeholder": "Enter team name",
+      "description": "You can add members and customize your team later.",
+      "cancel": "Cancel",
+      "create": "Create team",
+      "success": "Team created successfully",
+      "error": "Failed to create team"
+    },
+    "membersTable": {
+      "name-column": "Name",
+      "roles-column": "Roles"
+    },
+    "eventsTable": {
+      "events": "Events",
+      "upcoming": "Upcoming",
+      "past": "Past",
+      "no-events": "No events found.",
+      "create-event-btn": "Create an event",
+      "name-column": "Name",
+      "date-column": "Date",
+      "roles-column": "Roles",
+      "participants-column": "Participants",
+      "organizers-column": "Organized by",
+      "actions-column": "Actions",
+      "view-event": "See event",
+      "actions-menu": {
+        "dashboard-view": "See on dashboard",
+        "customer-view": "See as customer"
+      }
+    },
+    "communitiesTable": {
+      "communities": "Communities",
+      "no-communities": "No communities found.",
+      "create-community-btn": "Create a community",
+      "name-column": "Name",
+      "members-column": "Members",
+      "roles-column": "Roles",
+      "email-column": "Email",
+      "view-community": "See community",
+      "loading": "Loading...",
+      "actions-column": "Actions",
+      "actions-menu": {
+        "dashboard-view": "See on dashboard",
+        "customer-view": "See as customer"
+      }
+    },
+    "communitiyAdministratorsTable": {
+      "email-column": "Email",
+      "actions-column": "Actions",
+      "action-tooltip-delete": "Remove administrator"
+    },
+    "communityDetails": {
+      "communityTabs": {
+        "general": "General",
+        "members": "Members",
+        "administrators": "Administrators",
+        "events": "Events",
+        "payouts": "Payouts"
+      },
+      "administrators": {
+        "no-administrators": "No administrators assigned yet.",
+        "toast-administrator-management-success": "Administrators successfully updated!",
+        "toast-administrator-management-error": "Error while updating administrators!",
+        "add-administrator-form": {
+          "email-placeholder": "Enter administrator email to add...",
+          "error-administrator-already-exists": "This administrator is already assigned to the community!",
+          "add-btn": "Add"
+        }
+      },
+      "members": {
+        "no-members": "No members yet."
+      },
+      "events": {
+        "no-events": "No events yet."
+      }
+    },
+    "eventDetails": {
+      "event-details": "Event details",
+      "manage-event": "Manage event",
+      "edit-event": "Edit event",
+      "cancel-event": "Cancel event",
+      "view-event": "See event",
+      "eventTabs": {
+        "general": "General",
+        "participants": "Participants",
+        "gatekeepers": "Gatekeepers",
+        "broadcast": "Broadcast"
+      },
+      "header": {
+        "actions": "Actions",
+        "saveChanges": "Save changes",
+        "seeAsCustomer": "See as customer",
+        "edit": "Edit",
+        "cancel": "Cancel event",
+        "dateAndTime": "Date & Time",
+        "from": "From",
+        "to": "To",
+        "updateEventTime": "Update Event Time",
+        "location": "Location",
+        "updateLocation": "Update Location",
+        "capacity": "Capacity",
+        "prices": "Prices",
+        "noPlaces": "No places",
+        "attendees": "{count} attendees",
+        "updateCapacity": "Update Capacity",
+        "community": "Community",
+        "securityAndPrivacy": "Security & Privacy"
+      },
+      "participants": {
+        "exportCSV": "Export CSV",
+        "openQrCodeScanner": "QR Code Scanner",
+        "no-participants": "No participants yet."
+      },
+      "gatekeepers": {
+        "no-gatekeepers": "No gatekeepers assigned yet.",
+        "add-gatekeeper-form": {
+          "email-placeholder": "Enter gatekeeper email to add...",
+          "error-gatekeeper-already-exists": "This gatekeeper is already assigned to the event!",
+          "add-btn": "Add Gatekeeper"
+        }
+      },
+      "broadcast": {
+        "subtitle": "Broadcasts are a great way to share more information about your event, such as announcing a special guest, an event update, or a logistical change."
+      }
+    },
+    "data-table": {
+      "pagination": {
+        "rows-per-page": "Rows per page",
+        "page-of": "Page {page} of {pages}"
+      }
+    }
+  },
+  "metadata": {
+    "blog-page": {
+      "title": "Blog | Zenao",
+      "description": "Discover the latest articles, news, and updates about Zenao in our blog."
+    }
+  }
+}

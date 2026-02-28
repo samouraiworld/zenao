@@ -26,6 +26,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ### Repository Maintenance
 - **Branch cleanup**: Deleted 380 stale remote branches (385 → 9 total)
 - **PR housekeeping**: Closed PR #908 (superseded by #915) and PR #992 (stale CI testing draft)
+- **i18n: Spanish locale scaffold**: Added `es.json` skeleton (EN fallback) for LATAM expansion roadmap
+- **i18n: 3-locale support**: Updated `i18n-check` tool to validate EN/FR/ES
 
 ---
 
