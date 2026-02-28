@@ -48,6 +48,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ### Repository Maintenance
 - **PR #1017 closed**: Draft "Add langage button" superseded by locale switching (`bd4bb88e`)
 - **Unused flag cleanup**: Removed `NEXT_PUBLIC_PAID_EVENTS_ENABLED` — never referenced in frontend code, backend flag is the sole gate
+- **Staging Stripe config**: `deploy-staging.yml` now injects `ZENAO_STRIPE_SECRET_KEY` + `ZENAO_PAID_EVENTS_ENABLED=true` into VPS `backend.env` during deploy
 
 ---
 
