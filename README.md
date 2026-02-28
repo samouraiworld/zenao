@@ -316,19 +316,12 @@ Zenao supports paid events with Stripe checkout. This feature is behind a featur
 
 ### Enabling Paid Events
 
-**1. Set the feature flag** in `.env.local`:
+**1. Set the backend feature flag** (as environment variable, not from `.env.local`):
 ```bash
-# Frontend flag — shows price UI in event creation/editing
-NEXT_PUBLIC_PAID_EVENTS_ENABLED=true
-
-# Backend flag — enables payment endpoints
-ZENAO_PAID_EVENTS_ENABLED=true
+export ZENAO_PAID_EVENTS_ENABLED=true
 ```
 
-> **⚠️ Important:** Both flags must be set. The backend flag is read as an environment variable (not from `.env.local`), so export it before starting the server:
-> ```bash
-> export ZENAO_PAID_EVENTS_ENABLED=true
-> ```
+> **Note:** The frontend always renders price fields when price groups exist in event data. No frontend flag is needed.
 
 **2. Configure Stripe test keys:**
 ```bash
