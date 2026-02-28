@@ -6,13 +6,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
-## [Unreleased] — Production Incident Fix & Deploy Hardening
+## [Unreleased] — Production Incident Fix & Deploy Hardening (2026-02-28)
 
 ### Fixed
-- **Production outage (2026-02-28)**: Backend stuck in `--maintenance` mode after deploy #22523329085 failed at migration step — `git restore` in "Upgrade backend" never ran, leaving all RPC endpoints returning `CodeUnavailable`
-- **Deploy workflow safety net**: Added "Rollback maintenance on migration failure" step to both `deploy-prod.yml` and `deploy-staging.yml` — if migration fails, `git restore` + container rebuild runs automatically via `if: failure()`
-- **Emergency recovery workflow**: New `emergency-clear-maintenance.yml` — one-click workflow_dispatch to clear stuck maintenance mode on prod or staging via SSH
-- **CSP `connect-src` fix**: Backend API origin (`NEXT_PUBLIC_ZENAO_BACKEND_ENDPOINT`) was missing from CSP — browser blocked all client-side RPC calls to `api.prod.zenao.io`, causing `ConnectError: Failed to fetch` on every page
+- **Production outage**: Backend stuck in `--maintenance` mode after deploy #22523329085 failed at migration step — `git restore` never ran, leaving all RPC endpoints returning `CodeUnavailable`
+- **Deploy workflow safety net**: Added "Rollback maintenance on migration failure" step to `deploy-prod.yml` and `deploy-staging.yml` — `git restore` + container rebuild runs via `if: failure()`
+- **Emergency recovery workflow**: New `emergency-clear-maintenance.yml` — one-click workflow_dispatch to clear stuck maintenance mode
+- **Netlify build broken since 11:27 AM**: 5 lint/prettier errors from PR #1026 (location filter) and hydration fix prevented all Netlify deploys — unused `useEffect` import, prettier formatting in `discover-events-list.tsx`, `page.tsx`, `event-location-filter.tsx`, `sidebar.tsx`
+- **CSP `connect-src`**: Backend API origin (`api.prod.zenao.io`) was missing from CSP — blocked all client-side API calls
+- **CSP `script-src`/`connect-src`**: Clerk production custom domain (`clerk.zenao.io`) was blocked, causing `failed_to_load_clerk_js_timeout`
+- **SSR 500 on `/discover`**: `eventInfoSchema` used `z.bigint()` for `startDate`/`endDate` — `dehydrate(queryClient)` crashed because `JSON.stringify` cannot serialize BigInt. Changed to `z.coerce.number()` (unix timestamps fit safely in JS Number)
+- **`/discover` page restructure**: Removed incorrect redirect to `/discover/upcoming`, switched `useSuspenseInfiniteQuery` → `useInfiniteQuery` (suspense queries crash Netlify SSR when prefetched data isn't available), removed `/discover` → `/discover/upcoming` rewrite from `next.config.ts`
+- **SSR resilience**: `prefetchInfiniteQuery` in discover page now `await`ed with try-catch — page renders even if backend is temporarily unreachable
 
 ---
 
