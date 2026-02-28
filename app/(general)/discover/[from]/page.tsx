@@ -27,11 +27,15 @@ export default async function DiscoverPage({ params }: PageProps) {
     redirect("/discover/upcoming", RedirectType.replace);
   }
 
-  queryClient.prefetchInfiniteQuery(
-    from === "upcoming"
-      ? eventsList(now, Number.MAX_SAFE_INTEGER, DEFAULT_EVENTS_LIMIT)
-      : eventsList(now - 1, 0, DEFAULT_EVENTS_LIMIT),
-  );
+  try {
+    await queryClient.prefetchInfiniteQuery(
+      from === "upcoming"
+        ? eventsList(now, Number.MAX_SAFE_INTEGER, DEFAULT_EVENTS_LIMIT)
+        : eventsList(now - 1, 0, DEFAULT_EVENTS_LIMIT),
+    );
+  } catch {
+    // Backend unreachable during SSR — client-side query will retry
+  }
 
   const t = await getTranslations("discover");
 
