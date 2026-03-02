@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - develop
   pull_request:
   merge_group:
 
@@ -22,11 +23,29 @@ jobs:
       - name: Tidy go.mod
         run: go mod tidy
 
-      - name: Test
-        run: go test ./backend/...
+      - name: Test (with race detection)
+        run: go test -race -count=1 ./backend/...
 
       - name: Build
         run: go build -o zenao-backend ./backend
+
+      - name: Get go binaries path
+        id: go-bin-path
+        run: echo "PATH=$(go env GOPATH)/bin" >> "$GITHUB_OUTPUT"
+
+      - name: Cache atlas
+        id: cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.go-bin-path.outputs.PATH }}
+          key: ${{ runner.os }}-atlas-bin5-v1.1.0
+
+      - name: Install atlas
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: make install-atlas
+
+      - name: Validate migrations
+        run: atlas migrate validate --dir "file://migrations" --dev-url "sqlite://file?mode=memory"
 
       - name: Check diff
         run: git diff --exit-code

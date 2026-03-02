@@ -1,5 +1,10 @@
 # Zenao - Zen Autonomous Organizations
 
+[![E2E Tests](https://github.com/samouraiworld/zenao/actions/workflows/e2e.yml/badge.svg)](https://github.com/samouraiworld/zenao/actions/workflows/e2e.yml)
+[![JS](https://github.com/samouraiworld/zenao/actions/workflows/js.yml/badge.svg)](https://github.com/samouraiworld/zenao/actions/workflows/js.yml)
+[![Go](https://github.com/samouraiworld/zenao/actions/workflows/go.yml/badge.svg)](https://github.com/samouraiworld/zenao/actions/workflows/go.yml)
+[![Security](https://github.com/samouraiworld/zenao/actions/workflows/security.yml/badge.svg)](https://github.com/samouraiworld/zenao/actions/workflows/security.yml)
+
 An event management and community platform featuring event creation, community management, and social feeds.
 
 > **Note:** Zenao is currently a Web2 application, with plans to transition to Web3 using [base](https://www.base.org/).
@@ -11,6 +16,7 @@ An event management and community platform featuring event creation, community m
 - [Quick Start - Full Local Development](#quick-start---full-local-development)
 - [Environment Variables Reference](#environment-variables-reference)
 - [Testing](#testing)
+- [Contributing](#contributing)
 - [Clerk Authentication Setup](#clerk-authentication-setup)
 - [File Uploads with Pinata](#file-uploads-with-pinata)
 - [Paid Events & Stripe](#paid-events--stripe)
@@ -244,6 +250,16 @@ npm run cypress:e2e
 ```
 
 Select a test file (e.g., `cypress/main.cy.ts`) to run. Tests auto-rerun on file changes.
+
+## Contributing
+
+See [CONTRIBUTING.md](./CONTRIBUTING.md) for the mandatory development workflow, branch strategy, and code standards.
+
+**Quick summary:**
+1. Branch from `develop` → `feature/*`
+2. Run `make pre-push` before pushing
+3. Open PR to `develop` → CI must pass → 1 review required
+4. `develop` → `main` only after full audit
 
 ## Clerk Authentication Setup
 
@@ -503,6 +519,7 @@ The database is created at `dev.db` in the project root after running `make migr
 | `make migrate-local` | Apply database migrations to local dev.db |
 | `make update-schema` | Update Atlas schema from GORM models |
 | `make lint-fix` | Run ESLint with auto-fix |
+| `make pre-push` | Run all pre-push checks (type-check, lint, build, Go tests, Go lint, schema) |
 
 ## Project Structure
 

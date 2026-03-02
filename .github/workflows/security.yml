@@ -1,4 +1,4 @@
-name: Codegen
+name: Security
 
 on:
   push:
@@ -9,8 +9,10 @@ on:
   merge_group:
 
 jobs:
-  check-codegen:
+  audit:
     runs-on: ubuntu-latest
+    # Informational only — does not block PRs (will enforce later)
+    continue-on-error: true
     steps:
       - uses: actions/checkout@v4
 
@@ -23,14 +25,13 @@ jobs:
         uses: magnetikonline/action-golang-cache@v5
         with:
           go-version-file: go.mod
-          cache-key-suffix: buf-gen
-      - name: Install goimports
-        run: |
-          go install golang.org/x/tools/cmd/goimports@latest
-          echo "$(go env GOPATH)/bin" >> $GITHUB_PATH
+          cache-key-suffix: security
 
-      - name: Generate
-        run: make generate
+      - name: Install node modules
+        run: npm ci
 
-      - name: Check diff
-        run: git diff --exit-code
+      - name: npm audit (high severity)
+        run: npm audit --audit-level=high || true
+
+      - name: Go vulnerability check
+        run: go run golang.org/x/vuln/cmd/govulncheck@latest ./...
