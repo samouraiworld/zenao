@@ -84,7 +84,13 @@ func SetupDB(dsn string) (zeni.DB, error) {
 			DSN:        dsn,
 		}), &gorm.Config{})
 	} else {
-		db, err = gorm.Open(sqlite.Open(dsn), &gorm.Config{})
+		// _busy_timeout: retry for 5s instead of failing immediately on SQLITE_BUSY
+		// _journal_mode=WAL: allows concurrent reads during writes
+		sep := "?"
+		if strings.Contains(dsn, "?") {
+			sep = "&"
+		}
+		db, err = gorm.Open(sqlite.Open(dsn+sep+"_busy_timeout=5000&_journal_mode=WAL"), &gorm.Config{})
 	}
 	if err != nil {
 		return nil, err
