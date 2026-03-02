@@ -17,7 +17,7 @@ func SetupTestDB(t *testing.T) (zeni.DB, *sql.DB) {
 	t.Helper()
 
 	dbPath := filepath.Join(t.TempDir(), "test.db")
-	sqlDB, err := sql.Open("sqlite3", dbPath)
+	sqlDB, err := sql.Open("sqlite3", dbPath+"?_busy_timeout=5000&_journal_mode=WAL")
 	require.NoError(t, err)
 	t.Cleanup(func() { _ = sqlDB.Close() })
 
