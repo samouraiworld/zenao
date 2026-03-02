@@ -1,0 +1,10 @@
+# Generated protobuf files — managed by buf codegen, never format manually
+app/gen/
+
+# Build artifacts
+.next/
+node_modules/
+gnobuild/
+
+# Lock file
+package-lock.json

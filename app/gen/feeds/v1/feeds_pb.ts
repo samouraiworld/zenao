@@ -9,11 +9,8 @@ import type { Message } from "@bufbuild/protobuf";
 /**
  * Describes the file feeds/v1/feeds.proto.
  */
-export const file_feeds_v1_feeds: GenFile =
-  /*@__PURE__*/
-  fileDesc(
-    "ChRmZWVkcy92MS9mZWVkcy5wcm90bxIIZmVlZHMudjEiJgoKUG9zdEdlb0xvYxILCgNsYXQYAiABKAISCwoDbG5nGAMgASgCIh8KDFN0YW5kYXJkUG9zdBIPCgdjb250ZW50GAEgASgJIl4KC0FydGljbGVQb3N0Eg0KBXRpdGxlGAEgASgJEhQKDHByZXZpZXdfdGV4dBgCIAEoCRIZChFwcmV2aWV3X2ltYWdlX3VyaRgDIAEoCRIPCgdjb250ZW50GAQgASgJIhcKCExpbmtQb3N0EgsKA3VyaRgBIAEoCSJCCglJbWFnZVBvc3QSDQoFdGl0bGUYASABKAkSEwoLZGVzY3JpcHRpb24YAiABKAkSEQoJaW1hZ2VfdXJpGAMgASgJIlUKCUF1ZGlvUG9zdBINCgV0aXRsZRgBIAEoCRITCgtkZXNjcmlwdGlvbhgCIAEoCRIRCglhdWRpb191cmkYAyABKAkSEQoJaW1hZ2VfdXJpGAQgASgJIl8KCVZpZGVvUG9zdBINCgV0aXRsZRgBIAEoCRITCgtkZXNjcmlwdGlvbhgCIAEoCRIRCgl2aWRlb191cmkYAyABKAkSGwoTdGh1bWJuYWlsX2ltYWdlX3VyaRgEIAEoCSI7CghSZWFjdGlvbhIQCghwb3N0X3VyaRgBIAEoCRIMCgRpY29uGAIgASgJEg8KB3VzZXJfaWQYAyABKAkiOwoDVGlwEhUKDXBvc3RfbG9jYWxfaWQYASABKAkSDQoFZGVub20YAyABKAkSDgoGYW1vdW50GAQgASgDIrIDCgRQb3N0EhUKDWxvY2FsX3Bvc3RfaWQYASABKAQSDgoGYXV0aG9yGAIgASgJEhIKCnBhcmVudF91cmkYAyABKAkSIQoDbG9jGAQgASgLMhQuZmVlZHMudjEuUG9zdEdlb0xvYxISCgpjcmVhdGVkX2F0GAUgASgDEhIKCnVwZGF0ZWRfYXQYBiABKAMSEgoKZGVsZXRlZF9hdBgHIAEoAxIMCgR0YWdzGAggAygJEg4KBnBpbm5lZBgJIAEoCBIqCghzdGFuZGFyZBgKIAEoCzIWLmZlZWRzLnYxLlN0YW5kYXJkUG9zdEgAEigKB2FydGljbGUYCyABKAsyFS5mZWVkcy52MS5BcnRpY2xlUG9zdEgAEiIKBGxpbmsYDCABKAsyEi5mZWVkcy52MS5MaW5rUG9zdEgAEiQKBWltYWdlGA0gASgLMhMuZmVlZHMudjEuSW1hZ2VQb3N0SAASJAoFdmlkZW8YDiABKAsyEy5mZWVkcy52MS5WaWRlb1Bvc3RIABIkCgVhdWRpbxgPIAEoCzITLmZlZWRzLnYxLkF1ZGlvUG9zdEgAQgYKBHBvc3QiawoIUG9zdFZpZXcSHAoEcG9zdBgBIAEoCzIOLmZlZWRzLnYxLlBvc3QSFgoOY2hpbGRyZW5fY291bnQYAiABKAQSKQoJcmVhY3Rpb25zGAMgAygLMhYuZmVlZHMudjEuUmVhY3Rpb25WaWV3IkMKDFJlYWN0aW9uVmlldxIMCgRpY29uGAEgASgJEg0KBWNvdW50GAIgASgNEhYKDnVzZXJfaGFzX3ZvdGVkGAMgASgIQjlaN2dpdGh1Yi5jb20vc2Ftb3VyYWl3b3JsZC96ZW5hby9iYWNrZW5kL2ZlZWRzL3YxO2ZlZWRzdjFiBnByb3RvMw",
-  );
+export const file_feeds_v1_feeds: GenFile = /*@__PURE__*/
+  fileDesc("ChRmZWVkcy92MS9mZWVkcy5wcm90bxIIZmVlZHMudjEiJgoKUG9zdEdlb0xvYxILCgNsYXQYAiABKAISCwoDbG5nGAMgASgCIh8KDFN0YW5kYXJkUG9zdBIPCgdjb250ZW50GAEgASgJIl4KC0FydGljbGVQb3N0Eg0KBXRpdGxlGAEgASgJEhQKDHByZXZpZXdfdGV4dBgCIAEoCRIZChFwcmV2aWV3X2ltYWdlX3VyaRgDIAEoCRIPCgdjb250ZW50GAQgASgJIhcKCExpbmtQb3N0EgsKA3VyaRgBIAEoCSJCCglJbWFnZVBvc3QSDQoFdGl0bGUYASABKAkSEwoLZGVzY3JpcHRpb24YAiABKAkSEQoJaW1hZ2VfdXJpGAMgASgJIlUKCUF1ZGlvUG9zdBINCgV0aXRsZRgBIAEoCRITCgtkZXNjcmlwdGlvbhgCIAEoCRIRCglhdWRpb191cmkYAyABKAkSEQoJaW1hZ2VfdXJpGAQgASgJIl8KCVZpZGVvUG9zdBINCgV0aXRsZRgBIAEoCRITCgtkZXNjcmlwdGlvbhgCIAEoCRIRCgl2aWRlb191cmkYAyABKAkSGwoTdGh1bWJuYWlsX2ltYWdlX3VyaRgEIAEoCSI7CghSZWFjdGlvbhIQCghwb3N0X3VyaRgBIAEoCRIMCgRpY29uGAIgASgJEg8KB3VzZXJfaWQYAyABKAkiOwoDVGlwEhUKDXBvc3RfbG9jYWxfaWQYASABKAkSDQoFZGVub20YAyABKAkSDgoGYW1vdW50GAQgASgDIrIDCgRQb3N0EhUKDWxvY2FsX3Bvc3RfaWQYASABKAQSDgoGYXV0aG9yGAIgASgJEhIKCnBhcmVudF91cmkYAyABKAkSIQoDbG9jGAQgASgLMhQuZmVlZHMudjEuUG9zdEdlb0xvYxISCgpjcmVhdGVkX2F0GAUgASgDEhIKCnVwZGF0ZWRfYXQYBiABKAMSEgoKZGVsZXRlZF9hdBgHIAEoAxIMCgR0YWdzGAggAygJEg4KBnBpbm5lZBgJIAEoCBIqCghzdGFuZGFyZBgKIAEoCzIWLmZlZWRzLnYxLlN0YW5kYXJkUG9zdEgAEigKB2FydGljbGUYCyABKAsyFS5mZWVkcy52MS5BcnRpY2xlUG9zdEgAEiIKBGxpbmsYDCABKAsyEi5mZWVkcy52MS5MaW5rUG9zdEgAEiQKBWltYWdlGA0gASgLMhMuZmVlZHMudjEuSW1hZ2VQb3N0SAASJAoFdmlkZW8YDiABKAsyEy5mZWVkcy52MS5WaWRlb1Bvc3RIABIkCgVhdWRpbxgPIAEoCzITLmZlZWRzLnYxLkF1ZGlvUG9zdEgAQgYKBHBvc3QiawoIUG9zdFZpZXcSHAoEcG9zdBgBIAEoCzIOLmZlZWRzLnYxLlBvc3QSFgoOY2hpbGRyZW5fY291bnQYAiABKAQSKQoJcmVhY3Rpb25zGAMgAygLMhYuZmVlZHMudjEuUmVhY3Rpb25WaWV3IkMKDFJlYWN0aW9uVmlldxIMCgRpY29uGAEgASgJEg0KBWNvdW50GAIgASgNEhYKDnVzZXJfaGFzX3ZvdGVkGAMgASgIQjlaN2dpdGh1Yi5jb20vc2Ftb3VyYWl3b3JsZC96ZW5hby9iYWNrZW5kL2ZlZWRzL3YxO2ZlZWRzdjFiBnByb3RvMw");
 
 /**
  * @generated from message feeds.v1.PostGeoLoc
@@ -49,10 +46,8 @@ export type PostGeoLocJson = {
  * Describes the message feeds.v1.PostGeoLoc.
  * Use `create(PostGeoLocSchema)` to create a new message.
  */
-export const PostGeoLocSchema: GenMessage<
-  PostGeoLoc,
-  { jsonType: PostGeoLocJson }
-> = /*@__PURE__*/ messageDesc(file_feeds_v1_feeds, 0);
+export const PostGeoLocSchema: GenMessage<PostGeoLoc, {jsonType: PostGeoLocJson}> = /*@__PURE__*/
+  messageDesc(file_feeds_v1_feeds, 0);
 
 /**
  * @generated from message feeds.v1.StandardPost
@@ -78,10 +73,8 @@ export type StandardPostJson = {
  * Describes the message feeds.v1.StandardPost.
  * Use `create(StandardPostSchema)` to create a new message.
  */
-export const StandardPostSchema: GenMessage<
-  StandardPost,
-  { jsonType: StandardPostJson }
-> = /*@__PURE__*/ messageDesc(file_feeds_v1_feeds, 1);
+export const StandardPostSchema: GenMessage<StandardPost, {jsonType: StandardPostJson}> = /*@__PURE__*/
+  messageDesc(file_feeds_v1_feeds, 1);
 
 /**
  * @generated from message feeds.v1.ArticlePost
@@ -137,10 +130,8 @@ export type ArticlePostJson = {
  * Describes the message feeds.v1.ArticlePost.
  * Use `create(ArticlePostSchema)` to create a new message.
  */
-export const ArticlePostSchema: GenMessage<
-  ArticlePost,
-  { jsonType: ArticlePostJson }
-> = /*@__PURE__*/ messageDesc(file_feeds_v1_feeds, 2);
+export const ArticlePostSchema: GenMessage<ArticlePost, {jsonType: ArticlePostJson}> = /*@__PURE__*/
+  messageDesc(file_feeds_v1_feeds, 2);
 
 /**
  * @generated from message feeds.v1.LinkPost
@@ -166,8 +157,7 @@ export type LinkPostJson = {
  * Describes the message feeds.v1.LinkPost.
  * Use `create(LinkPostSchema)` to create a new message.
  */
-export const LinkPostSchema: GenMessage<LinkPost, { jsonType: LinkPostJson }> =
-  /*@__PURE__*/
+export const LinkPostSchema: GenMessage<LinkPost, {jsonType: LinkPostJson}> = /*@__PURE__*/
   messageDesc(file_feeds_v1_feeds, 3);
 
 /**
@@ -214,10 +204,8 @@ export type ImagePostJson = {
  * Describes the message feeds.v1.ImagePost.
  * Use `create(ImagePostSchema)` to create a new message.
  */
-export const ImagePostSchema: GenMessage<
-  ImagePost,
-  { jsonType: ImagePostJson }
-> = /*@__PURE__*/ messageDesc(file_feeds_v1_feeds, 4);
+export const ImagePostSchema: GenMessage<ImagePost, {jsonType: ImagePostJson}> = /*@__PURE__*/
+  messageDesc(file_feeds_v1_feeds, 4);
 
 /**
  * @generated from message feeds.v1.AudioPost
@@ -273,10 +261,8 @@ export type AudioPostJson = {
  * Describes the message feeds.v1.AudioPost.
  * Use `create(AudioPostSchema)` to create a new message.
  */
-export const AudioPostSchema: GenMessage<
-  AudioPost,
-  { jsonType: AudioPostJson }
-> = /*@__PURE__*/ messageDesc(file_feeds_v1_feeds, 5);
+export const AudioPostSchema: GenMessage<AudioPost, {jsonType: AudioPostJson}> = /*@__PURE__*/
+  messageDesc(file_feeds_v1_feeds, 5);
 
 /**
  * @generated from message feeds.v1.VideoPost
@@ -332,10 +318,8 @@ export type VideoPostJson = {
  * Describes the message feeds.v1.VideoPost.
  * Use `create(VideoPostSchema)` to create a new message.
  */
-export const VideoPostSchema: GenMessage<
-  VideoPost,
-  { jsonType: VideoPostJson }
-> = /*@__PURE__*/ messageDesc(file_feeds_v1_feeds, 6);
+export const VideoPostSchema: GenMessage<VideoPost, {jsonType: VideoPostJson}> = /*@__PURE__*/
+  messageDesc(file_feeds_v1_feeds, 6);
 
 /**
  * XXX: not used yet in contracts
@@ -385,8 +369,7 @@ export type ReactionJson = {
  * Describes the message feeds.v1.Reaction.
  * Use `create(ReactionSchema)` to create a new message.
  */
-export const ReactionSchema: GenMessage<Reaction, { jsonType: ReactionJson }> =
-  /*@__PURE__*/
+export const ReactionSchema: GenMessage<Reaction, {jsonType: ReactionJson}> = /*@__PURE__*/
   messageDesc(file_feeds_v1_feeds, 7);
 
 /**
@@ -441,8 +424,7 @@ export type TipJson = {
  * Describes the message feeds.v1.Tip.
  * Use `create(TipSchema)` to create a new message.
  */
-export const TipSchema: GenMessage<Tip, { jsonType: TipJson }> =
-  /*@__PURE__*/
+export const TipSchema: GenMessage<Tip, {jsonType: TipJson}> = /*@__PURE__*/
   messageDesc(file_feeds_v1_feeds, 8);
 
 /**
@@ -501,50 +483,43 @@ export type Post = Message<"feeds.v1.Post"> & {
   /**
    * @generated from oneof feeds.v1.Post.post
    */
-  post:
-    | {
-        /**
-         * @generated from field: feeds.v1.StandardPost standard = 10;
-         */
-        value: StandardPost;
-        case: "standard";
-      }
-    | {
-        /**
-         * @generated from field: feeds.v1.ArticlePost article = 11;
-         */
-        value: ArticlePost;
-        case: "article";
-      }
-    | {
-        /**
-         * @generated from field: feeds.v1.LinkPost link = 12;
-         */
-        value: LinkPost;
-        case: "link";
-      }
-    | {
-        /**
-         * @generated from field: feeds.v1.ImagePost image = 13;
-         */
-        value: ImagePost;
-        case: "image";
-      }
-    | {
-        /**
-         * @generated from field: feeds.v1.VideoPost video = 14;
-         */
-        value: VideoPost;
-        case: "video";
-      }
-    | {
-        /**
-         * @generated from field: feeds.v1.AudioPost audio = 15;
-         */
-        value: AudioPost;
-        case: "audio";
-      }
-    | { case: undefined; value?: undefined };
+  post: {
+    /**
+     * @generated from field: feeds.v1.StandardPost standard = 10;
+     */
+    value: StandardPost;
+    case: "standard";
+  } | {
+    /**
+     * @generated from field: feeds.v1.ArticlePost article = 11;
+     */
+    value: ArticlePost;
+    case: "article";
+  } | {
+    /**
+     * @generated from field: feeds.v1.LinkPost link = 12;
+     */
+    value: LinkPost;
+    case: "link";
+  } | {
+    /**
+     * @generated from field: feeds.v1.ImagePost image = 13;
+     */
+    value: ImagePost;
+    case: "image";
+  } | {
+    /**
+     * @generated from field: feeds.v1.VideoPost video = 14;
+     */
+    value: VideoPost;
+    case: "video";
+  } | {
+    /**
+     * @generated from field: feeds.v1.AudioPost audio = 15;
+     */
+    value: AudioPost;
+    case: "audio";
+  } | { case: undefined; value?: undefined };
 };
 
 /**
@@ -635,8 +610,7 @@ export type PostJson = {
  * Describes the message feeds.v1.Post.
  * Use `create(PostSchema)` to create a new message.
  */
-export const PostSchema: GenMessage<Post, { jsonType: PostJson }> =
-  /*@__PURE__*/
+export const PostSchema: GenMessage<Post, {jsonType: PostJson}> = /*@__PURE__*/
   messageDesc(file_feeds_v1_feeds, 9);
 
 /**
@@ -683,8 +657,7 @@ export type PostViewJson = {
  * Describes the message feeds.v1.PostView.
  * Use `create(PostViewSchema)` to create a new message.
  */
-export const PostViewSchema: GenMessage<PostView, { jsonType: PostViewJson }> =
-  /*@__PURE__*/
+export const PostViewSchema: GenMessage<PostView, {jsonType: PostViewJson}> = /*@__PURE__*/
   messageDesc(file_feeds_v1_feeds, 10);
 
 /**
@@ -731,7 +704,6 @@ export type ReactionViewJson = {
  * Describes the message feeds.v1.ReactionView.
  * Use `create(ReactionViewSchema)` to create a new message.
  */
-export const ReactionViewSchema: GenMessage<
-  ReactionView,
-  { jsonType: ReactionViewJson }
-> = /*@__PURE__*/ messageDesc(file_feeds_v1_feeds, 11);
+export const ReactionViewSchema: GenMessage<ReactionView, {jsonType: ReactionViewJson}> = /*@__PURE__*/
+  messageDesc(file_feeds_v1_feeds, 11);
+

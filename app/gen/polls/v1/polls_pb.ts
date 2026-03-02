@@ -2,22 +2,15 @@
 // @generated from file polls/v1/polls.proto (package polls.v1, syntax proto3)
 /* eslint-disable */
 
-import type {
-  GenEnum,
-  GenFile,
-  GenMessage,
-} from "@bufbuild/protobuf/codegenv2";
+import type { GenEnum, GenFile, GenMessage } from "@bufbuild/protobuf/codegenv2";
 import { enumDesc, fileDesc, messageDesc } from "@bufbuild/protobuf/codegenv2";
 import type { Message } from "@bufbuild/protobuf";
 
 /**
  * Describes the file polls/v1/polls.proto.
  */
-export const file_polls_v1_polls: GenFile =
-  /*@__PURE__*/
-  fileDesc(
-    "ChRwb2xscy92MS9wb2xscy5wcm90bxIIcG9sbHMudjEiQwoKUG9sbFJlc3VsdBIOCgZvcHRpb24YASABKAkSDQoFY291bnQYAiABKA0SFgoOaGFzX3VzZXJfdm90ZWQYAyABKAgimwEKBFBvbGwSEAoIcXVlc3Rpb24YASABKAkSJQoHcmVzdWx0cxgCIAMoCzIULnBvbGxzLnYxLlBvbGxSZXN1bHQSIAoEa2luZBgDIAEoDjISLnBvbGxzLnYxLlBvbGxLaW5kEhAKCGR1cmF0aW9uGAQgASgDEhIKCmNyZWF0ZWRfYXQYBSABKAMSEgoKY3JlYXRlZF9ieRgGIAEoCSphCghQb2xsS2luZBIZChVQT0xMX0tJTkRfVU5TUEVDSUZJRUQQABIbChdQT0xMX0tJTkRfU0lOR0xFX0NIT0lDRRABEh0KGVBPTExfS0lORF9NVUxUSVBMRV9DSE9JQ0UQAkI5WjdnaXRodWIuY29tL3NhbW91cmFpd29ybGQvemVuYW8vYmFja2VuZC9wb2xscy92MTtwb2xsc3YxYgZwcm90bzM",
-  );
+export const file_polls_v1_polls: GenFile = /*@__PURE__*/
+  fileDesc("ChRwb2xscy92MS9wb2xscy5wcm90bxIIcG9sbHMudjEiQwoKUG9sbFJlc3VsdBIOCgZvcHRpb24YASABKAkSDQoFY291bnQYAiABKA0SFgoOaGFzX3VzZXJfdm90ZWQYAyABKAgimwEKBFBvbGwSEAoIcXVlc3Rpb24YASABKAkSJQoHcmVzdWx0cxgCIAMoCzIULnBvbGxzLnYxLlBvbGxSZXN1bHQSIAoEa2luZBgDIAEoDjISLnBvbGxzLnYxLlBvbGxLaW5kEhAKCGR1cmF0aW9uGAQgASgDEhIKCmNyZWF0ZWRfYXQYBSABKAMSEgoKY3JlYXRlZF9ieRgGIAEoCSphCghQb2xsS2luZBIZChVQT0xMX0tJTkRfVU5TUEVDSUZJRUQQABIbChdQT0xMX0tJTkRfU0lOR0xFX0NIT0lDRRABEh0KGVBPTExfS0lORF9NVUxUSVBMRV9DSE9JQ0UQAkI5WjdnaXRodWIuY29tL3NhbW91cmFpd29ybGQvemVuYW8vYmFja2VuZC9wb2xscy92MTtwb2xsc3YxYgZwcm90bzM");
 
 /**
  * @generated from message polls.v1.PollResult
@@ -63,10 +56,8 @@ export type PollResultJson = {
  * Describes the message polls.v1.PollResult.
  * Use `create(PollResultSchema)` to create a new message.
  */
-export const PollResultSchema: GenMessage<
-  PollResult,
-  { jsonType: PollResultJson }
-> = /*@__PURE__*/ messageDesc(file_polls_v1_polls, 0);
+export const PollResultSchema: GenMessage<PollResult, {jsonType: PollResultJson}> = /*@__PURE__*/
+  messageDesc(file_polls_v1_polls, 0);
 
 /**
  * @generated from message polls.v1.Poll
@@ -142,8 +133,7 @@ export type PollJson = {
  * Describes the message polls.v1.Poll.
  * Use `create(PollSchema)` to create a new message.
  */
-export const PollSchema: GenMessage<Poll, { jsonType: PollJson }> =
-  /*@__PURE__*/
+export const PollSchema: GenMessage<Poll, {jsonType: PollJson}> = /*@__PURE__*/
   messageDesc(file_polls_v1_polls, 1);
 
 /**
@@ -169,14 +159,11 @@ export enum PollKind {
 /**
  * @generated from enum polls.v1.PollKind
  */
-export type PollKindJson =
-  | "POLL_KIND_UNSPECIFIED"
-  | "POLL_KIND_SINGLE_CHOICE"
-  | "POLL_KIND_MULTIPLE_CHOICE";
+export type PollKindJson = "POLL_KIND_UNSPECIFIED" | "POLL_KIND_SINGLE_CHOICE" | "POLL_KIND_MULTIPLE_CHOICE";
 
 /**
  * Describes the enum polls.v1.PollKind.
  */
-export const PollKindSchema: GenEnum<PollKind, PollKindJson> =
-  /*@__PURE__*/
+export const PollKindSchema: GenEnum<PollKind, PollKindJson> = /*@__PURE__*/
   enumDesc(file_polls_v1_polls, 0);
+

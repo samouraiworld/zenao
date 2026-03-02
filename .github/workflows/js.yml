@@ -29,7 +29,7 @@ jobs:
         run: npm run lint
 
       - name: Format check
-        run: npx prettier --check "**/*.{ts,tsx,js,jsx,json,css,md}" --ignore-path .gitignore --ignore-unknown
+        run: npx prettier --check "**/*.{ts,tsx,js,jsx,json,css,md}" --ignore-path .prettierignore --ignore-unknown
 
       - name: Build
         run: npm run build
