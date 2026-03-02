@@ -10,17 +10,17 @@ We use a **GitFlow-lite** branching model:
 feature/* ──→ develop ──→ main (production)
 ```
 
-| Branch | Purpose | Who merges |
-|--------|---------|------------|
-| `main` | Production-ready code. **Never push directly.** | Maintainers only, after full audit |
-| `develop` | Integration branch. All features merge here first. | Any contributor via PR |
-| `feature/*` | Individual feature or fix branches | Created by contributors |
-| `fix/*` | Bug fix branches | Created by contributors |
+| Branch      | Purpose                                            | Who merges                         |
+| ----------- | -------------------------------------------------- | ---------------------------------- |
+| `main`      | Production-ready code. **Never push directly.**    | Maintainers only, after full audit |
+| `develop`   | Integration branch. All features merge here first. | Any contributor via PR             |
+| `feature/*` | Individual feature or fix branches                 | Created by contributors            |
+| `fix/*`     | Bug fix branches                                   | Created by contributors            |
 
 ### Rules
 
 1. **Never push directly to `main`** — All changes go through PRs
-2. **Never push directly to `develop`** — All changes go through PRs  
+2. **Never push directly to `develop`** — All changes go through PRs
 3. **All PRs require CI to pass** — Every workflow must be green
 4. **All PRs require 1 review** — No self-merging
 5. **Use conventional commit messages** — e.g., `feat:`, `fix:`, `docs:`, `ci:`, `chore:`
@@ -52,6 +52,7 @@ make pre-push
 ```
 
 This runs:
+
 1. TypeScript type check (`tsc --noEmit`)
 2. ESLint + Prettier lint
 3. Next.js build (catches SSR errors)
@@ -60,6 +61,7 @@ This runs:
 6. Schema validation
 
 > **Tip:** Enable the git hook to run this automatically:
+>
 > ```bash
 > git config core.hooksPath .githooks
 > ```
@@ -87,23 +89,23 @@ When `develop` is stable and fully tested:
 
 Every PR triggers these automated checks:
 
-| Check | File | What it catches |
-|-------|------|-----------------|
-| TypeScript type check | `js.yml` | Type errors |
-| ESLint + Prettier | `js.yml` | Lint + formatting |
-| Next.js build | `js.yml` | SSR crashes, import errors |
-| Go tests (race) | `go.yml` | Backend bugs, race conditions |
-| Migration validation | `go.yml` | Bad SQL migrations |
-| Go lint | `golangci-lint.yml` | Go code quality |
-| Go format | `go-fmt.yml` | Go formatting |
-| Schema check | `schema.yml` | Schema drift |
-| Protobuf codegen | `buf-gen.yml` | Stale generated code |
-| Protobuf lint | `buf-lint.yml` | Proto file quality |
-| Translations | `translations.yml` | Missing i18n keys |
-| PR title | `lint-pr-title.yml` | Conventional commits |
-| E2E tests | `e2e.yml` | Full-stack integration |
-| Security audit | `security.yml` | Dependency vulnerabilities |
-| Docker build | `docker.yml` | Dockerfile validity |
+| Check                 | File                | What it catches               |
+| --------------------- | ------------------- | ----------------------------- |
+| TypeScript type check | `js.yml`            | Type errors                   |
+| ESLint + Prettier     | `js.yml`            | Lint + formatting             |
+| Next.js build         | `js.yml`            | SSR crashes, import errors    |
+| Go tests (race)       | `go.yml`            | Backend bugs, race conditions |
+| Migration validation  | `go.yml`            | Bad SQL migrations            |
+| Go lint               | `golangci-lint.yml` | Go code quality               |
+| Go format             | `go-fmt.yml`        | Go formatting                 |
+| Schema check          | `schema.yml`        | Schema drift                  |
+| Protobuf codegen      | `buf-gen.yml`       | Stale generated code          |
+| Protobuf lint         | `buf-lint.yml`      | Proto file quality            |
+| Translations          | `translations.yml`  | Missing i18n keys             |
+| PR title              | `lint-pr-title.yml` | Conventional commits          |
+| E2E tests             | `e2e.yml`           | Full-stack integration        |
+| Security audit        | `security.yml`      | Dependency vulnerabilities    |
+| Docker build          | `docker.yml`        | Dockerfile validity           |
 
 ## Documentation
 
