@@ -70,7 +70,7 @@ This runs:
 
 - Target branch: `develop`
 - Use a [conventional commit](https://www.conventionalcommits.org/) title
-- Wait for all CI checks to pass (18 workflows)
+- Wait for all CI checks to pass (16 workflows)
 - Request a review from a maintainer
 
 ### 5. Merge to `main` (Maintainers Only)
