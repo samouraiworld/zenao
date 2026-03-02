@@ -1,0 +1,25 @@
+#!/bin/sh
+#
+# Pre-push hook for Zenao
+# Runs all local checks before allowing a push to remote.
+#
+# To enable: git config core.hooksPath .githooks
+# To bypass (emergencies only): git push --no-verify
+#
+
+echo "🔍 Running pre-push checks..."
+echo ""
+
+# Run the full pre-push check suite
+make pre-push
+
+if [ $? -ne 0 ]; then
+  echo ""
+  echo "❌ Pre-push checks FAILED. Push aborted."
+  echo "   Fix the issues above and try again."
+  echo "   To bypass (emergencies only): git push --no-verify"
+  exit 1
+fi
+
+echo ""
+echo "✅ All checks passed. Pushing..."

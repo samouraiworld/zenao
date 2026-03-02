@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 
-ARG GO_VERSION="1.25"
+ARG GO_VERSION="1.25.7"
 ARG RUNNER_IMAGE="debian:bookworm"
 
 # --------------------------------------------------------
@@ -10,10 +10,10 @@ ARG RUNNER_IMAGE="debian:bookworm"
 FROM golang:${GO_VERSION}-bookworm AS builder
 
 RUN apt-get update \
- && DEBIAN_FRONTEND=noninteractive \
-    apt-get install --no-install-recommends --assume-yes \
-      build-essential \
-      libsqlite3-dev
+  && DEBIAN_FRONTEND=noninteractive \
+  apt-get install --no-install-recommends --assume-yes \
+  build-essential \
+  libsqlite3-dev
 
 # Download go dependencies
 WORKDIR /app
@@ -41,10 +41,10 @@ RUN --mount=type=cache,target=/root/.cache/go-build \
 FROM ${RUNNER_IMAGE}
 
 RUN apt-get update \
- && DEBIAN_FRONTEND=noninteractive \
-    apt-get install --no-install-recommends --assume-yes \
-      libsqlite3-dev \
-      ca-certificates
+  && DEBIAN_FRONTEND=noninteractive \
+  apt-get install --no-install-recommends --assume-yes \
+  libsqlite3-dev \
+  ca-certificates
 
 COPY --from=builder /app/build/zenao-backend /bin/zenao-backend
 

@@ -101,3 +101,19 @@ jobs:
             docker compose -f staging.docker-compose.yml up -d --wait otel-collector jaeger
             git restore staging.docker-compose.yml
             docker compose -f staging.docker-compose.yml up -d --build backend
+
+      - name: Post-deploy smoke test
+        run: |
+          echo "⏳ Waiting 60s for services to stabilize..."
+          sleep 60
+          for i in 1 2 3 4 5; do
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 15 https://staging.zenao.io/)
+            if [ "$STATUS" = "200" ]; then
+              echo "✅ Smoke test passed (HTTP $STATUS)"
+              exit 0
+            fi
+            echo "⏳ Attempt $i/5: HTTP $STATUS — retrying in 30s..."
+            sleep 30
+          done
+          echo "❌ Smoke test FAILED after 5 attempts"
+          exit 1

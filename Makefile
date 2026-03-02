@@ -115,3 +115,28 @@ update-schema:
 .PHONY: migrate-local
 migrate-local:
 	atlas migrate apply --dir "file://migrations" --env dev
+
+.PHONY: pre-push
+pre-push: check-node
+	@echo "🔍 Running pre-push checks..."
+	@echo ""
+	@echo "Step 1/6: TypeScript type check..."
+	npx tsc --noEmit
+	@echo ""
+	@echo "Step 2/6: Lint (ESLint + Prettier)..."
+	npm run lint
+	@echo ""
+	@echo "Step 3/6: Next.js build..."
+	npm run build
+	@echo ""
+	@echo "Step 4/6: Go tests (with race detection)..."
+	go test -race -p 1 ./backend/...
+	@echo ""
+	@echo "Step 5/6: Go lint..."
+	go run -modfile go.mod github.com/golangci/golangci-lint/cmd/golangci-lint run ./... --timeout=5m
+	@echo ""
+	@echo "Step 6/6: Schema check..."
+	$(MAKE) update-schema
+	git diff --exit-code schema.hcl
+	@echo ""
+	@echo "✅ All pre-push checks passed! Safe to push."

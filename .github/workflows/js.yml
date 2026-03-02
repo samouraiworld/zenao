@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - develop
   pull_request:
   merge_group:
 
@@ -21,8 +22,23 @@ jobs:
       - name: Install node modules
         run: npm ci
 
+      - name: Type check
+        run: npx tsc --noEmit
+
       - name: Lint
         run: npm run lint
+
+      - name: Format check
+        run: npx prettier --check "**/*.{ts,tsx,js,jsx,json,css,md}" --ignore-path .prettierignore --ignore-unknown
+
+      - name: Build
+        run: npm run build
+        env:
+          NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: "pk_test_placeholder"
+          NEXT_PUBLIC_ZENAO_BACKEND_ENDPOINT: "http://localhost:4242"
+          NEXT_PUBLIC_ZENAO_NAMESPACE: "zenao"
+          NEXT_PUBLIC_GATEWAY_URL: "placeholder.mypinata.cloud"
+          NEXT_PUBLIC_STRIPE_DASHBOARD_URL: "https://dashboard.stripe.com/test"
 
       - name: Check that there is no diff
         run: git diff --exit-code
