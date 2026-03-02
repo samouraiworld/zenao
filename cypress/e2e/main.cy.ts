@@ -217,7 +217,7 @@ describe("main", () => {
 
   it("send event feed standard post", () => {
     // start from the event we just created
-    cy.visit("/event/11");
+    cy.visit("/");
 
     // Explore an event
     cy.get("a").contains("Discover").click();
@@ -253,7 +253,7 @@ describe("main", () => {
 
   it("send event feed poll post", () => {
     // start from the event we just created
-    cy.visit("/event/11");
+    cy.visit("/");
 
     // Explore an event
     cy.get("a").contains("Discover").click();
@@ -320,7 +320,7 @@ describe("main", () => {
 
   it("send a comment on an event post", () => {
     // start from the event we just created
-    cy.visit("/event/11");
+    cy.visit("/");
 
     // Explore an event
     cy.get("a").contains("Discover").click();
