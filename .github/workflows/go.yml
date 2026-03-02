@@ -24,7 +24,7 @@ jobs:
         run: go mod tidy
 
       - name: Test (with race detection)
-        run: go test -race ./backend/...
+        run: go test -race -p 1 ./backend/...
 
       - name: Build
         run: go build -o zenao-backend ./backend

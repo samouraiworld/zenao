@@ -130,7 +130,7 @@ pre-push: check-node
 	npm run build
 	@echo ""
 	@echo "Step 4/6: Go tests (with race detection)..."
-	go test -race -count=1 ./backend/...
+	go test -race -p 1 ./backend/...
 	@echo ""
 	@echo "Step 5/6: Go lint..."
 	go run -modfile go.mod github.com/golangci/golangci-lint/cmd/golangci-lint run ./... --timeout=5m
