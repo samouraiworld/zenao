@@ -74,7 +74,7 @@ On Feb 28, 2026, a production outage affected zenao.io for several hours:
 - **Dashboard hydration** (#1014): Replaced `Math.random()` in `useMemo()` with deterministic width
 - **Sentry Apdex**: Numeric ID validation prevents `strconv.ParseUint` errors from bot traffic
 - **Atlas upgrade**: v0.31.0 → v1.1.0 (fixes `unsupported dialect "libsql"`)
-- **Dockerfile**: Go 1.24 → 1.25 to match `go.mod`
+- **Dockerfile**: Go 1.24 → 1.25.7 to match `go.mod`
 - **Schema CI**: Deterministic FK ordering via `normalize-schema.sh`
 
 ### Repository Maintenance

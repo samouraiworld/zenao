@@ -52,14 +52,17 @@ jobs:
 
     - run: go install ./backend
 
+    - name: Setup E2E environment
+      run: |
+        cp .env.example .env.local
+        sed -i "s|sk_test_YOUR_KEY_HERE|${{ secrets.TEST_CLERK_SECRET_KEY }}|" .env.local
+
     - uses: cypress-io/github-action@v6
       with:
         browser: chrome
-        build: cp .env.example .env.local
         start: backend e2e-infra --ci
         wait-on: 'npx wait-on --timeout 250000 http://localhost:3000'
       env:
-        # Or as an environment variable
         PINATA_JWT: ${{ secrets.TEST_PINATA_JWT }}
         CLERK_SECRET_KEY: ${{ secrets.TEST_CLERK_SECRET_KEY }}
         ZENAO_CLERK_SECRET_KEY: ${{ secrets.TEST_CLERK_SECRET_KEY }}

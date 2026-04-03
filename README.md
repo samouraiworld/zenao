@@ -41,7 +41,7 @@ An event management and community platform featuring event creation, community m
 ## Prerequisites
 
 - **Node.js 20.13.1+** ([download](https://nodejs.org/))
-- **Go 1.25+** ([download](https://go.dev/doc/install))
+- **Go 1.25.7+** ([download](https://go.dev/doc/install))
 
 > **⚠️ Important:** This project uses **Node.js 20.13.1** (see `.nvmrc`), which is not the latest version. Using a different Node version may cause package-lock.json conflicts and CI failures. We strongly recommend using a Node version manager like [nvm](https://github.com/nvm-sh/nvm) or [fnm](https://github.com/Schniz/fnm) to switch to the correct version:
 >
@@ -174,7 +174,7 @@ PINATA_JWT="" # Required for uploading images (e.g., to create events)
 
 # Observability (optional)
 OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318
-SEOBOT_API_KEY=a8c58738-7b98-4597-b20a-0bb1c2fe5772
+SEOBOT_API_KEY=your-seobot-api-key
 
 # Sentry (optional — error monitoring)
 NEXT_PUBLIC_SENTRY_DSN= # Your Sentry DSN (leave empty to disable)
