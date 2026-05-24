@@ -1,0 +1,51 @@
+name: Run IPFS Migration
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Target environment"
+        required: true
+        type: choice
+        options:
+          - staging
+          - prod
+      dry_run:
+        description: "Dry run (list CIDs without pinning)"
+        required: false
+        type: boolean
+        default: true
+
+jobs:
+  pin-ipfs-cids:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Golang with cache
+        uses: magnetikonline/action-golang-cache@v5
+        with:
+          go-version-file: go.mod
+          cache-key-suffix: ipfs-migration
+
+      - name: Set DB URL (staging)
+        if: inputs.environment == 'staging'
+        env:
+          TOKEN: ${{ secrets.STAGING_TURSO_TOKEN }}
+        run: echo "ZENAO_DB=libsql://zenao-staging-3-samourai-coop.turso.io?authToken=${TOKEN}" >> $GITHUB_ENV
+
+      - name: Set DB URL (prod)
+        if: inputs.environment == 'prod'
+        env:
+          TOKEN: ${{ secrets.PROD_TURSO_TOKEN }}
+        run: echo "ZENAO_DB=libsql://zenao-prod-samourai-coop.turso.io?authToken=${TOKEN}" >> $GITHUB_ENV
+
+      - name: Run pin-ipfs-cids (dry run)
+        if: inputs.dry_run == true
+        run: go run ./backend pin-ipfs-cids -dry-run
+
+      - name: Run pin-ipfs-cids
+        if: inputs.dry_run == false
+        env:
+          PINATA_JWT: ${{ secrets.PINATA_JWT }}
+        run: go run ./backend pin-ipfs-cids

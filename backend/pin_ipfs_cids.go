@@ -41,7 +41,7 @@ type pinIPFSCIDsConfig struct {
 }
 
 func (conf *pinIPFSCIDsConfig) RegisterFlags(flset *flag.FlagSet) {
-	flset.StringVar(&conf.dbPath, "db", "dev.db", "path to the SQLite database")
+	flset.StringVar(&conf.dbPath, "db", "dev.db", "path to the SQLite database or a libsql DSN (libsql://...?authToken=...)")
 	flset.StringVar(&conf.pinataJWT, "pinata-jwt", "", "Pinata API JWT token (or set PINATA_JWT env var)")
 	flset.BoolVar(&conf.dryRun, "dry-run", false, "list CIDs without actually pinning them")
 }
@@ -62,7 +62,15 @@ func pinIPFSCIDs() error {
 		return err
 	}
 
-	db, err := gorm.Open(sqlite.Open(pinIPFSCIDsConf.dbPath), &gorm.Config{})
+	var db *gorm.DB
+	if strings.HasPrefix(pinIPFSCIDsConf.dbPath, "libsql") {
+		db, err = gorm.Open(sqlite.New(sqlite.Config{
+			DriverName: "libsql",
+			DSN:        pinIPFSCIDsConf.dbPath,
+		}), &gorm.Config{})
+	} else {
+		db, err = gorm.Open(sqlite.Open(pinIPFSCIDsConf.dbPath), &gorm.Config{})
+	}
 	if err != nil {
 		return fmt.Errorf("open database: %w", err)
 	}
