@@ -74,6 +74,15 @@ const nextConfig: NextConfig = {
 
     return [
       {
+        source: "/_next/image",
+        headers: [
+          {
+            key: "Content-Disposition",
+            value: "inline",
+          },
+        ],
+      },
+      {
         source: "/(.*)",
         headers: [
           {
