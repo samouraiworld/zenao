@@ -19,7 +19,7 @@ type PaidPurchaseFormProps = {
   isPending: boolean;
   maxGuests: number;
   requireEmail: boolean;
-  totalMinor: bigint | null;
+  totalMinor: number | null;
 };
 
 export function PaidPurchaseForm({
