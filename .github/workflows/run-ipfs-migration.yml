@@ -40,12 +40,22 @@ jobs:
           TOKEN: ${{ secrets.PROD_TURSO_TOKEN }}
         run: echo "ZENAO_DB=libsql://zenao-prod-samourai-coop.turso.io?authToken=${TOKEN}" >> $GITHUB_ENV
 
+      - name: Set Pinata JWT (staging)
+        if: inputs.environment == 'staging'
+        env:
+          TOKEN: ${{ secrets.STAGING_PINATA_JWT }}
+        run: echo "PINATA_JWT=${TOKEN}" >> $GITHUB_ENV
+
+      - name: Set Pinata JWT (prod)
+        if: inputs.environment == 'prod'
+        env:
+          TOKEN: ${{ secrets.PROD_PINATA_JWT }}
+        run: echo "PINATA_JWT=${TOKEN}" >> $GITHUB_ENV
+
       - name: Run pin-ipfs-cids (dry run)
         if: inputs.dry_run == true
         run: go run ./backend pin-ipfs-cids -dry-run
 
       - name: Run pin-ipfs-cids
         if: inputs.dry_run == false
-        env:
-          PINATA_JWT: ${{ secrets.PINATA_JWT }}
         run: go run ./backend pin-ipfs-cids
