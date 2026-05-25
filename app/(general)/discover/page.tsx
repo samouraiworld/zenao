@@ -22,8 +22,15 @@ export default async function DiscoverPage() {
 
   const t = await getTranslations("discover");
 
+  let dehydratedState;
+  try {
+    dehydratedState = dehydrate(queryClient);
+  } catch {
+    dehydratedState = { queries: [], mutations: [] };
+  }
+
   return (
-    <HydrationBoundary state={dehydrate(queryClient)}>
+    <HydrationBoundary state={dehydratedState}>
       <ScreenContainer>
         <EventsListLayout
           from="upcoming"
