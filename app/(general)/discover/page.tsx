@@ -25,7 +25,8 @@ export default async function DiscoverPage() {
   let dehydratedState;
   try {
     dehydratedState = dehydrate(queryClient);
-  } catch {
+  } catch (err) {
+    console.error("Failed to dehydrate query client on /discover:", err);
     dehydratedState = { queries: [], mutations: [] };
   }
 

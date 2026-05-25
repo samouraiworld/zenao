@@ -9,6 +9,10 @@ import { DEFAULT_EVENTS_LIMIT, eventsList } from "@/lib/queries/events-list";
 
 export const revalidate = 60;
 
+export async function generateStaticParams() {
+  return [];
+}
+
 type PageProps = {
   params: Promise<{ from: string }>;
 };
@@ -38,7 +42,11 @@ export default async function DiscoverPage({ params }: PageProps) {
   let dehydratedState;
   try {
     dehydratedState = dehydrate(queryClient);
-  } catch {
+  } catch (err) {
+    console.error(
+      `Failed to dehydrate query client on /discover/${from}:`,
+      err,
+    );
     dehydratedState = { queries: [], mutations: [] };
   }
 
