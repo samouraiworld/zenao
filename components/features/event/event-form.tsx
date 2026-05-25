@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { UseFormReturn, useFieldArray } from "react-hook-form";
 import { useTranslations } from "next-intl";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -47,7 +48,6 @@ import {
   IMAGE_FILE_SIZE_LIMIT_MB,
 } from "@/components/features/event/constants";
 import { useCurrencyOptionsForCommunity } from "@/lib/pricing";
-import Link from "next/link";
 
 interface EventFormProps {
   form: UseFormReturn<EventFormSchemaType>;
