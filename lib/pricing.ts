@@ -99,22 +99,24 @@ export const formatPrice = (
 
 export const useCurrencyOptionsForCommunity = (communityId: string | null) => {
   const { getToken } = useAuth();
-  const { data: payoutStatus } = useQuery({
+  const { data: payoutStatus, isLoading } = useQuery({
     ...communityPayoutStatus(communityId ?? "", getToken),
     enabled: !!communityId,
   });
 
   const t = useTranslations("eventForm");
 
-  return useMemo(() => {
+  const options = useMemo(() => {
     const currencies =
       payoutStatus?.verificationState == VerificationState.verified
         ? payoutStatus?.currencies
         : [];
-    const options = currencies.map((currency) => ({
+    const mapped = currencies.map((currency) => ({
       value: currency.toUpperCase(),
       label: currency.toUpperCase(),
     }));
-    return [{ value: "", label: t("currency-free-option") }, ...options];
+    return [{ value: "", label: t("currency-free-option") }, ...mapped];
   }, [payoutStatus?.currencies, payoutStatus?.verificationState, t]);
+
+  return { options, isLoading: !!communityId && isLoading };
 };
