@@ -9,10 +9,6 @@ import { DEFAULT_EVENTS_LIMIT, eventsList } from "@/lib/queries/events-list";
 
 export const revalidate = 60;
 
-export async function generateStaticParams() {
-  return [];
-}
-
 type PageProps = {
   params: Promise<{ from: string }>;
 };
