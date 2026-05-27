@@ -2,23 +2,21 @@
 
 import React from "react";
 import Image, { ImageProps } from "next/image";
-import withWeb3ImgLoader from "@/lib/web3-img-loader";
+import { web2URL } from "@/lib/uris";
 import { cn } from "@/lib/tailwind";
 
 export const Web3Image = React.forwardRef<
   HTMLImageElement,
-  Omit<ImageProps, "loader"> & {
-    imgFit?: "scale-down" | "contain" | "cover" | "crop" | "pad";
-  }
->(({ alt, src, className, imgFit, ...props }, ref) => {
-  const isWeb3 = typeof src === "string" && src.startsWith("ipfs://");
+  Omit<ImageProps, "loader">
+>(({ alt, src, className, ...props }, ref) => {
+  const resolvedSrc =
+    typeof src === "string" && src.startsWith("ipfs://") ? web2URL(src) : src;
 
   return (
     <Image
       ref={ref}
-      src={src}
+      src={resolvedSrc}
       alt={alt}
-      loader={isWeb3 ? withWeb3ImgLoader({ imgFit }) : undefined}
       className={cn("bg-primary/10", className)}
       {...props}
     />
