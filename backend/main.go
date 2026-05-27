@@ -47,6 +47,7 @@ func main() {
 		newGenticketCmd(),
 		newGenPdfTicketCmd(),
 		newConvertEvtToComCmd(),
+		newPinIPFSCIDsCmd(),
 	)
 
 	cmd.Execute(context.Background(), os.Args[1:])
