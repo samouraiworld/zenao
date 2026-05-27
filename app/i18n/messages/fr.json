@@ -92,6 +92,8 @@
     "price-free": "Gratuit",
     "price-helper": "Laissez 0 pour un événement gratuit.",
     "price-community-required": "Sélectionnez une communauté pour définir un prix.",
+    "price-stripe-not-configured": "Cette communauté n'a pas encore configuré Stripe.",
+    "price-stripe-setup-link": "Configurer les paiements",
     "discoverable-label": "Rendre l'événement visible publiquement (Visible dans Découvrir)",
     "exclusive-label": "Exclusif",
     "pick-a-start-date-placeholder": "Choisir une date de début...",
