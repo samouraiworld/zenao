@@ -1,12 +1,9 @@
 import { useTranslations } from "next-intl";
 import { useMemo } from "react";
 import { formatPrice } from "@/lib/pricing";
-import { EventPriceGroup } from "@/app/gen/zenao/v1/zenao_pb";
 import { SafeEventPriceGroup } from "@/types/schemas";
 
-export const usePriceLabel = (
-  pricesGroups: (SafeEventPriceGroup | EventPriceGroup)[],
-) => {
+export const usePriceLabel = (pricesGroups: SafeEventPriceGroup[]) => {
   const t = useTranslations("event");
   return useMemo(() => {
     const priceGroups = pricesGroups ?? [];

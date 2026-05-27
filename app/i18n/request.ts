@@ -23,6 +23,11 @@ function parseAcceptLanguage(header: string): Locale | undefined {
   return undefined;
 }
 
+// Reading cookies()/headers() makes the locale request-dependent, so any route
+// rendering translated server content must be dynamic (no static generation/ISR):
+// this is why discover/[from] had to drop generateStaticParams. If this causes a
+// perf regression, the (likely) refactor is locale-prefixed routing (/en, /fr, /es)
+// + setRequestLocale, which restores static generation per locale.
 export default getRequestConfig(async () => {
   let locale: Locale = defaultLocale;
 

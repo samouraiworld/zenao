@@ -107,7 +107,13 @@ export default function DashboardEventEditionContextProvider({
     })),
     exclusive: eventInfo.privacy?.eventPrivacy.case === "guarded",
     password: "",
-    pricesGroups: eventInfo.pricesGroups ?? [],
+    pricesGroups: (eventInfo.pricesGroups ?? []).map((group) => ({
+      ...group,
+      prices: group.prices.map((price) => ({
+        ...price,
+        amountMinor: BigInt(price.amountMinor),
+      })),
+    })),
     communityId: communityId || null,
   };
 

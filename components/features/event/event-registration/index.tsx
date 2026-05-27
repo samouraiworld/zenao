@@ -52,7 +52,7 @@ const selectCheckoutPrice = (
   groups: SafeEventPriceGroup[],
 ): CheckoutPrice | null => {
   const prices = groups.flatMap((group) => group.prices);
-  const paidPrices = prices.filter((price) => price.amountMinor > BigInt(0));
+  const paidPrices = prices.filter((price) => price.amountMinor > 0);
   if (paidPrices.length === 0) {
     return null;
   }
@@ -108,7 +108,7 @@ export function EventRegistrationForm({
     (buyerIsCounted ? 1 : 0) + (guestsValue ? guestsValue.length : 0);
   const totalMinor =
     checkoutPrice && attendeeCount > 0
-      ? checkoutPrice.amountMinor * BigInt(attendeeCount)
+      ? checkoutPrice.amountMinor * attendeeCount
       : null;
 
   const onSubmit = async (data: EventRegistrationFormSchemaType) => {
