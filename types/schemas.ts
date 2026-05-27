@@ -444,7 +444,7 @@ export type SafeEventLocation = z.infer<typeof eventInfoLocationSchema>;
 
 export const eventPriceSchema = z
   .object({
-    amountMinor: z.bigint(),
+    amountMinor: z.coerce.number(),
     currencyCode: z.string(),
     paymentAccountId: z.string(),
     paymentAccountType: z.string().optional().default(""),
