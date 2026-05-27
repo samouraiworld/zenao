@@ -15,3 +15,10 @@
 
 // Import commands.js using ES2015 syntax:
 import "./commands";
+
+beforeEach(() => {
+  cy.intercept("POST", "/api/files", {
+    statusCode: 200,
+    body: { uri: "ipfs://test" },
+  });
+});
