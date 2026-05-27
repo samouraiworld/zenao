@@ -399,7 +399,7 @@ describe("main", () => {
     cy.url().should("contain", "/participants");
 
     // Open ticket scanner
-    cy.get("button").contains("QR Code Scanner").click();
+    cy.get("a[href$='/scanner'] button").click();
     cy.url().should("contain", "/scanner");
 
     cy.wait(5000);
