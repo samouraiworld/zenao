@@ -1,6 +1,6 @@
 # Zenao - Zen Autonomous Organizations
 
-An events management and communities platform featuring event creation, community management, and social feeds.
+An event management and community platform featuring event creation, community management, and social feeds.
 
 > **Note:** Zenao is currently a Web2 application, with plans to transition to Web3 using [base](https://www.base.org/).
 
@@ -27,7 +27,7 @@ An events management and communities platform featuring event creation, communit
 - **Backend**: Go, Connect-RPC (gRPC-web)
 - **Database**: SQLite/LibSQL (Turso), GORM, Atlas migrations
 - **Auth**: Clerk
-- **Payments**: Stripe (checkout sessions, webhooks)
+- **Payments**: Stripe (Checkout sessions, Webhooks)
 - **Testing**: Cypress (E2E)
 - **Observability**: OpenTelemetry, Sentry
 - **i18n**: next-intl (English, French, Spanish — 690 keys each)
