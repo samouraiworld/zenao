@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { UseFormReturn, useFieldArray } from "react-hook-form";
 import { useTranslations } from "next-intl";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -91,7 +92,8 @@ export const EventForm: React.FC<EventFormProps> = ({
   const isCustom = useMemo(() => !isVirtual && !marker, [isVirtual, marker]);
   const eventTimezone = locationTimezone(location);
   const timeZone = useLayoutTimezone(eventTimezone);
-  const currencyOptions = useCurrencyOptionsForCommunity(communityId);
+  const { options: currencyOptions, isLoading: payoutLoading } =
+    useCurrencyOptionsForCommunity(communityId);
 
   // Upload
   const descriptionRef = useRef<HTMLTextAreaElement>(null);
@@ -422,7 +424,20 @@ export const EventForm: React.FC<EventFormProps> = ({
           ))}
           <FormDescription>
             {t("price-helper")}
-            {!communityId ? ` ${t("price-community-required")}` : ""}
+            {!communityId ? (
+              ` ${t("price-community-required")}`
+            ) : !payoutLoading && currencyOptions.length < 2 ? (
+              <>
+                {" "}
+                {t("price-stripe-not-configured")}{" "}
+                <Link
+                  href={`/dashboard/community/${communityId}/payouts`}
+                  className="text-main hover:underline"
+                >
+                  {t("price-stripe-setup-link")}
+                </Link>
+              </>
+            ) : null}
           </FormDescription>
           <FormFieldDatePicker
             name="startDate"
