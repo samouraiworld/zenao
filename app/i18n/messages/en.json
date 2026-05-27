@@ -92,6 +92,8 @@
     "price-free": "Free",
     "price-helper": "Leave 0 for a free event.",
     "price-community-required": "Select a community to set a price.",
+    "price-stripe-not-configured": "This community has not configured Stripe yet.",
+    "price-stripe-setup-link": "Set up payouts",
     "discoverable-label": "Make event discoverable (Visible in Discover)",
     "exclusive-label": "Exclusive",
     "pick-a-start-date-placeholder": "Pick a start date...",
