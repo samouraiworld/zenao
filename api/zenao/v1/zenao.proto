@@ -1,0 +1,709 @@
+syntax = "proto3";
+
+package zenao.v1;
+option go_package = "github.com/samouraiworld/zenao/backend/zenao/v1;zenaov1";
+
+import "polls/v1/polls.proto";
+import "feeds/v1/feeds.proto";
+
+service ZenaoService {
+  // USER
+  rpc EditUser(EditUserRequest) returns (EditUserResponse);
+  rpc GetUserInfo(GetUserInfoRequest) returns (GetUserInfoResponse);
+
+  // EVENT
+  rpc CreateEvent(CreateEventRequest) returns (CreateEventResponse);
+  rpc CancelEvent(CancelEventRequest) returns (CancelEventResponse);
+  rpc EditEvent(EditEventRequest) returns (EditEventResponse);
+  rpc GetEventGatekeepers(GetEventGatekeepersRequest)
+      returns (GetEventGatekeepersResponse);
+  rpc ValidatePassword(ValidatePasswordRequest)
+      returns (ValidatePasswordResponse);
+  rpc BroadcastEvent(BroadcastEventRequest) returns (BroadcastEventResponse);
+  rpc Participate(ParticipateRequest) returns (ParticipateResponse);
+  rpc StartTicketPayment(StartTicketPaymentRequest)
+      returns (StartTicketPaymentResponse);
+  rpc ConfirmTicketPayment(ConfirmTicketPaymentRequest)
+      returns (ConfirmTicketPaymentResponse);
+  rpc CancelParticipation(CancelParticipationRequest)
+      returns (CancelParticipationResponse);
+  rpc GetEventTickets(GetEventTicketsRequest) returns (GetEventTicketsResponse);
+  rpc GetUserOrders(GetUserOrdersRequest) returns (GetUserOrdersResponse);
+  rpc GetOrderDetails(GetOrderDetailsRequest) returns (GetOrderDetailsResponse);
+  rpc Checkin(CheckinRequest) returns (CheckinResponse);
+  rpc ExportParticipants(ExportParticipantsRequest)
+      returns (ExportParticipantsResponse);
+
+  // COMMUNITY
+  rpc CreateCommunity(CreateCommunityRequest)
+      returns (CreateCommunityResponse);
+  rpc EditCommunity(EditCommunityRequest) returns (EditCommunityResponse);
+  rpc StartCommunityStripeOnboarding(StartCommunityStripeOnboardingRequest)
+      returns (StartCommunityStripeOnboardingResponse);
+  rpc GetCommunityPayoutStatus(GetCommunityPayoutStatusRequest)
+      returns (GetCommunityPayoutStatusResponse);
+  rpc GetCommunityAdministrators(GetCommunityAdministratorsRequest)
+      returns (GetCommunityAdministratorsResponse);
+  rpc JoinCommunity(JoinCommunityRequest) returns (JoinCommunityResponse);
+  rpc LeaveCommunity(LeaveCommunityRequest) returns (LeaveCommunityResponse);
+  rpc AddEventToCommunity(AddEventToCommunityRequest)
+      returns (AddEventToCommunityResponse);
+  rpc RemoveEventFromCommunity(RemoveEventFromCommunityRequest)
+      returns (RemoveEventFromCommunityResponse);
+
+  // TEAM
+  rpc CreateTeam(CreateTeamRequest) returns (CreateTeamResponse);
+  rpc EditTeam(EditTeamRequest) returns (EditTeamResponse);
+  rpc DeleteTeam(DeleteTeamRequest) returns (DeleteTeamResponse);
+  rpc GetUserTeams(GetUserTeamsRequest) returns (GetUserTeamsResponse);
+  rpc GetTeamMembers(GetTeamMembersRequest) returns (GetTeamMembersResponse);
+
+  // XXX: TEMPORARY SWITCH TO WEB2 FIRST
+  rpc EntityRoles(EntityRolesRequest) returns (EntityRolesResponse); // -> GetCommunityUserRoles, GetEventUserRoles
+  rpc EntitiesWithRoles(EntitiesWithRolesRequest) returns (EntitiesWithRolesResponse); // -> CommunitiesWithUserRole, EventsWithUserRole
+  rpc GetCommunity(GetCommunityRequest) returns (GetCommunityResponse);
+  rpc ListCommunities(ListCommunitiesRequest) returns (ListCommunitiesResponse);
+  rpc ListCommunitiesByEvent(ListCommunitiesByEventRequest) returns (ListCommunitiesByEventResponse);
+  rpc ListCommunitiesByUserRoles(ListCommunitiesByUserRolesRequest) returns (ListCommunitiesByUserRolesResponse);
+  rpc GetEvent(GetEventRequest) returns (GetEventResponse);
+  rpc ListEvents(ListEventsRequest) returns (ListEventsResponse);
+  rpc ListEventsByUserRoles(ListEventsByUserRolesRequest) returns (ListEventsByUserRolesResponse);
+  rpc GetPost(GetPostRequest) returns (GetPostResponse);
+  rpc GetFeedPosts(GetFeedPostsRequest) returns (GetFeedPostsResponse);
+  rpc GetChildrenPosts(GetChildrenPostsRequest) returns (GetChildrenPostsResponse);
+  rpc GetPoll(GetPollRequest) returns (GetPollResponse);
+  rpc GetUsersProfile(GetUsersProfileRequest) returns (GetUsersProfileResponse); // -> BatchProfile
+
+  // FEED
+  rpc CreatePoll(CreatePollRequest) returns (CreatePollResponse);
+  rpc VotePoll(VotePollRequest) returns (VotePollResponse);
+  rpc CreatePost(CreatePostRequest) returns (CreatePostResponse);
+  rpc DeletePost(DeletePostRequest) returns (DeletePostResponse);
+  rpc ReactPost(ReactPostRequest) returns (ReactPostResponse);
+  rpc PinPost(PinPostRequest) returns (PinPostResponse);
+  rpc EditPost(EditPostRequest) returns (EditPostResponse);
+
+  // HEALTH
+  rpc Health(HealthRequest) returns (HealthResponse);
+}
+
+message HealthRequest {}
+
+// XXX: add more fields (e.g. version, commit_hash, ...)
+message HealthResponse { bool maintenance = 1; }
+
+message EditUserRequest {
+  string display_name = 1;
+  string bio = 2;
+  string avatar_uri = 3;
+}
+
+message EditUserResponse { string id = 1; }
+
+message GetUserInfoRequest {}
+
+message GetUserInfoResponse {
+  string user_id = 1;
+  string plan = 2;
+  string actor_id = 3;
+  string actor_plan = 4;
+}
+
+message Profile {
+  string user_id = 1;
+  string display_name = 2;
+  string bio = 3;
+  string avatar_uri = 4;
+  bool is_team = 5;
+}
+
+message GetUsersProfileRequest {
+  repeated string ids = 1;
+}
+
+message GetUsersProfileResponse {
+  repeated Profile profiles = 1;
+}
+
+message GetEventRequest {
+  string event_id = 1;
+}
+
+message GetEventResponse {
+  EventInfo event = 1;
+}
+
+message ListEventsRequest {
+  uint32 limit = 1;
+  uint32 offset = 2;
+  int64 from = 3; // unix seconds
+  int64 to = 4; // unix seconds
+  DiscoverableFilter discoverable_filter = 5; // XXX: should we ensure events non discoverable are listed only if the user is an organizer?
+  LocationFilter location_filter = 6; // optional location filter
+}
+
+// Filter events by geographical location
+message LocationFilter {
+  double lat = 1; // latitude of the center point
+  double lng = 2; // longitude of the center point
+  double radius_km = 3; // radius in kilometers
+}
+
+message ListEventsResponse {
+  repeated EventInfo events = 1;
+}
+
+message EventUser {
+  EventInfo event = 1;
+  repeated string roles = 2; // one of: organizer, gatekeeper, participant
+}
+
+message ListEventsByUserRolesRequest {
+  string user_id = 1;
+  repeated string roles = 2; // one of: organizer, gatekeeper, participant
+  uint32 limit = 3;
+  uint32 offset = 4;
+  int64 from = 5; // unix seconds
+  int64 to = 6; // unix seconds
+  DiscoverableFilter discoverable_filter = 7; // XXX: should we ensure events non discoverable are listed only if the user is an organizer?
+}
+
+message ListEventsByUserRolesResponse {
+  repeated EventUser events = 1;
+}
+
+
+message CreateEventRequest {
+  string title = 1;
+  string description = 2; // markdown
+  string image_uri = 3;
+  uint64 start_date = 4; // unix seconds
+  uint64 end_date = 5; // unix seconds
+  double ticket_price = 6; // XXX: use fixed point?
+  uint32 capacity = 7;
+  EventLocation location = 9;
+  string password = 10;
+  repeated string organizers = 11;
+  repeated string gatekeepers = 12;
+  bool discoverable = 13;
+  string community_id = 14; // optional
+  bool community_email = 15;
+  repeated EventPriceGroup prices_groups = 16;
+}
+
+message CreateEventResponse { string id = 1; }
+
+message CancelEventRequest { string event_id = 1; }
+
+message CancelEventResponse {}
+
+message EditEventRequest {
+  string event_id = 1;
+  string title = 2;
+  string description = 3; // markdown
+  string image_uri = 4;
+  uint64 start_date = 5; // unix seconds
+  uint64 end_date = 6; // unix seconds
+  double ticket_price = 7; // XXX: use fixed point?
+  uint32 capacity = 8;
+  EventLocation location = 9;
+  string password = 10;
+  bool update_password = 11;
+  repeated string organizers = 12;
+  repeated string gatekeepers = 13;
+  bool discoverable = 14;
+  string community_id = 15; // optional
+  bool community_email = 16;
+  repeated EventPriceGroup prices_groups = 17;
+}
+
+message EditEventResponse { string id = 1; }
+
+message GetEventGatekeepersRequest { string event_id = 1; }
+
+message GetEventGatekeepersResponse { repeated string gatekeepers = 1; }
+
+message ValidatePasswordRequest {
+  string event_id = 1;
+  string password = 2;
+}
+
+message ValidatePasswordResponse { bool valid = 1; }
+
+message ParticipateRequest {
+  string event_id = 1;
+  string email = 2;
+  repeated string guests = 3;
+  string password = 4;
+}
+
+message CancelParticipationRequest { string event_id = 1; }
+
+message CancelParticipationResponse {}
+
+message ParticipateResponse { string ticket_secret = 1; }
+
+message StartTicketPaymentLineItem {
+  string price_id = 1;
+  string attendee_email = 2;
+}
+
+message StartTicketPaymentRequest {
+  string event_id = 1;
+  repeated StartTicketPaymentLineItem line_items = 2;
+  string password = 3;
+  string success_path = 4;
+  string cancel_path = 5;
+}
+
+message StartTicketPaymentResponse {
+  string checkout_url = 1;
+  string order_id = 2;
+}
+
+message ConfirmTicketPaymentRequest {
+  string order_id = 1;
+  string checkout_session_id = 2;
+}
+
+message ConfirmTicketPaymentResponse {
+  string order_id = 1;
+  string status = 2;
+  string receipt_reference = 3;
+}
+
+message BroadcastEventRequest {
+  string event_id = 1;
+  string message = 2;
+  bool attach_ticket = 3;
+}
+
+message BroadcastEventResponse {}
+
+message EventLocation {
+  string venue_name = 1;
+  string instructions = 2; // markdown
+  oneof address {
+    AddressGeo geo = 3;
+    AddressVirtual virtual = 4;
+    AddressCustom custom = 5;
+  }
+}
+
+message AddressVirtual { string uri = 1; }
+
+message AddressGeo {
+  string address = 1;
+  float lat = 2;
+  float lng = 3;
+  float size = 4;
+}
+
+message AddressCustom {
+  string address = 1;
+  string timezone = 2; // IANA name
+}
+
+message EventPrivacy {
+  oneof event_privacy {
+    EventPrivacyPublic public = 1;
+    EventPrivacyGuarded guarded = 2;
+  }
+}
+
+message EventPrivacyPublic {}
+
+message EventPrivacyGuarded { string participation_pubkey = 1; }
+
+enum DiscoverableFilter {
+  DISCOVERABLE_FILTER_UNSPECIFIED = 0;
+  DISCOVERABLE_FILTER_DISCOVERABLE = 1;
+  DISCOVERABLE_FILTER_UNDISCOVERABLE = 2;
+}
+
+message EventInfo {
+  string id = 1;
+  string title = 2;
+  string description = 3;
+  string image_uri = 4;
+  repeated string organizers = 5;
+  repeated string gatekeepers = 6;
+  
+  int64 start_date = 7; // unix seconds
+  int64 end_date = 8; // unix seconds
+  uint32 capacity = 9;
+  EventLocation location = 10;
+  uint32 participants = 11;
+  EventPrivacy privacy = 12;
+  uint32 checked_in = 13;
+  bool discoverable = 14;
+  repeated EventPriceGroup prices_groups = 15;
+}
+
+message EventPriceGroup {
+  string id = 1;
+  string name = 2;
+  repeated EventPrice prices = 3;
+}
+
+message EventPrice {
+  string id = 1;
+  int64 amount_minor = 2;
+  string currency_code = 3;
+  string payment_account_id = 4;
+  string payment_account_type = 5;
+}
+
+message BatchProfileField {
+  string type = 1;
+  string key = 2;
+}
+
+message BatchProfileRequest {
+  repeated BatchProfileField fields = 1;
+  repeated string addresses = 2;
+}
+
+message CreatePollRequest {
+  string org_type = 1; // one of: event, community
+  string org_id = 2;
+  string question = 3;
+  repeated string options = 4;
+  int64 duration = 5; // unix seconds
+  polls.v1.PollKind kind = 6;
+}
+
+message CreatePollResponse { string post_id = 1; }
+
+message GetPollRequest { 
+  string poll_id = 1;
+  string user_id = 2; // optional, to check if the user has voted
+ }
+
+message GetPollResponse {
+  polls.v1.Poll poll = 1;
+}
+
+message VotePollRequest {
+  string poll_id = 1;
+  string option = 2;
+}
+
+message VotePollResponse {}
+
+message CreatePostRequest {
+  string org_type = 1; // one of: event, community
+  string org_id = 2;
+  string content = 3;
+  string parent_id = 4;
+  repeated string tags = 5;
+}
+
+message CreatePostResponse { string post_id = 1; }
+
+message GetPostRequest {
+  string post_id = 1;
+  string user_id = 2; // optional, to check if the user has reacted
+}
+
+message GetPostResponse {
+  feeds.v1.PostView post = 1;
+}
+
+message GetFeedPostsRequest {
+  Entity org = 1;
+  uint32 limit = 2;
+  uint32 offset = 3;
+  repeated string tags = 4;
+  string user_id = 5; // optional, to check if the user has reacted
+}
+
+message GetFeedPostsResponse {
+  repeated feeds.v1.PostView posts = 1;
+}
+
+message GetChildrenPostsRequest {
+  string parent_id = 1;
+  uint32 limit = 2;
+  uint32 offset = 3;
+  repeated string tags = 4;
+  string user_id = 5; // optional, to check if the user has reacted
+}
+
+message GetChildrenPostsResponse {
+  repeated feeds.v1.PostView posts = 1;
+}
+
+message DeletePostRequest { string post_id = 1; }
+
+message DeletePostResponse {}
+
+message ReactPostRequest {
+  string post_id = 1;
+  string icon = 2;
+}
+
+message ReactPostResponse {}
+
+message PinPostRequest {
+  string post_id = 1;
+  bool pinned = 2;
+}
+
+message PinPostResponse {}
+
+message EditPostRequest {
+  string post_id = 1;
+  string content = 2;
+  repeated string tags = 3;
+}
+
+message EditPostResponse { string post_id = 1; }
+
+message GetEventTicketsRequest { string event_id = 1; }
+
+message GetEventTicketsResponse { repeated TicketInfo tickets_info = 1; }
+
+message TicketInfo {
+  string ticket_secret = 1;
+  string user_email = 2;
+}
+
+message GetOrderDetailsRequest { string order_id = 1; }
+
+message OrderSummary {
+  string order_id = 1;
+  string event_id = 2;
+  string buyer_id = 3;
+  int64 amount_minor = 4;
+  string currency_code = 5;
+  int64 created_at = 6;
+}
+
+message OrderTicketInfo {
+  string ticket_secret = 1;
+  string user_email = 2;
+}
+
+message GetOrderDetailsResponse {
+  OrderSummary order = 1;
+  repeated OrderTicketInfo tickets = 2;
+}
+
+message GetUserOrdersRequest {}
+
+message GetUserOrdersResponse { repeated OrderSummary orders = 1; }
+
+message CheckinRequest {
+  string ticket_pubkey = 1;
+  string signature = 2;
+}
+
+message CheckinResponse {}
+
+message ExportParticipantsRequest { string event_id = 1; }
+
+message ExportParticipantsResponse {
+  // XXX: cannot use bytes because not handled in gno-protoc-gen
+  string content = 1;
+  string filename = 2;
+  // XXX: use this to change the mime type without re-generating the proto
+  string mime_type = 3;
+}
+
+message Entity {
+  string entity_type = 1; // one of: user, event
+  string entity_id = 2;
+}
+
+message EntityRolesRequest {
+  Entity org = 1; // one of: community, event
+  Entity entity = 2; // one of: user, event
+}
+
+message EntityRolesResponse {
+  repeated string roles = 1; // one of: administrator, organizer, gatekeeper, member, participant
+}
+
+message EntitiesWithRolesRequest {
+  Entity org = 1; // one of: community, event
+  repeated string roles = 2; // one of: administrator, organizer, gatekeeper, member, participant
+}
+
+message EntityWithRoles {
+  string entity_type = 1;
+  string entity_id = 2;
+  repeated string roles = 3;
+}
+
+message EntitiesWithRolesResponse {
+  repeated EntityWithRoles entities_with_roles = 1;
+}
+
+message GetCommunityRequest {
+  string community_id = 1;
+}
+
+message GetCommunityResponse {
+  CommunityInfo community = 1;
+}
+
+message CommunityInfo {
+  string id = 1;
+  string display_name = 2;
+  string description = 3;
+  string avatar_uri = 4;
+  string banner_uri = 5;
+  repeated string administrators = 6;
+  uint32 count_members = 7;
+}
+
+message ListCommunitiesRequest {
+  uint32 limit = 1;
+  uint32 offset = 2;
+}
+
+message ListCommunitiesResponse {
+  repeated CommunityInfo communities = 1;
+}
+
+message ListCommunitiesByEventRequest {
+  string event_id = 1;
+  uint32 limit = 2;
+  uint32 offset = 3;
+}
+
+message ListCommunitiesByEventResponse {
+  repeated CommunityInfo communities = 1;
+}
+
+message CommunityUser {
+  CommunityInfo community = 1;
+  repeated string roles = 2; // one of: administrator, member
+}
+
+message ListCommunitiesByUserRolesRequest {
+  string user_id = 1;
+  repeated string roles = 2; // one of: administrator, member
+  uint32 limit = 3;
+  uint32 offset = 4;
+}
+
+message ListCommunitiesByUserRolesResponse {
+  repeated CommunityUser communities = 1;
+}
+
+message CreateCommunityRequest {
+  string display_name = 1;
+  string description = 2;
+  string avatar_uri = 3;
+  string banner_uri = 4;
+  repeated string administrators = 5;
+}
+
+message CreateCommunityResponse { string community_id = 1; }
+
+message EditCommunityRequest {
+  string community_id = 1;
+  string display_name = 2;
+  string description = 3;
+  string avatar_uri = 4;
+  string banner_uri = 5;
+  repeated string administrators = 6;
+}
+
+message EditCommunityResponse {}
+
+message StartCommunityStripeOnboardingRequest {
+  string community_id = 1;
+  string return_path = 2;
+  string refresh_path = 3;
+}
+
+message StartCommunityStripeOnboardingResponse { string onboarding_url = 1; }
+
+message GetCommunityPayoutStatusRequest {
+  string community_id = 1;
+}
+
+message GetCommunityPayoutStatusResponse {
+  string verification_state = 1;
+  int64 last_verified_at = 2;
+  bool is_stale = 3;
+  string refresh_error = 4;
+  string onboarding_state = 5;
+  string platform_account_id = 6;
+  repeated string currencies = 7;
+}
+
+message CreateTeamRequest { string display_name = 1; }
+
+message CreateTeamResponse { string team_id = 1; }
+
+message EditTeamRequest {
+  string team_id = 1;
+  string display_name = 2;
+  string bio = 3;
+  string avatar_uri = 4;
+  repeated string members = 5;
+}
+
+message EditTeamResponse {}
+
+message DeleteTeamRequest { string team_id = 1; }
+
+message DeleteTeamResponse {}
+
+message GetUserTeamsRequest {}
+
+message GetUserTeamsResponse {
+  repeated UserTeam teams = 1;
+}
+
+message UserTeam {
+  string team_id = 1;
+  string display_name = 2;
+  string bio = 3;
+  string avatar_uri = 4;
+  string role = 5;
+  string plan = 6;
+}
+
+message GetTeamMembersRequest { string team_id = 1; }
+
+message GetTeamMembersResponse { repeated TeamMember members = 1; }
+
+message TeamMember {
+  string user_id = 1;
+  string display_name = 2;
+  string avatar_uri = 3;
+  string email = 4;
+  string role = 5;
+}
+
+message GetCommunityAdministratorsRequest { string community_id = 1; }
+
+message GetCommunityAdministratorsResponse {
+  repeated string administrators = 1;
+}
+
+message JoinCommunityRequest { string community_id = 1; }
+
+message JoinCommunityResponse {}
+
+message LeaveCommunityRequest { string community_id = 1; }
+message LeaveCommunityResponse {}
+
+message AddEventToCommunityRequest {
+  string community_id = 1;
+  string event_id = 2;
+}
+
+message AddEventToCommunityResponse {}
+
+message RemoveEventFromCommunityRequest {
+  string community_id = 1;
+  string event_id = 2;
+}
+
+message RemoveEventFromCommunityResponse {}

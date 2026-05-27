@@ -1,0 +1,21 @@
+services:
+  collector:
+    container_name: otel-collector
+    image: otel/opentelemetry-collector:0.107.0
+    volumes:
+      - ./dev.otelco.yaml:/etc/otelcol/config.yaml
+    ports:
+      - 127.0.0.1:4318:4318
+    depends_on:
+      jaeger:
+        condition: service_healthy
+
+  jaeger:
+    container_name: otel-jaeger
+    image: jaegertracing/all-in-one:latest
+    environment:
+      JAEGER_PROPAGATION: w3c
+    ports:
+      - 127.0.0.1:16686:16686
+    healthcheck:
+      test: [CMD, wget, -q, -S, -O, "-", "localhost:14269"]

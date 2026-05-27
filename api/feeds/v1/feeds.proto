@@ -1,0 +1,90 @@
+syntax = "proto3";
+
+package feeds.v1;
+option go_package = "github.com/samouraiworld/zenao/backend/feeds/v1;feedsv1";
+
+message PostGeoLoc {
+  float lat = 2;
+  float lng = 3;
+}
+
+message StandardPost { string content = 1; }
+
+message ArticlePost {
+  string title = 1;
+  string preview_text = 2;
+  string preview_image_uri = 3;
+  string content = 4;
+}
+
+message LinkPost { string uri = 1; }
+
+message ImagePost {
+  string title = 1;
+  string description = 2;
+  string image_uri = 3;
+}
+
+message AudioPost {
+  string title = 1;
+  string description = 2;
+  string audio_uri = 3;
+  string image_uri = 4;
+}
+
+message VideoPost {
+  string title = 1;
+  string description = 2;
+  string video_uri = 3;
+  string thumbnail_image_uri = 4;
+}
+
+// XXX: not used yet in contracts
+message Reaction {
+  string post_uri = 1;
+  string icon = 2;
+  string user_id = 3;
+}
+
+// Only on local chaine from the related post
+message Tip {
+  string post_local_id = 1;
+  string denom = 3;
+  int64 amount = 4; // XXX: use string encoding?
+}
+
+message Post {
+  uint64 local_post_id = 1;
+  string author = 2;
+  string parent_uri = 3;
+  PostGeoLoc loc = 4;
+  // XXX: map any extentions = 10;
+
+  int64 created_at = 5;
+  int64 updated_at = 6;
+  int64 deleted_at = 7; // if != 0 -> deleted
+
+  repeated string tags = 8;
+  bool pinned = 9;
+
+  oneof post {
+    StandardPost standard = 10;
+    ArticlePost article = 11;
+    LinkPost link = 12;
+    ImagePost image = 13;
+    VideoPost video = 14;
+    AudioPost audio = 15;
+  }
+}
+
+message PostView {
+  Post post = 1;
+  uint64 children_count = 2;
+  repeated ReactionView reactions = 3;
+}
+
+message ReactionView {
+  string icon = 1;
+  uint32 count = 2;
+  bool user_has_voted = 3;
+}

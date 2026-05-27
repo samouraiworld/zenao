@@ -1,0 +1,55 @@
+name: Emergency Clear Maintenance
+
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: "Target environment"
+        required: true
+        default: "prod"
+        type: choice
+        options:
+          - prod
+          - staging
+
+jobs:
+  clear-maintenance:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clear maintenance mode (prod)
+        if: inputs.target == 'prod'
+        uses: appleboy/ssh-action@v1
+        with:
+          host: 62.210.92.144
+          username: root
+          key: ${{ secrets.PROD_SSH_KEY }}
+          script: |
+            set -xe
+            cd zenao
+            echo "=== Before restore ==="
+            grep -n "maintenance\|command" prod.backend.docker-compose.yml || true
+            git restore prod.backend.docker-compose.yml
+            echo "=== After restore ==="
+            grep -n "maintenance\|command" prod.backend.docker-compose.yml || true
+            docker compose -f prod.backend.docker-compose.yml up -d --build backend
+            sleep 10
+            docker logs backend --tail 10
+
+      - name: Clear maintenance mode (staging)
+        if: inputs.target == 'staging'
+        uses: appleboy/ssh-action@v1
+        with:
+          host: 51.159.98.163
+          username: root
+          key: ${{ secrets.STAGING_SSH_KEY }}
+          script: |
+            set -xe
+            cd zenao
+            echo "=== Before restore ==="
+            grep -n "maintenance\|command" staging.docker-compose.yml || true
+            git restore staging.docker-compose.yml
+            echo "=== After restore ==="
+            grep -n "maintenance\|command" staging.docker-compose.yml || true
+            docker compose -f staging.docker-compose.yml up -d --build backend
+            sleep 10
+            docker logs backend --tail 10

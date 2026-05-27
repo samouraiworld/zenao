@@ -1,0 +1,51 @@
+import { queryOptions } from "@tanstack/react-query";
+import { withSpan } from "../tracer";
+import { buildQueryHeaders } from "./build-query-headers";
+import { GetToken } from "@/lib/utils";
+import { zenaoClient } from "@/lib/zenao-client";
+import { eventInfoSchema } from "@/types/schemas";
+
+export const eventOptions = (id: string) =>
+  queryOptions({
+    queryKey: ["event", id],
+    queryFn: async () => {
+      return withSpan(`query:backend:event:${id}`, async () => {
+        const res = await zenaoClient.getEvent({ eventId: id });
+        if (res.event == null) {
+          throw new Error("event not found");
+        }
+        return eventInfoSchema.parse(res.event);
+      });
+    },
+    staleTime: Infinity,
+  });
+
+export const eventGatekeepersEmails = (
+  eventId: string,
+  getToken: GetToken,
+  teamId?: string,
+) =>
+  queryOptions({
+    queryKey: ["event", eventId, "gatekeepers"],
+    queryFn: async () => {
+      return withSpan(
+        `query:backend:event:${eventId}:gatekeepers`,
+        async () => {
+          const token = await getToken();
+
+          if (!token) {
+            throw new Error("not authenticated");
+          }
+
+          const data = await zenaoClient.getEventGatekeepers(
+            {
+              eventId,
+            },
+            { headers: buildQueryHeaders(token, teamId) },
+          );
+
+          return data;
+        },
+      );
+    },
+  });

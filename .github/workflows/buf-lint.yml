@@ -1,0 +1,23 @@
+name: Buf Lint
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  merge_group:
+
+jobs:
+  buf-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Golang with cache
+        uses: magnetikonline/action-golang-cache@v5
+        with:
+          go-version-file: go.mod
+          cache-key-suffix: buf-lint
+
+      - name: Buf lint
+        run: make lint-buf

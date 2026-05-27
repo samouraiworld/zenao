@@ -1,0 +1,103 @@
+name: Deploy Staging
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy-staging:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Golang with cache
+        uses: magnetikonline/action-golang-cache@v5
+        with:
+          go-version-file: go.mod
+          cache-key-suffix: deploy-staging
+
+      - name: Get go binaries path
+        id: go-bin-path
+        run: echo "PATH=$(go env GOPATH)/bin" >> "$GITHUB_OUTPUT"
+      - name: Cache atlas
+        id: cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.go-bin-path.outputs.PATH }}
+          key: ${{ runner.os }}-atlas-bin5-v1.1.0
+      - name: Install atlas
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: make install-atlas
+
+      - name: Get current date
+        id: date
+        run: echo "::set-output name=date::$(date +'%Y-%m-%d-%s')"
+
+      - name: Enable maintenance mode
+        uses: appleboy/ssh-action@v1
+        with:
+          host: 51.159.98.163
+          username: root
+          key: ${{ secrets.STAGING_SSH_KEY }}
+          script: |
+            set -xe
+            cd zenao
+            git fetch
+            git checkout ${{ github.sha }}
+            yq -iy 'del(.services.backend.command)' staging.docker-compose.yml
+            yq -iy '.services.backend |= ({"command": "--maintenance"} + .)' staging.docker-compose.yml
+            docker compose -f staging.docker-compose.yml up -d backend
+
+      - name: Backup DB
+        shell: bash
+        run: |
+          RESPONSE=$(curl -s -f -X POST \
+            -H "Authorization: Bearer ${{ secrets.TURSO_API_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            -d '{"name": "zenao-staging-backup-${{ steps.date.outputs.date }}", "group": "zenao", "seed": {"type": "database", "name": "zenao-staging-3"} }' \
+                "https://api.turso.tech/v1/organizations/samourai-coop/databases")
+
+          if [ $? -ne 0 ]; then
+            echo "API call failed"
+            exit 1
+          fi
+
+      - name: Migrate DB
+        id: migrate
+        run: TURSO_TOKEN=${{ secrets.STAGING_TURSO_TOKEN }} atlas migrate apply --dir "file://migrations" --env staging
+
+      - name: Rollback maintenance on migration failure
+        if: failure() && steps.migrate.outcome == 'failure'
+        uses: appleboy/ssh-action@v1
+        with:
+          host: 51.159.98.163
+          username: root
+          key: ${{ secrets.STAGING_SSH_KEY }}
+          script: |
+            set -xe
+            cd zenao
+            git restore staging.docker-compose.yml
+            docker compose -f staging.docker-compose.yml up -d --build backend
+
+      - name: Upgrade services
+        uses: appleboy/ssh-action@v1
+        with:
+          host: 51.159.98.163
+          username: root
+          key: ${{ secrets.STAGING_SSH_KEY }}
+          # git restore is there to disable maintenance mode
+          script: |
+            set -xe
+            cd zenao
+
+            # Inject Stripe env vars into backend.env (idempotent)
+            grep -q '^ZENAO_STRIPE_SECRET_KEY=' backend.env 2>/dev/null && \
+              sed -i 's|^ZENAO_STRIPE_SECRET_KEY=.*|ZENAO_STRIPE_SECRET_KEY=${{ secrets.STRIPE_TEST_SECRET_KEY }}|' backend.env || \
+              echo 'ZENAO_STRIPE_SECRET_KEY=${{ secrets.STRIPE_TEST_SECRET_KEY }}' >> backend.env
+
+            grep -q '^ZENAO_PAID_EVENTS_ENABLED=' backend.env 2>/dev/null && \
+              sed -i 's|^ZENAO_PAID_EVENTS_ENABLED=.*|ZENAO_PAID_EVENTS_ENABLED=true|' backend.env || \
+              echo 'ZENAO_PAID_EVENTS_ENABLED=true' >> backend.env
+
+            docker compose -f staging.docker-compose.yml up -d --wait otel-collector jaeger
+            git restore staging.docker-compose.yml
+            docker compose -f staging.docker-compose.yml up -d --build backend

@@ -1,0 +1,267 @@
+package main
+
+import (
+	"context"
+	"errors"
+	"flag"
+	"fmt"
+	"net/http"
+	"os"
+	"slices"
+	"strings"
+	"time"
+
+	"connectrpc.com/connect"
+	connectcors "connectrpc.com/cors"
+	"github.com/gnolang/gno/tm2/pkg/commands"
+	"github.com/resend/resend-go/v2"
+	"github.com/rs/cors"
+	"github.com/samouraiworld/zenao/backend/payment"
+	"github.com/samouraiworld/zenao/backend/payment/zpstripe"
+	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
+	"go.uber.org/zap"
+	"golang.org/x/net/http2"
+	"golang.org/x/net/http2/h2c"
+
+	"github.com/samouraiworld/zenao/backend/czauth"
+	"github.com/samouraiworld/zenao/backend/gzdb"
+	"github.com/samouraiworld/zenao/backend/zenao/v1/zenaov1connect"
+)
+
+func main() {
+	cmd := commands.NewCommand(
+		commands.Metadata{
+			ShortUsage: "<subcommand> [flags] [<arg>...]",
+			LongHelp:   "zenao backend server and tools",
+		},
+		commands.NewEmptyConfig(),
+		commands.HelpExec,
+	)
+
+	cmd.AddSubCommands(
+		newStartCmd(),
+		newFakegenCmd(),
+		newMailCmd(),
+		newPromoteUserCmd(),
+		newE2EInfraCmd(),
+		newGenticketCmd(),
+		newGenPdfTicketCmd(),
+		newConvertEvtToComCmd(),
+	)
+
+	cmd.Execute(context.Background(), os.Args[1:])
+}
+
+type config struct {
+	appBaseURL        string
+	allowedOrigins    string
+	clerkSecretKey    string
+	bindAddr          string
+	dbPath            string
+	mailSender        string
+	resendSecretKey   string
+	discordtoken      string
+	maintenance       bool
+	stripeSecretKey   string
+	paidEventsEnabled bool
+}
+
+func (conf *config) RegisterFlags(flset *flag.FlagSet) {
+	flset.StringVar(&conf.appBaseURL, "app-base-url", "https://zenao.io/", "App base URL")
+	flset.StringVar(&conf.allowedOrigins, "allowed-origins", "*", "CORS allowed origin")
+	flset.StringVar(&conf.clerkSecretKey, "clerk-secret-key", "", "Clerk secret key")
+	flset.StringVar(&conf.bindAddr, "bind-addr", "localhost:4242", "Address to bind to")
+	flset.StringVar(&conf.dbPath, "db", "dev.db", "DB, can be a file or a libsql dsn")
+	flset.StringVar(&conf.mailSender, "mail-sender", "contact@mail.zenao.io", "Mail sender address")
+	flset.StringVar(&conf.resendSecretKey, "resend-secret-key", "", "Resend secret key")
+	flset.StringVar(&conf.discordtoken, "discord-token", "", "Discord Token")
+	flset.BoolVar(&conf.maintenance, "maintenance", false, "Maintenance mode, disable all API calls except healthcheck")
+	flset.StringVar(&conf.stripeSecretKey, "stripe-secret-key", "", "Stripe secret key")
+	flset.BoolVar(&conf.paidEventsEnabled, "paid-events", false, "Enable paid events feature")
+}
+
+var conf config
+
+func newStartCmd() *commands.Command {
+	return commands.NewCommand(
+		commands.Metadata{
+			Name:       "start",
+			ShortUsage: "start",
+			ShortHelp:  "start the server",
+		},
+		&conf,
+		func(ctx context.Context, args []string) error {
+			return execStart(ctx)
+		},
+	)
+}
+
+func injectStartEnv() {
+	mappings := map[string]*string{
+		"ZENAO_APP_BASE_URL":      &conf.appBaseURL,
+		"ZENAO_RESEND_SECRET_KEY": &conf.resendSecretKey,
+		"ZENAO_CLERK_SECRET_KEY":  &conf.clerkSecretKey,
+		"ZENAO_DB":                &conf.dbPath,
+		"ZENAO_ALLOWED_ORIGINS":   &conf.allowedOrigins,
+		"ZENAO_MAIL_SENDER":       &conf.mailSender,
+		"DISCORD_TOKEN":           &conf.discordtoken,
+		"ZENAO_STRIPE_SECRET_KEY": &conf.stripeSecretKey,
+	}
+
+	for key, ps := range mappings {
+		val := os.Getenv(key)
+		if val != "" {
+			*ps = val
+		}
+	}
+
+	// Bool env vars
+	if val := os.Getenv("ZENAO_PAID_EVENTS_ENABLED"); val == "true" || val == "1" {
+		conf.paidEventsEnabled = true
+	}
+}
+
+func execStart(ctx context.Context) (retErr error) {
+	logger, err := zap.NewDevelopment()
+	if err != nil {
+		return err
+	}
+
+	injectStartEnv()
+
+	otelShutdown, err := setupOTelSDK(ctx)
+	if err != nil {
+		return fmt.Errorf("setup otel: %w", err)
+	}
+	defer func() {
+		retErr = errors.Join(retErr, otelShutdown(ctx))
+	}()
+
+	auth, err := czauth.SetupAuth(conf.clerkSecretKey, logger)
+	if err != nil {
+		return err
+	}
+
+	db, err := gzdb.SetupDB(conf.dbPath)
+	if err != nil {
+		return err
+	}
+
+	err = RegisterMultiAddrProtocols()
+	if err != nil {
+		return err
+	}
+
+	mux := http.NewServeMux()
+
+	mailClient := (*resend.Client)(nil)
+	if conf.resendSecretKey != "" {
+		logger.Info("resend mail client initialized")
+		mailHTTPClient := &http.Client{
+			Timeout:   time.Minute,
+			Transport: otelhttp.NewTransport(http.DefaultTransport),
+		}
+		mailClient = resend.NewCustomClient(mailHTTPClient, conf.resendSecretKey)
+	}
+
+	zenao := &ZenaoServer{
+		Logger:            logger,
+		Auth:              auth,
+		DB:                db,
+		AppBaseURL:        conf.appBaseURL,
+		MailClient:        mailClient,
+		MailSender:        conf.mailSender,
+		DiscordToken:      conf.discordtoken,
+		Maintenance:       conf.maintenance,
+		StripeSecretKey:   conf.stripeSecretKey,
+		PaidEventsEnabled: conf.paidEventsEnabled,
+		PaymentProviders:  map[string]payment.Payment{},
+	}
+
+	if conf.stripeSecretKey != "" {
+		stripePaymentProvider := zpstripe.NewStripe(conf.stripeSecretKey)
+		zenao.PaymentProviders[stripePaymentProvider.PlatformType()] = stripePaymentProvider
+	}
+
+	allowedOrigins := strings.Split(conf.allowedOrigins, ",")
+
+	// Per-IP rate limiter: 10 requests/second, burst of 20, entries expire after 5 minutes
+	rateLimiter := NewRateLimiter(10, 20, 5*time.Minute)
+
+	path, handler := zenaov1connect.NewZenaoServiceHandler(zenao,
+		connect.WithInterceptors(
+			NewRateLimitInterceptor(rateLimiter),
+			NewLoggingInterceptor(logger),
+			NewMaintenanceInterceptor(conf.maintenance),
+		),
+	)
+	mux.Handle(path, middlewares(handler,
+		withTracing(),
+		withConnectCORS(allowedOrigins...),
+		auth.WithAuth(),
+	))
+
+	logger.Info("Starting server", zap.String("addr", conf.bindAddr))
+
+	return http.ListenAndServe(
+		conf.bindAddr,
+		// Use h2c so we can serve HTTP/2 without TLS.
+		h2c.NewHandler(mux, &http2.Server{}),
+	)
+}
+
+func middlewares(base http.Handler, ms ...func(http.Handler) http.Handler) http.Handler {
+	res := base
+	rms := ms[:]
+	slices.Reverse(rms)
+	for _, m := range rms {
+		res = m(res)
+	}
+	return res
+}
+
+func withConnectCORS(allowedOrigins ...string) func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		middleware := cors.New(cors.Options{
+			AllowedOrigins: allowedOrigins,
+			AllowedMethods: connectcors.AllowedMethods(),
+			AllowedHeaders: append(connectcors.AllowedHeaders(), "Authorization", "X-Team-Id"),
+			ExposedHeaders: connectcors.ExposedHeaders(),
+		})
+		return middleware.Handler(next)
+	}
+}
+
+func NewMaintenanceInterceptor(maintenance bool) connect.UnaryInterceptorFunc {
+	interceptor := func(next connect.UnaryFunc) connect.UnaryFunc {
+		return connect.UnaryFunc(func(
+			ctx context.Context,
+			req connect.AnyRequest,
+		) (connect.AnyResponse, error) {
+			if maintenance && req.Spec().Procedure != "/zenao.v1.ZenaoService/Health" {
+				return nil, connect.NewError(connect.CodeUnavailable, errors.New("service is under maintenance, try again in few minutes..."))
+			}
+			return next(ctx, req)
+		})
+	}
+	return connect.UnaryInterceptorFunc(interceptor)
+}
+
+func NewLoggingInterceptor(logger *zap.Logger) connect.UnaryInterceptorFunc {
+	interceptor := func(next connect.UnaryFunc) connect.UnaryFunc {
+		return connect.UnaryFunc(func(
+			ctx context.Context,
+			req connect.AnyRequest,
+		) (connect.AnyResponse, error) {
+			// Log procedure and peer only — never log request payloads
+			// which may contain passwords, emails, or payment data
+			logger.Info(req.Spec().Procedure, zap.Any("peer", req.Peer()))
+			res, err := next(ctx, req)
+			if err != nil {
+				logger.Error(req.Spec().Procedure, zap.Any("peer", req.Peer()), zap.Error(err))
+			}
+			return res, err
+		})
+	}
+	return connect.UnaryInterceptorFunc(interceptor)
+}

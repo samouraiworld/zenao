@@ -1,0 +1,368 @@
+package main
+
+import (
+	"context"
+	"errors"
+	"fmt"
+	"net/url"
+	"slices"
+	"strings"
+	"time"
+	_ "time/tzdata"
+
+	"connectrpc.com/connect"
+	"github.com/resend/resend-go/v2"
+	"github.com/samouraiworld/zenao/backend/webhook"
+	zenaov1 "github.com/samouraiworld/zenao/backend/zenao/v1"
+	"github.com/samouraiworld/zenao/backend/zeni"
+	"go.uber.org/zap"
+)
+
+func (s *ZenaoServer) CreateEvent(
+	ctx context.Context,
+	req *connect.Request[zenaov1.CreateEventRequest],
+) (*connect.Response[zenaov1.CreateEventResponse], error) {
+	actor, err := s.GetActor(ctx, req.Header())
+	if err != nil {
+		return nil, err
+	}
+
+	s.Logger.Info("create-event", zap.String("title", req.Msg.Title), zap.String("actor-id", actor.ID()), zap.Bool("acting-as-team", actor.IsTeam()))
+
+	if err := validateEvent(req.Msg.StartDate, req.Msg.EndDate, req.Msg.Title, req.Msg.Description, req.Msg.Location, req.Msg.ImageUri, req.Msg.Capacity, req.Msg.TicketPrice, req.Msg.Password); err != nil {
+		return nil, fmt.Errorf("invalid input: %w", err)
+	}
+	if err := validatePriceGroups(req.Msg.PricesGroups); err != nil {
+		return nil, fmt.Errorf("invalid price groups: %w", err)
+	}
+
+	if hasPaidPrices(req.Msg.PricesGroups) && req.Msg.CommunityId == "" {
+		return nil, errors.New("community is required for paid events")
+	}
+
+	//XXX: refactor the logic to avoid duplicate w/ gkps ?
+	authOrgas, err := s.Auth.EnsureUsersExists(ctx, req.Msg.Organizers)
+	if err != nil {
+		return nil, err
+	}
+
+	var organizersIDs []string
+	organizersIDs = append(organizersIDs, actor.ID())
+	for _, authOrg := range authOrgas {
+		if authOrg.Banned {
+			return nil, fmt.Errorf("user %s is banned", authOrg.Email)
+		}
+		zOrg, err := s.EnsureUserExists(ctx, authOrg)
+		if err != nil {
+			return nil, err
+		}
+		if slices.Contains(organizersIDs, zOrg.ID) {
+			return nil, fmt.Errorf("duplicate organizer: %s", authOrg.Email)
+		}
+		organizersIDs = append(organizersIDs, zOrg.ID)
+	}
+
+	authGkps, err := s.Auth.EnsureUsersExists(ctx, req.Msg.Gatekeepers)
+	if err != nil {
+		return nil, err
+	}
+
+	var gatekeepersIDs []string
+	for _, authGkp := range authGkps {
+		if authGkp.Banned {
+			return nil, fmt.Errorf("user %s is banned", authGkp.Email)
+		}
+		zGkp, err := s.EnsureUserExists(ctx, authGkp)
+		if err != nil {
+			return nil, err
+		}
+		if slices.Contains(gatekeepersIDs, zGkp.ID) {
+			return nil, fmt.Errorf("duplicate gatekeeper: %s", authGkp.Email)
+		}
+		gatekeepersIDs = append(gatekeepersIDs, zGkp.ID)
+	}
+
+	evt := (*zeni.Event)(nil)
+	cmt := (*zeni.Community)(nil)
+	targets := []*zeni.User{}
+	if err := s.DB.TxWithSpan(ctx, "db.CreateEvent", func(db zeni.DB) error {
+		if evt, err = db.CreateEvent(actor.ID(), organizersIDs, gatekeepersIDs, req.Msg); err != nil {
+			return err
+		}
+
+		if _, err = db.CreateFeed(zeni.EntityTypeEvent, evt.ID, "main"); err != nil {
+			return err
+		}
+
+		if req.Msg.CommunityId != "" {
+			cmt, err = db.GetCommunity(req.Msg.CommunityId)
+			if err != nil {
+				return err
+			}
+			roles, err := db.EntityRoles(zeni.EntityTypeUser, actor.ID(), zeni.EntityTypeCommunity, cmt.ID)
+			if err != nil {
+				return err
+			}
+			if !slices.Contains(roles, zeni.RoleAdministrator) {
+				return errors.New("user is not an admin of the community and cannot add event to it")
+			}
+			err = db.AddEventToCommunity(evt.ID, cmt.ID)
+			if err != nil {
+				return err
+			}
+			targets, err = db.GetOrgUsersWithRoles(zeni.EntityTypeCommunity, req.Msg.CommunityId, []string{zeni.RoleMember})
+			if err != nil {
+				return err
+			}
+		}
+
+		if len(req.Msg.PricesGroups) > 0 {
+			var (
+				paymentAccount   *zeni.PaymentAccount
+				paymentAccountID string
+			)
+			if hasPaidPrices(req.Msg.PricesGroups) {
+				paymentAccount, err = db.GetPaymentAccountByCommunityPlatform(req.Msg.CommunityId, zeni.PaymentPlatformStripeConnect)
+				if err != nil {
+					return errors.New("payment account is required for paid events")
+				}
+				paymentAccountID = paymentAccount.ID
+			}
+
+			for _, group := range req.Msg.PricesGroups {
+				if len(group.Prices) == 0 {
+					continue
+				}
+				priceGroup, err := db.CreatePriceGroup(evt.ID, req.Msg.Capacity)
+				if err != nil {
+					return err
+				}
+				for _, price := range group.Prices {
+					amountMinor := price.AmountMinor
+					currency := strings.ToUpper(strings.TrimSpace(price.CurrencyCode))
+					if amountMinor == 0 {
+						currency = ""
+					}
+
+					var (
+						pricePaymentAccount *zeni.PaymentAccount
+						priceAccountID      string
+					)
+					if amountMinor > 0 {
+						priceAccountID = paymentAccountID
+						pricePaymentAccount = paymentAccount
+					}
+
+					if _, err := db.CreatePrice(pricePaymentAccount, &zeni.Price{
+						PriceGroupID:     priceGroup.ID,
+						AmountMinor:      amountMinor,
+						CurrencyCode:     currency,
+						PaymentAccountID: priceAccountID,
+					}); err != nil {
+						return err
+					}
+				}
+			}
+		}
+		return nil
+	}); err != nil {
+		return nil, err
+	}
+
+	webhook.TrySendDiscordMessage(s.Logger, s.DiscordToken, evt)
+
+	if s.MailClient != nil {
+		htmlStr, text, err := ticketsConfirmationMailContent(evt, "Event created!")
+		if err != nil {
+			s.Logger.Error("generate-event-email-content", zap.Error(err), zap.String("event-id", evt.ID))
+		} else {
+			// XXX: Replace sender name with organizer name
+			if _, err := s.MailClient.Emails.SendWithContext(ctx, &resend.SendEmailRequest{
+				From:    fmt.Sprintf("Zenao <%s>", s.MailSender),
+				To:      []string{actor.AuthUser.Email},
+				Subject: fmt.Sprintf("%s - Creation confirmed", evt.Title),
+				Html:    htmlStr,
+				Text:    text,
+			}); err != nil {
+				s.Logger.Error("send-event-confirmation-email", zap.Error(err), zap.String("event-id", evt.ID))
+			}
+		}
+	}
+
+	if cmt != nil && len(targets) > 0 && req.Msg.CommunityEmail && s.MailClient != nil {
+		var authIDs []string
+		for _, target := range targets {
+			// Skip teams which don't have AuthID
+			if target.AuthID == "" {
+				continue
+			}
+			authIDs = append(authIDs, target.AuthID)
+		}
+		if len(authIDs) == 0 {
+			return connect.NewResponse(&zenaov1.CreateEventResponse{
+				Id: evt.ID,
+			}), nil
+		}
+		authTargets, err := s.Auth.GetUsersFromIDs(ctx, authIDs)
+		if err != nil {
+			return nil, err
+		}
+
+		htmlStr, text, err := communityNewEventMailContent(evt, cmt)
+		if err != nil {
+			return nil, err
+		}
+
+		var requests []*resend.SendEmailRequest
+		for _, authTarget := range authTargets {
+			if authTarget.Email == "" {
+				s.Logger.Error("create-event", zap.String("target-id", authTarget.ID), zap.String("target-email", authTarget.Email), zap.Error(errors.New("target has no email")))
+				continue
+			}
+			requests = append(requests, &resend.SendEmailRequest{
+				From:    fmt.Sprintf("Zenao <%s>", s.MailSender),
+				To:      []string{authTarget.Email},
+				Subject: "New event by " + cmt.DisplayName + "!",
+				Html:    htmlStr,
+				Text:    text,
+			})
+		}
+		count := 0
+		s.Logger.Info("send-community-new-event-emails", zap.Int("count", len(requests)))
+		for i := 0; i < len(requests); i += 100 {
+			batch := requests[i:min(i+100, len(requests))]
+			if _, err := s.MailClient.Batch.SendWithContext(context.Background(), batch); err != nil {
+				s.Logger.Error("send-community-new-event-emails", zap.Error(err), zap.Int("batch-size", len(batch)))
+				continue
+			}
+			count += len(batch)
+			s.Logger.Info("send-community-new-event-emails", zap.Int("already-sent-count", count), zap.Int("total", len(requests)))
+		}
+	}
+
+	return connect.NewResponse(&zenaov1.CreateEventResponse{
+		Id: evt.ID,
+	}), nil
+}
+
+func validateEvent(startDate, endDate uint64, title, description string, location *zenaov1.EventLocation, imageURI string, capacity uint32, ticketPrice float64, password string) error {
+	if startDate >= endDate {
+		return errors.New("end date must be after start date")
+	}
+	if len(title) < 2 || len(title) > 140 {
+		return errors.New("title must be of length 2 to 140")
+	}
+	if len(description) < 10 || len(description) > 10000 {
+		return errors.New("event description must be of length 10 to 10000")
+	}
+	if len(imageURI) == 0 || len(imageURI) > 400 {
+		return errors.New("image uri must be of length 1 to 400")
+	}
+	// NOTE: url package supports uri parsing
+	if _, err := url.Parse(imageURI); err != nil {
+		return fmt.Errorf("invalid image uri: %w", err)
+	}
+	if capacity <= 0 {
+		return errors.New("capacity must be greater than 0")
+	}
+	if ticketPrice != 0 {
+		return errors.New("event with price is not supported")
+	}
+
+	// NOTE: location venue name can be empty
+
+	instructions := location.GetInstructions()
+	if len(instructions) > 10000 {
+		return errors.New("location instructions over 10000 characters")
+	}
+
+	switch val := location.GetAddress().(type) {
+	case *zenaov1.EventLocation_Custom:
+		addr := val.Custom.GetAddress()
+		if len(addr) == 0 || len(addr) > 400 {
+			return errors.New("loc address must be of length 1 to 400")
+		}
+
+		tz := val.Custom.GetTimezone()
+		if tz == "" {
+			return errors.New("loc timezone empty")
+		}
+		_, err := time.LoadLocation(tz)
+		if err != nil {
+			return fmt.Errorf("loc timezone: %w", err)
+		}
+		if tz == "Local" {
+			return errors.New("loc timezone can't be Local")
+		}
+
+	case *zenaov1.EventLocation_Geo:
+		addr := val.Geo.GetAddress()
+		if len(addr) == 0 || len(addr) > 400 {
+			return errors.New("loc address must be of length 1 to 400")
+		}
+
+		lng := val.Geo.Lng
+		if lng < -180 || lng > 180 {
+			return errors.New("loc longitude must be in the range [-180,180]")
+		}
+		lat := val.Geo.Lat
+		if lat < -90 || lat > 90 {
+			return errors.New("loc latitude must be in the range [-90,90]")
+		}
+
+	case *zenaov1.EventLocation_Virtual:
+		uri := val.Virtual.GetUri()
+		if len(uri) == 0 || len(uri) > 400 {
+			return errors.New("loc uri must be of length 1 to 400")
+		}
+		// NOTE: url package supports uri parsing
+		if _, err := url.Parse(uri); err != nil {
+			return fmt.Errorf("loc uri: %w", err)
+		}
+
+	default:
+		return errors.New("unknown location kind")
+	}
+
+	// allowing any password length is a DoS vector
+	if len(password) > zeni.MaxPasswordLen {
+		return errors.New("password too long")
+	}
+
+	return nil
+}
+
+func validatePriceGroups(groups []*zenaov1.EventPriceGroup) error {
+	for _, group := range groups {
+		for _, price := range group.Prices {
+			if price.AmountMinor < 0 {
+				return errors.New("amount must be greater or equal to 0")
+			}
+			currency := strings.ToUpper(strings.TrimSpace(price.CurrencyCode))
+			if price.AmountMinor == 0 {
+				if currency != "" {
+					return errors.New("currency must be empty for zero price")
+				}
+				continue
+			}
+			if currency == "" {
+				return errors.New("currency is required for non-zero price")
+			}
+			if !zeni.IsSupportedStripeCurrency(currency) {
+				return errors.New("unsupported currency")
+			}
+		}
+	}
+	return nil
+}
+
+func hasPaidPrices(groups []*zenaov1.EventPriceGroup) bool {
+	for _, group := range groups {
+		for _, price := range group.Prices {
+			if price.AmountMinor > 0 {
+				return true
+			}
+		}
+	}
+	return false
+}

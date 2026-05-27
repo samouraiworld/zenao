@@ -1,0 +1,12 @@
+import { useTranslations } from "next-intl";
+import Text from "../widgets/texts/text";
+
+export function MaintenanceScreen() {
+  const t = useTranslations();
+
+  return (
+    <div className="h-screen flex items-center justify-center">
+      <Text className="text-center">{t("maintenance")}</Text>
+    </div>
+  );
+}

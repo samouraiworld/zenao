@@ -1,0 +1,20 @@
+Join us for the upcoming event organized by {{.CommunityName}}!
+
+
+EVENT DETAILS:
+
+{{.EventName}}
+
+DATE AND TIME
+
+
+
+From: {{.EventDate}} To: {{.EventEndDate}}
+
+ORGANIZED BY
+
+
+
+{{.CommunityName}}
+
+See the event {{.EventURL}}

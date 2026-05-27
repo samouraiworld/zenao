@@ -1,0 +1,28 @@
+name: JS
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  merge_group:
+
+jobs:
+  check-js:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          cache: "npm"
+          node-version-file: ".nvmrc"
+
+      - name: Install node modules
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Check that there is no diff
+        run: git diff --exit-code
