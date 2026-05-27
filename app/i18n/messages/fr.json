@@ -55,7 +55,6 @@
     }
   },
   "home": {
-    "base-news": "Actualités : Nous arrivons bientôt sur",
     "main-text": "Organisez des événements en quelques secondes",
     "secondary-text": "\"Tout ce qui arrive, survient ou apparaît, peut donner naissance à une communauté autonome, ou une nouvelle tribu.\"",
     "placeholder": "Nom de l'événement...",
@@ -502,9 +501,6 @@
       }
     },
     "widgets": {
-      "soon-on-base": {
-        "soon-on": "Bientôt sur"
-      },
       "quick-create-menu": {
         "create-event": "Créer un événement",
         "create-community": "Créer une communauté"

@@ -55,7 +55,6 @@
     }
   },
   "home": {
-    "base-news": "Novedades: Pronto llegaremos a",
     "main-text": "Organiza evento(s) en segundos",
     "secondary-text": "\"Todo lo que sucede, llega o aparece, puede dar origen a una comunidad autónoma o a una nueva tribu.\"",
     "placeholder": "Nombre del evento...",
@@ -502,9 +501,6 @@
       }
     },
     "widgets": {
-      "soon-on-base": {
-        "soon-on": "Próximamente en"
-      },
       "quick-create-menu": {
         "create-event": "Crear nuevo evento",
         "create-community": "Crear nueva comunidad"

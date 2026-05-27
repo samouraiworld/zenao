@@ -31,7 +31,6 @@ import {
 import { UserMenu } from "@/components/features/user/user-menu";
 import { useActiveAccount } from "@/components/providers/active-account-provider";
 import { useAnalyticsEvents } from "@/hooks/use-analytics-events";
-import SoonOnBase from "@/components/widgets/soon-on-base";
 import VersionTag from "@/components/widgets/version-tag";
 
 export type NavItem = {
@@ -205,7 +204,6 @@ export function Header() {
       </div>
 
       <div className="flex gap-2 items-center">
-        <SoonOnBase className="hidden sm:flex" />
         <QuickCreateMenu />
         <div className="max-md:hidden">
           <LocaleSwitcher />

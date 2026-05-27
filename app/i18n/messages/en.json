@@ -55,7 +55,6 @@
     }
   },
   "home": {
-    "base-news": "News & Updates: We are arriving soon on",
     "main-text": "Organize event(s) in seconds",
     "secondary-text": "\"Anything that happens, arrives or appears, can give birth to an autonomous community, or a new tribe.\"",
     "placeholder": "Event name...",
@@ -502,9 +501,6 @@
       }
     },
     "widgets": {
-      "soon-on-base": {
-        "soon-on": "Soon on"
-      },
       "quick-create-menu": {
         "create-event": "Create new event",
         "create-community": "Create new community"

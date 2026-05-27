@@ -2,8 +2,6 @@
 
 An event management and community platform featuring event creation, community management, and social feeds.
 
-> **Note:** Zenao is currently a Web2 application, with plans to transition to Web3 using [base](https://www.base.org/).
-
 ## Table of Contents
 
 - [Tech Stack](#tech-stack)
