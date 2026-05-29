@@ -1,6 +1,5 @@
 "use client";
 
-import * as Sentry from "@sentry/nextjs";
 import { useEffect } from "react";
 import { ClerkProvider } from "@clerk/nextjs";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
@@ -18,6 +17,7 @@ import { Footer } from "@/components/layout/navigation/footer";
 import PwaBottomBar from "@/components/layout/navigation/pwa-bottom-bar";
 import { ScreenContainerCentered } from "@/components/layout/screen-container";
 import { Button } from "@/components/shadcn/button";
+import { captureException } from "@/lib/report";
 
 const albertSans = Albert_Sans({
   variable: "--font-albert-sans",
@@ -32,9 +32,7 @@ export default function GlobalError({
   const contextNow = new Date();
 
   useEffect(() => {
-    if (process.env.NEXT_PUBLIC_ENV ?? "development" !== "development") {
-      Sentry.captureException(error);
-    }
+    captureException(error);
   }, [error]);
 
   return (
