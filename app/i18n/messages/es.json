@@ -690,7 +690,9 @@
     "sign-in-to-join-button": "Inicia sesión para unirte",
     "joining-state": "Uniéndose...",
     "join-community-button": "Unirse a la comunidad",
-    "edit-community-button": "Editar comunidad"
+    "edit-community-button": "Editar comunidad",
+    "about-event": "Acerca de",
+    "discussion": "Discusión"
   },
   "community-create-form": {
     "log-in": "Inicia sesión para crear una comunidad",

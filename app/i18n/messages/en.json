@@ -690,7 +690,9 @@
     "sign-in-to-join-button": "Sign in to join",
     "joining-state": "Joining...",
     "join-community-button": "Join community",
-    "edit-community-button": "Edit community"
+    "edit-community-button": "Edit community",
+    "about-event": "About",
+    "discussion": "Discussion"
   },
   "community-create-form": {
     "log-in": "Log in to create a community",
