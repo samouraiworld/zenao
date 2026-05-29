@@ -84,36 +84,6 @@ describe("main", () => {
     cy.get('a[href^="/ticket/"]').should("be.visible");
   });
 
-  it("navigate to manifesto from home", () => {
-    // start from the index page
-    cy.visit("/");
-
-    logout();
-
-    // go to manifesto page
-    cy.get("a").contains("Manifesto").click();
-
-    // check that manifesto text is present
-    cy.get("p")
-      .contains(
-        "commit ourselves to building sustainable tools that help people",
-      )
-      .should("be.visible");
-  });
-
-  it("navigate to home from manifesto", () => {
-    // start from the index page
-    cy.visit("/manifesto");
-
-    logout();
-
-    // go to home page
-    cy.get("a").contains("ZENAO").click();
-
-    // check that home text is present
-    cy.get("h1").contains("Organize event(s) in seconds").should("be.visible");
-  });
-
   it("blog exists", () => {
     // start from the index page
     cy.visit("/blog");

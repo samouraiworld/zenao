@@ -1,12 +1,6 @@
 "use client";
 
-import {
-  BookOpenText,
-  BoxesIcon,
-  CompassIcon,
-  FileText,
-  Tickets,
-} from "lucide-react";
+import { BoxesIcon, CompassIcon, FileText, Tickets } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { usePathname } from "next/navigation";
 import { useMemo } from "react";
@@ -51,13 +45,6 @@ function PwaBottomBar() {
         icon: FileText,
         needsAuth: true,
         children: t("orders"),
-      },
-      {
-        key: "manifesto",
-        to: "/manifesto",
-        icon: BookOpenText,
-        needsAuth: false,
-        children: t("manifesto"),
       },
     ],
     [t],

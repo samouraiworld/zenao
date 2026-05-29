@@ -6,7 +6,6 @@ import Link from "next/link";
 import { useTranslations } from "next-intl";
 import {
   ArrowLeft,
-  BookOpenText,
   BoxesIcon,
   CompassIcon,
   FileText,
@@ -78,13 +77,6 @@ const HeaderLinks = () => {
         icon: FileText,
         needsAuth: true,
         children: t("orders"),
-      },
-      {
-        key: "manifesto",
-        to: "/manifesto",
-        icon: BookOpenText,
-        needsAuth: false,
-        children: t("manifesto"),
       },
       {
         key: "blog",
