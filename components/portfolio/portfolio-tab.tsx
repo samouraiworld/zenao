@@ -3,7 +3,6 @@ import { Loader2, AudioWaveform } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useState, useRef, memo } from "react";
 
-import { captureException } from "@sentry/nextjs";
 import PortfolioPreviewDialog from "../dialogs/portfolio-preview-dialog";
 import PortfolioUploadVideoDialog from "../dialogs/portfolio-upload-video-dialog";
 import { Web3Image } from "../widgets/images/web3-image";
@@ -21,6 +20,7 @@ import { cn } from "@/lib/tailwind";
 import { PortfolioItem, PortfolioUploadVideoSchemaType } from "@/types/schemas";
 import { useToast } from "@/hooks/use-toast";
 import { uploadFile } from "@/lib/files";
+import { captureException } from "@/lib/report";
 
 const MemoizedVideoPreview = memo(({ uri }: { uri: string }) => (
   <MarkdownPreview
