@@ -2,17 +2,22 @@
 
 import {
   Check,
+  ChevronDown,
   CircleUserRound,
   Eye,
+  Globe,
   LayoutDashboard,
   LogOut,
+  Moon,
   Plus,
+  Sun,
 } from "lucide-react";
 import { SignOutButton, useAuth } from "@clerk/nextjs";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import Link from "next/link";
-import { useTranslations } from "next-intl";
-import { ReactNode } from "react";
+import { useLocale, useTranslations } from "next-intl";
+import { ReactNode, useState } from "react";
+import { useTheme } from "next-themes";
 import { UserAvatar } from "./user";
 import { CreateTeamDialog } from "@/components/dialogs/create-team-dialog";
 import {
@@ -23,11 +28,19 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/shadcn/dropdown-menu";
+import { cn } from "@/lib/tailwind";
 import { useAccountSwitcher } from "@/hooks/use-account-switcher";
 import { profileOptions } from "@/lib/queries/profile";
 import { userInfoOptions } from "@/lib/queries/user";
 import RoleBasedViewMode from "@/components/widgets/permissions/view-mode";
 import { planSchema } from "@/types/schemas";
+import {
+  type Locale,
+  locales,
+  localeNames,
+  localeFlags,
+} from "@/app/i18n/config";
+import { useLocaleChange } from "@/hooks/use-locale-change";
 
 export type UserMenuVariant = "dashboard" | "customer";
 
@@ -76,9 +89,24 @@ export function UserMenu({
 
   const currentAccountId = activeAccount?.id ?? userId;
 
+  const [isLangExpanded, setIsLangExpanded] = useState(false);
+  const [isThemeExpanded, setIsThemeExpanded] = useState(false);
+
+  const { theme, setTheme } = useTheme();
+  const tTheme = useTranslations("components.toggle-theme-button");
+  const currentLocale = useLocale() as Locale;
+  const { isPending: isLocalePending, handleLocaleChange } = useLocaleChange();
+
   return (
     <>
-      <DropdownMenu>
+      <DropdownMenu
+        onOpenChange={(open) => {
+          if (!open) {
+            setIsLangExpanded(false);
+            setIsThemeExpanded(false);
+          }
+        }}
+      >
         <DropdownMenuTrigger asChild>{children}</DropdownMenuTrigger>
         <DropdownMenuContent
           className="min-w-56 rounded-lg"
@@ -176,8 +204,6 @@ export function UserMenu({
             </DropdownMenuItem>
           </DropdownMenuGroup>
 
-          <DropdownMenuSeparator />
-
           {/* View switch */}
           {variant === "dashboard" ? (
             <DropdownMenuItem asChild className="cursor-pointer">
@@ -193,6 +219,81 @@ export function UserMenu({
                 {tNav("dashboard-view")}
               </Link>
             </DropdownMenuItem>
+          )}
+
+          <DropdownMenuSeparator />
+
+          {/* Mobile-only: language and theme (customer variant only, dashboard header always shows these) */}
+          {variant === "customer" && (
+            <>
+              <DropdownMenuItem
+                className="sm:hidden cursor-pointer"
+                onSelect={(e) => e.preventDefault()}
+                onClick={() => {
+                  setIsLangExpanded((v) => !v);
+                  setIsThemeExpanded(false);
+                }}
+              >
+                <Globe className="h-4 w-4" />
+                {t("language")}
+                <ChevronDown
+                  className={cn(
+                    "ml-auto h-4 w-4 transition-transform",
+                    isLangExpanded && "rotate-180",
+                  )}
+                />
+              </DropdownMenuItem>
+              {isLangExpanded &&
+                locales.map((locale) => (
+                  <DropdownMenuItem
+                    key={locale}
+                    className="sm:hidden pl-8 cursor-pointer"
+                    disabled={isLocalePending}
+                    onClick={() => handleLocaleChange(locale)}
+                  >
+                    <span>{localeFlags[locale]}</span>
+                    {localeNames[locale]}
+                    {locale === currentLocale && (
+                      <Check className="ml-auto h-4 w-4" />
+                    )}
+                  </DropdownMenuItem>
+                ))}
+
+              <DropdownMenuItem
+                className="sm:hidden cursor-pointer"
+                onSelect={(e) => e.preventDefault()}
+                onClick={() => {
+                  setIsThemeExpanded((v) => !v);
+                  setIsLangExpanded(false);
+                }}
+              >
+                <Sun className="h-4 w-4 rotate-0 scale-100 dark:-rotate-90 dark:scale-0" />
+                <Moon className="absolute h-4 w-4 rotate-90 scale-0 dark:rotate-0 dark:scale-100" />
+                {t("theme")}
+                <ChevronDown
+                  className={cn(
+                    "ml-auto h-4 w-4 transition-transform",
+                    isThemeExpanded && "rotate-180",
+                  )}
+                />
+              </DropdownMenuItem>
+              {isThemeExpanded && (
+                <>
+                  {(["light", "dark", "system"] as const).map((t) => (
+                    <DropdownMenuItem
+                      key={t}
+                      className="sm:hidden pl-8 cursor-pointer"
+                      onClick={() => setTheme(t)}
+                    >
+                      {tTheme(`${t}-option`)}
+                      {theme === t && <Check className="ml-auto h-4 w-4" />}
+                    </DropdownMenuItem>
+                  ))}
+                </>
+              )}
+
+              <DropdownMenuSeparator className="sm:hidden" />
+            </>
           )}
 
           {/* Sign out */}

@@ -7,6 +7,8 @@ import { UserMenu } from "../user/user-menu";
 import { Separator } from "@/components/shadcn/separator";
 import { SidebarTrigger } from "@/components/shadcn/sidebar";
 import { ToggleThemeButton } from "@/components/widgets/buttons/toggle-theme-button";
+import { LocaleSwitcher } from "@/components/layout/navigation/locale-switcher";
+import QuickCreateMenu from "@/components/layout/navigation/header/quick-create-menu";
 import { cn } from "@/lib/tailwind";
 import { NavbarStyle } from "@/lib/preferences/preferences";
 import { Skeleton } from "@/components/shadcn/skeleton";
@@ -21,7 +23,7 @@ export default function DashboardHeader({ navbarStyle }: DashboardHeaderProps) {
     <header
       data-navbar-style={navbarStyle}
       className={cn(
-        "flex py-2 shrink-0 items-center gap-2 border-b transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:py-2",
+        "flex py-4 md:py-2 shrink-0 items-center gap-2 md:border-b transition-[width,height] ease-linear md:group-has-data-[collapsible=icon]/sidebar-wrapper:py-2",
         // Handle sticky navbar style with conditional classes so blur, background, z-index, and rounded corners remain consistent across all SidebarVariant layouts.
         "data-[navbar-style=sticky]:bg-background/50 data-[navbar-style=sticky]:sticky data-[navbar-style=sticky]:top-0 data-[navbar-style=sticky]:z-50 data-[navbar-style=sticky]:overflow-hidden data-[navbar-style=sticky]:rounded-t-[inherit] data-[navbar-style=sticky]:backdrop-blur-md",
       )}
@@ -34,7 +36,9 @@ export default function DashboardHeader({ navbarStyle }: DashboardHeaderProps) {
             className="mx-2 data-[orientation=vertical]:h-4"
           />
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-4">
+          <QuickCreateMenu />
+          <LocaleSwitcher />
           <ToggleThemeButton />
           <Suspense fallback={<Skeleton className="h-8 w-8 rounded-full" />}>
             <DashboardUserMenu />
