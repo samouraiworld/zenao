@@ -2,7 +2,7 @@
 
 import { useAuth } from "@clerk/nextjs";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { Suspense, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
@@ -156,6 +156,11 @@ function EventPostPage({
   const { data: eventData } = useSuspenseQuery(eventOptions(eventId));
 
   const [editMode, setEditMode] = useState(false);
+  const tabsRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    tabsRef.current?.scrollIntoView({ block: "start" });
+  }, []);
 
   const { onEditStandardPost, isEditing } = useFeedPostEditHandler(
     "event",
@@ -198,7 +203,9 @@ function EventPostPage({
   return (
     <div className="flex flex-col gap-8">
       <EventInfoLayout eventId={eventId} data={eventData} />
-      <EventPostTabsNav eventId={eventId} />
+      <div ref={tabsRef}>
+        <EventPostTabsNav eventId={eventId} />
+      </div>
       <div className="flex flex-col gap-12">
         <EventPostInfo
           post={post}
@@ -256,6 +263,11 @@ function CommunityPostPage({
   const { data: post } = useSuspenseQuery(feedPost(postId, userProfileId));
 
   const [editMode, setEditMode] = useState(false);
+  const tabsRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    tabsRef.current?.scrollIntoView({ block: "start" });
+  }, []);
 
   const { onEditStandardPost, isEditing } = useFeedPostEditHandler(
     "community",
@@ -298,7 +310,9 @@ function CommunityPostPage({
   return (
     <CommunityInfoLayout communityId={communityId}>
       <div className="flex flex-col gap-8">
-        <CommunityPostTabsNav communityId={communityId} />
+        <div ref={tabsRef}>
+          <CommunityPostTabsNav communityId={communityId} />
+        </div>
         <div className="flex flex-col gap-12">
           <CommunityPostInfo
             post={post}
