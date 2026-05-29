@@ -121,7 +121,7 @@ var staticCIDs = []string{
 	"bafybeidrbpiyfvwsel6fxb7wl4p64tymnhgd7xnt3nowquqymtllrq67uy", // default user avatar
 	"bafkreifqabflxtsqvaggg2kw4lyju3pckq4osun4vdlltsn7lal7ak5hli", // mail logo
 	"bafkreiaknq3mxzx5ulryv5tnikjkntmckvz3h4mhjyjle4zbtqkwhyb5xa", // mail calendar icon
-	"bafkreidfskfo2ld3i75s3d2uf6asiena3jletbz5cy7ostihwoyjclceqa",  // mail pin icon
+	"bafkreidfskfo2ld3i75s3d2uf6asiena3jletbz5cy7ostihwoyjclceqa", // mail pin icon
 }
 
 // allIPFSCIDsQuery collects every distinct ipfs:// URI across all tables that store
