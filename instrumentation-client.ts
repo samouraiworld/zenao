@@ -3,7 +3,7 @@
 // https://docs.sentry.io/platforms/javascript/guides/nextjs/
 
 import * as Sentry from "@sentry/nextjs";
-import { APP_ENV, IS_DEV, tracesSampleRate } from "@/lib/env";
+import { APP_ENV, tracesSampleRate } from "@/lib/env";
 
 // Single source of truth for client-side network blips (no connectivity, ad-blocker,
 // brief API downtime) that we cannot act on. Covers Chrome/Edge, Safari, Firefox and
@@ -48,8 +48,7 @@ function isNetworkError(error: unknown): boolean {
 Sentry.init({
   dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
 
-  // No-op locally (and whenever the DSN is missing) instead of relying on an unset DSN.
-  enabled: !!process.env.NEXT_PUBLIC_SENTRY_DSN && !IS_DEV,
+  enabled: !!process.env.NEXT_PUBLIC_SENTRY_DSN,
 
   environment: APP_ENV,
 
