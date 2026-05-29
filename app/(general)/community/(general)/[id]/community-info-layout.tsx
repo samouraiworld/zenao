@@ -68,7 +68,7 @@ function CommunityInfoLayout({
             src={
               data.bannerUri.length > 0
                 ? data.bannerUri
-                : "/images/community-image-fallback.png"
+                : "ipfs://bafybeib2gyk2yagrcdrnhpgbaj6an6ghk2liwx2mshhoa6d54y2mheny24"
             }
             priority
             fetchPriority="high"

@@ -32,7 +32,7 @@ func newMailCmd() *commands.Command {
 
 func execMail() error {
 	evt := &zeni.Event{
-		ImageURI:  "https://zenao.io/images/mail-logo.jpg",
+		ImageURI:  "ipfs://bafkreifqabflxtsqvaggg2kw4lyju3pckq4osun4vdlltsn7lal7ak5hli",
 		Title:     "PEER IN STEP: n0izn0iz + zooma + pwnh4",
 		StartDate: time.Now().Add(time.Hour * 24),
 		EndDate:   time.Now().Add(time.Hour * 30),
