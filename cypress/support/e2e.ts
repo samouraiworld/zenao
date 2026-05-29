@@ -16,6 +16,13 @@
 // Import commands.js using ES2015 syntax:
 import "./commands";
 
+// Ignore React hydration errors caused by failed external image loads (e.g. Wikimedia URLs returning 400)
+Cypress.on("uncaught:exception", (err) => {
+  if (err.message.includes("#418")) {
+    return false;
+  }
+});
+
 beforeEach(() => {
   cy.intercept("POST", "/api/files", {
     statusCode: 200,
