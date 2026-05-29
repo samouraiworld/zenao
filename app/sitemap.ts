@@ -8,8 +8,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     {
       url: "https://zenao.io/discover",
     },
-    {
-      url: "https://zenao.io/manifesto",
-    },
   ];
 }
