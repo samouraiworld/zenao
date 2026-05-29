@@ -7,8 +7,11 @@ import { APP_ENV, tracesSampleRate } from "@/lib/env";
 
 // Single source of truth for client-side network blips (no connectivity, ad-blocker,
 // brief API downtime) that we cannot act on. Covers Chrome/Edge, Safari, Firefox and
-// React Native. Used both for `ignoreErrors` (direct errors) and `isNetworkError`
-// (wrapped errors, e.g. ConnectError wrapping a TypeError: Failed to fetch).
+// React Native. Browsers emit these as the *entire* error message; connect-es re-wraps
+// them as `[code] <message>` (e.g. `[unavailable] Failed to fetch`) and keeps the
+// original error as `.cause`. `isNetworkError` matches a pattern exactly or behind that
+// prefix, so a genuine app error that merely *contains* the words (e.g. "Image Load
+// failed", "Failed to fetch user config") is still reported.
 const NETWORK_ERROR_PATTERNS = [
   "Failed to fetch",
   "Load failed",
@@ -64,6 +67,15 @@ function isWalletProviderError(originalException: unknown): boolean {
   );
 }
 
+// True when `message` is exactly a network blip, or a connect-es-wrapped one
+// (`[code] <message>`). Anchored rather than substring so unrelated app errors that
+// merely contain the words are not swallowed.
+function matchesNetworkPattern(message: string): boolean {
+  return NETWORK_ERROR_PATTERNS.some(
+    (pattern) => message === pattern || message.endsWith(`] ${pattern}`),
+  );
+}
+
 // Walks the `error.cause` chain (bounded depth) so wrapped network errors are caught.
 function isNetworkError(error: unknown): boolean {
   let current = error;
@@ -76,7 +88,7 @@ function isNetworkError(error: unknown): boolean {
           ? current.message
           : "";
 
-    if (NETWORK_ERROR_PATTERNS.some((pattern) => message.includes(pattern))) {
+    if (matchesNetworkPattern(message)) {
       return true;
     }
 
@@ -97,8 +109,9 @@ Sentry.init({
 
   debug: false,
 
-  // Filters direct network errors by message. beforeSend below covers wrapped errors.
-  ignoreErrors: [...NETWORK_ERROR_PATTERNS, ...BROWSER_NOISE_PATTERNS],
+  // Network errors (direct *and* wrapped) are handled by the anchored isNetworkError
+  // check in beforeSend. Here we only drop browser noise like ResizeObserver.
+  ignoreErrors: BROWSER_NOISE_PATTERNS,
 
   integrations: [
     Sentry.feedbackIntegration({
