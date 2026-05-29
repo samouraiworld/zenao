@@ -9,6 +9,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"regexp"
 	"strings"
 	"time"
 
@@ -107,6 +108,10 @@ func pinIPFSCIDs() error {
 	return nil
 }
 
+// ipfsURIRe matches an ipfs:// URI and captures the CID (everything after the scheme
+// up to a whitespace, double-quote, or backslash).
+var ipfsURIRe = regexp.MustCompile(`ipfs://([^\s"\\]+)`)
+
 // allIPFSCIDsQuery collects every distinct ipfs:// URI across all tables that store
 // user-uploaded media, so we can pin them all to the current Pinata account.
 const allIPFSCIDsQuery = `
@@ -130,22 +135,60 @@ SELECT DISTINCT uri FROM (
 	SELECT thumbnail_image_uri         FROM posts        WHERE thumbnail_image_uri LIKE 'ipfs://%'
 )`
 
+// allFrontMatterIPFSCIDsQuery fetches text blobs that embed portfolio items as
+// front-matter JSON (communities.description and users.bio), so we can regex-scan
+// them for ipfs:// URIs that the column-level query above would miss.
+const allFrontMatterIPFSCIDsQuery = `
+SELECT DISTINCT blob FROM (
+	SELECT description AS blob FROM communities WHERE description LIKE '%ipfs://%'
+	UNION ALL
+	SELECT bio         AS blob FROM users        WHERE bio         LIKE '%ipfs://%'
+)`
+
 func collectAllIPFSCIDs(db *gorm.DB) ([]string, error) {
+	seen := make(map[string]struct{})
+
+	// Collect CIDs from dedicated URI columns.
 	rows, err := db.Raw(allIPFSCIDsQuery).Rows()
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-
-	var cids []string
 	for rows.Next() {
 		var uri string
 		if err := rows.Scan(&uri); err != nil {
 			return nil, err
 		}
-		cids = append(cids, strings.TrimPrefix(uri, "ipfs://"))
+		seen[strings.TrimPrefix(uri, "ipfs://")] = struct{}{}
 	}
-	return cids, rows.Err()
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	// Collect CIDs embedded in front-matter blobs (portfolio items).
+	fmRows, err := db.Raw(allFrontMatterIPFSCIDsQuery).Rows()
+	if err != nil {
+		return nil, err
+	}
+	defer fmRows.Close()
+	for fmRows.Next() {
+		var blob string
+		if err := fmRows.Scan(&blob); err != nil {
+			return nil, err
+		}
+		for _, m := range ipfsURIRe.FindAllStringSubmatch(blob, -1) {
+			seen[m[1]] = struct{}{}
+		}
+	}
+	if err := fmRows.Err(); err != nil {
+		return nil, err
+	}
+
+	cids := make([]string, 0, len(seen))
+	for cid := range seen {
+		cids = append(cids, cid)
+	}
+	return cids, nil
 }
 
 type pinByHashBody struct {
