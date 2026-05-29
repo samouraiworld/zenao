@@ -55,8 +55,7 @@ export default function ProfileHeader({
         <AspectRatio ratio={4 / 1}>
           <Web3Image
             src={
-              profileDetails.bannerUri ||
-              "ipfs://bafybeidp4z4cywvdzoyqgdolcqmmxeug62qukpl3nfumjquqragxwr7bny"
+              profileDetails.bannerUri || "/images/profile-avatar-fallback.png"
             }
             alt={tImages("profile-banner")}
             priority
