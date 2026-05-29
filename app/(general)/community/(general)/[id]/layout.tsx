@@ -106,7 +106,7 @@ async function CommunityPageLayout({ params, children }: PageProps) {
           src:
             communityData.bannerUri.length > 0
               ? communityData.bannerUri
-              : "ipfs://bafybeib2gyk2yagrcdrnhpgbaj6an6ghk2liwx2mshhoa6d54y2mheny24",
+              : "/images/community-image-fallback.png",
           width: 3840,
           height: 720,
         }}

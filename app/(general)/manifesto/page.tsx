@@ -206,7 +206,7 @@ export default function Manifesto() {
             alt={tImages("zenao-arch")}
             width={1000}
             height={300}
-            src="https://ipfs.io/ipfs/bafybeigirez6x4hn5ghchng5eoxoi2bkcglaybuz4np6joub6zja5om6l4"
+            src="/images/manifesto-image.png"
             priority
             fetchPriority="high"
             quality={70}
