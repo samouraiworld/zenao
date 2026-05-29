@@ -112,6 +112,18 @@ func pinIPFSCIDs() error {
 // up to a whitespace, double-quote, or backslash).
 var ipfsURIRe = regexp.MustCompile(`ipfs://([^\s"\\]+)`)
 
+// staticCIDs lists hardcoded IPFS CIDs used as fallback images and email icons.
+// These are not stored in the database so they must be pinned explicitly.
+var staticCIDs = []string{
+	"bafybeidp4z4cywvdzoyqgdolcqmmxeug62qukpl3nfumjquqragxwr7bny", // profile banner fallback
+	"bafybeib2gyk2yagrcdrnhpgbaj6an6ghk2liwx2mshhoa6d54y2mheny24", // community banner fallback
+	"bafybeigirez6x4hn5ghchng5eoxoi2bkcglaybuz4np6joub6zja5om6l4", // manifesto architecture image
+	"bafybeidrbpiyfvwsel6fxb7wl4p64tymnhgd7xnt3nowquqymtllrq67uy", // default user avatar
+	"bafkreifqabflxtsqvaggg2kw4lyju3pckq4osun4vdlltsn7lal7ak5hli", // mail logo
+	"bafkreiaknq3mxzx5ulryv5tnikjkntmckvz3h4mhjyjle4zbtqkwhyb5xa", // mail calendar icon
+	"bafkreidfskfo2ld3i75s3d2uf6asiena3jletbz5cy7ostihwoyjclceqa", // mail pin icon
+}
+
 // allIPFSCIDsQuery collects every distinct ipfs:// URI across all tables that store
 // user-uploaded media, so we can pin them all to the current Pinata account.
 const allIPFSCIDsQuery = `
@@ -182,6 +194,10 @@ func collectAllIPFSCIDs(db *gorm.DB) ([]string, error) {
 	}
 	if err := fmRows.Err(); err != nil {
 		return nil, err
+	}
+
+	for _, cid := range staticCIDs {
+		seen[cid] = struct{}{}
 	}
 
 	cids := make([]string, 0, len(seen))
