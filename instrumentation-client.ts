@@ -23,6 +23,47 @@ const BROWSER_NOISE_PATTERNS = [
   "ResizeObserver loop completed with undelivered notifications",
 ];
 
+const EXTENSION_URL_PREFIXES = [
+  "chrome-extension://",
+  "moz-extension://",
+  "safari-extension://",
+  "safari-web-extension://",
+];
+
+// Drops errors originating from browser extensions. Extensions inject into every
+// page and produce noise we cannot act on. Signal: a stack frame whose file is
+// served from an extension URL.
+function isBrowserExtensionError(event: Sentry.ErrorEvent): boolean {
+  const frames =
+    event.exception?.values?.flatMap((v) => v.stacktrace?.frames ?? []) ?? [];
+  return frames.some((f) =>
+    EXTENSION_URL_PREFIXES.some((p) => f.filename?.startsWith(p)),
+  );
+}
+
+// Drops JSON-RPC / EIP-1193 provider errors. Wallet extensions (Keplr, MetaMask…)
+// inject into every page and reject with these codes when several wallets clash
+// (e.g. `{ code: -32603, message: "Internal JSON-RPC error." }`). We ship no web3
+// code, so any such rejection is third-party extension noise we cannot act on.
+// A ConnectError uses gRPC codes (1-16), never these, so there is no false positive.
+function isWalletProviderError(originalException: unknown): boolean {
+  if (
+    !originalException ||
+    typeof originalException !== "object" ||
+    originalException instanceof Error
+  ) {
+    return false;
+  }
+  const code = (originalException as { code?: unknown }).code;
+  if (typeof code !== "number") {
+    return false;
+  }
+  return (
+    (code >= -32768 && code <= -32000) || // JSON-RPC 2.0 reserved (incl. -32603)
+    [4001, 4100, 4200, 4900, 4901].includes(code) // EIP-1193 provider errors
+  );
+}
+
 // Walks the `error.cause` chain (bounded depth) so wrapped network errors are caught.
 function isNetworkError(error: unknown): boolean {
   let current = error;
@@ -67,6 +108,14 @@ Sentry.init({
 
   beforeSend(event, hint) {
     if (isNetworkError(hint?.originalException)) {
+      return null;
+    }
+
+    if (isBrowserExtensionError(event)) {
+      return null;
+    }
+
+    if (isWalletProviderError(hint?.originalException)) {
       return null;
     }
 
