@@ -1,8 +1,6 @@
 "use client";
 
 import { useLocale, useTranslations } from "next-intl";
-import { useRouter } from "next/navigation";
-import { useTransition } from "react";
 import { Globe } from "lucide-react";
 import { Button } from "@/components/shadcn/button";
 import {
@@ -17,20 +15,12 @@ import {
   localeNames,
   localeFlags,
 } from "@/app/i18n/config";
-import { setLocale } from "@/app/i18n/set-locale";
+import { useLocaleChange } from "@/hooks/use-locale-change";
 
 export function LocaleSwitcher() {
   const currentLocale = useLocale() as Locale;
-  const router = useRouter();
-  const [isPending, startTransition] = useTransition();
   const t = useTranslations("a11y");
-
-  function handleLocaleChange(locale: Locale) {
-    startTransition(async () => {
-      await setLocale(locale);
-      router.refresh();
-    });
-  }
+  const { isPending, handleLocaleChange } = useLocaleChange();
 
   return (
     <DropdownMenu>
@@ -38,11 +28,11 @@ export function LocaleSwitcher() {
         <Button
           variant="ghost"
           size="icon"
-          className="h-9 w-9"
+          className="h-auto w-auto p-0 text-secondary-color hover:text-primary-color hover:bg-transparent [&_svg]:size-5"
           disabled={isPending}
           aria-label={t("switch-language")}
         >
-          <Globe className="h-[1.2rem] w-[1.2rem] text-secondary-color hover:text-primary-color" />
+          <Globe />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">

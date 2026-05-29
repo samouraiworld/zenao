@@ -183,7 +183,7 @@ export function Header() {
               alt={tImages("zenao-logo")}
               width={28}
               height={28}
-              className="max-[450px]:w-6 max-[450px]:h-6"
+              className=""
               priority
             />
             <Text className="max-md:hidden font-extrabold">{t("zenao")}</Text>
@@ -195,12 +195,10 @@ export function Header() {
         </div>
       </div>
 
-      <div className="flex gap-2 items-center">
+      <div className="flex gap-4 items-center">
         <QuickCreateMenu />
-        <div className="max-md:hidden">
+        <div className="hidden sm:flex gap-4 items-center">
           <LocaleSwitcher />
-        </div>
-        <div className="max-md:hidden">
           <ToggleThemeButton />
         </div>
         <Suspense fallback={<UserAvatarSignedButtonSkeleton />}>

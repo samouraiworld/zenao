@@ -25,9 +25,13 @@ export const ToggleThemeButton: React.FC = () => {
         asChild
         aria-label={t("dropdown-trigger-aria-label")}
       >
-        <Button variant="outline" size="icon" className="focus-visible:ring-0">
-          <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-          <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+        <Button
+          variant="ghost"
+          size="icon"
+          className="focus-visible:ring-0 h-auto w-auto p-0 text-secondary-color hover:text-primary-color hover:bg-transparent [&_svg]:size-5"
+        >
+          <Sun className="w-5 h-5 text-inherit rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+          <Moon className="absolute w-5 h-5 text-inherit rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
           <span className="sr-only">{t("toggle-theme-label")}</span>
         </Button>
       </DropdownMenuTrigger>

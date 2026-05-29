@@ -817,6 +817,7 @@
       "create-team": "Create a team",
       "profile": "Profile",
       "language": "Language",
+      "theme": "Theme",
       "sign-out": "Sign out"
     },
     "createTeam": {
