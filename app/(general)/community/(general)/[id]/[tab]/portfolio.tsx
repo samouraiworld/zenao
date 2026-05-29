@@ -51,20 +51,6 @@ export default function CommunityPortfolio({
   const { data: communityInfo } = useSuspenseQuery(
     communityInfoQuery(communityId),
   );
-  const { data: administrators } = useSuspenseQuery({
-    queryKey: ["communityAdmins", communityId],
-    queryFn: async () => {
-      const token = await getToken();
-      if (!token) throw new Error("invalid clerk token");
-      const res = await zenaoClient.getCommunityAdministrators(
-        { communityId },
-        { headers: { Authorization: `Bearer ${token}` } },
-      );
-      return res.administrators;
-    },
-    initialData: [],
-  });
-
   const isAdmin = userRoles.includes("administrator");
 
   const { portfolio, ...otherDetails } = deserializeWithFrontMatter({
@@ -88,6 +74,11 @@ export default function CommunityPortfolio({
     const token = await getToken();
     if (!token) throw new Error("invalid clerk token");
 
+    const adminsRes = await zenaoClient.getCommunityAdministrators(
+      { communityId },
+      { headers: { Authorization: `Bearer ${token}` } },
+    );
+
     const description = serializeWithFrontMatter<
       Omit<CommunityDetails, "description">
     >(otherDetails.description, {
@@ -99,7 +90,7 @@ export default function CommunityPortfolio({
     await editCommunity({
       ...communityInfo,
       communityId,
-      administrators,
+      administrators: adminsRes.administrators,
       token,
       description,
     });
