@@ -691,7 +691,9 @@
     "sign-in-to-join-button": "Connectez-vous pour rejoindre",
     "joining-state": "Adhésion en cours...",
     "join-community-button": "Rejoindre la communauté",
-    "edit-community-button": "Modifier la communauté"
+    "edit-community-button": "Modifier la communauté",
+    "about-event": "À propos",
+    "discussion": "Discussion"
   },
   "community-create-form": {
     "log-in": "Connectez-vous pour créer une communauté",
