@@ -268,6 +268,7 @@ func (g *gormZenaoDB) GetPostsByFeedID(feedID string, limit int, offset int, tag
 		Preload("Reactions").
 		Preload("Tags").
 		Where("feed_id = ?", feedIDUint).
+		Where("parent_uri = ?", "").
 		Order("pinned_at IS NOT NULL DESC, pinned_at DESC, id DESC")
 
 	if len(tags) > 0 {
