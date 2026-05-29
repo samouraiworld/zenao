@@ -67,7 +67,7 @@ export default function PostCommentForm({
       });
 
       toast({
-        title: t("toast-post-creation-success"),
+        title: t("toast-comment-creation-success"),
       });
 
       form.resetField("content", { defaultValue: "" });
