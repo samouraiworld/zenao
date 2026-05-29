@@ -582,6 +582,7 @@
       "message-placeholder-sm": "Dites quelque chose...",
       "message-placeholder-lg": "Ne soyez pas timide, dites quelque chose !",
       "toast-post-creation-success": "Publication créée !",
+      "toast-comment-creation-success": "Commentaire créé !",
       "toast-post-creation-error": "Erreur lors de la création de la publication !",
       "toast-post-edit-error": "Erreur lors de la modification de la publication !",
       "comment-restricted-to-members": "Vous devez être membre pour soumettre un commentaire.",
