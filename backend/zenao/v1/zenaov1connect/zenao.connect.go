@@ -82,6 +82,9 @@ const (
 	// ZenaoServiceExportParticipantsProcedure is the fully-qualified name of the ZenaoService's
 	// ExportParticipants RPC.
 	ZenaoServiceExportParticipantsProcedure = "/zenao.v1.ZenaoService/ExportParticipants"
+	// ZenaoServiceRemoveParticipantProcedure is the fully-qualified name of the ZenaoService's
+	// RemoveParticipant RPC.
+	ZenaoServiceRemoveParticipantProcedure = "/zenao.v1.ZenaoService/RemoveParticipant"
 	// ZenaoServiceCreateCommunityProcedure is the fully-qualified name of the ZenaoService's
 	// CreateCommunity RPC.
 	ZenaoServiceCreateCommunityProcedure = "/zenao.v1.ZenaoService/CreateCommunity"
@@ -198,6 +201,7 @@ type ZenaoServiceClient interface {
 	GetOrderDetails(context.Context, *connect.Request[v1.GetOrderDetailsRequest]) (*connect.Response[v1.GetOrderDetailsResponse], error)
 	Checkin(context.Context, *connect.Request[v1.CheckinRequest]) (*connect.Response[v1.CheckinResponse], error)
 	ExportParticipants(context.Context, *connect.Request[v1.ExportParticipantsRequest]) (*connect.Response[v1.ExportParticipantsResponse], error)
+	RemoveParticipant(context.Context, *connect.Request[v1.RemoveParticipantRequest]) (*connect.Response[v1.RemoveParticipantResponse], error)
 	// COMMUNITY
 	CreateCommunity(context.Context, *connect.Request[v1.CreateCommunityRequest]) (*connect.Response[v1.CreateCommunityResponse], error)
 	EditCommunity(context.Context, *connect.Request[v1.EditCommunityRequest]) (*connect.Response[v1.EditCommunityResponse], error)
@@ -352,6 +356,12 @@ func NewZenaoServiceClient(httpClient connect.HTTPClient, baseURL string, opts .
 			httpClient,
 			baseURL+ZenaoServiceExportParticipantsProcedure,
 			connect.WithSchema(zenaoServiceMethods.ByName("ExportParticipants")),
+			connect.WithClientOptions(opts...),
+		),
+		removeParticipant: connect.NewClient[v1.RemoveParticipantRequest, v1.RemoveParticipantResponse](
+			httpClient,
+			baseURL+ZenaoServiceRemoveParticipantProcedure,
+			connect.WithSchema(zenaoServiceMethods.ByName("RemoveParticipant")),
 			connect.WithClientOptions(opts...),
 		),
 		createCommunity: connect.NewClient[v1.CreateCommunityRequest, v1.CreateCommunityResponse](
@@ -592,6 +602,7 @@ type zenaoServiceClient struct {
 	getOrderDetails                *connect.Client[v1.GetOrderDetailsRequest, v1.GetOrderDetailsResponse]
 	checkin                        *connect.Client[v1.CheckinRequest, v1.CheckinResponse]
 	exportParticipants             *connect.Client[v1.ExportParticipantsRequest, v1.ExportParticipantsResponse]
+	removeParticipant              *connect.Client[v1.RemoveParticipantRequest, v1.RemoveParticipantResponse]
 	createCommunity                *connect.Client[v1.CreateCommunityRequest, v1.CreateCommunityResponse]
 	editCommunity                  *connect.Client[v1.EditCommunityRequest, v1.EditCommunityResponse]
 	startCommunityStripeOnboarding *connect.Client[v1.StartCommunityStripeOnboardingRequest, v1.StartCommunityStripeOnboardingResponse]
@@ -713,6 +724,11 @@ func (c *zenaoServiceClient) Checkin(ctx context.Context, req *connect.Request[v
 // ExportParticipants calls zenao.v1.ZenaoService.ExportParticipants.
 func (c *zenaoServiceClient) ExportParticipants(ctx context.Context, req *connect.Request[v1.ExportParticipantsRequest]) (*connect.Response[v1.ExportParticipantsResponse], error) {
 	return c.exportParticipants.CallUnary(ctx, req)
+}
+
+// RemoveParticipant calls zenao.v1.ZenaoService.RemoveParticipant.
+func (c *zenaoServiceClient) RemoveParticipant(ctx context.Context, req *connect.Request[v1.RemoveParticipantRequest]) (*connect.Response[v1.RemoveParticipantResponse], error) {
+	return c.removeParticipant.CallUnary(ctx, req)
 }
 
 // CreateCommunity calls zenao.v1.ZenaoService.CreateCommunity.
@@ -916,6 +932,7 @@ type ZenaoServiceHandler interface {
 	GetOrderDetails(context.Context, *connect.Request[v1.GetOrderDetailsRequest]) (*connect.Response[v1.GetOrderDetailsResponse], error)
 	Checkin(context.Context, *connect.Request[v1.CheckinRequest]) (*connect.Response[v1.CheckinResponse], error)
 	ExportParticipants(context.Context, *connect.Request[v1.ExportParticipantsRequest]) (*connect.Response[v1.ExportParticipantsResponse], error)
+	RemoveParticipant(context.Context, *connect.Request[v1.RemoveParticipantRequest]) (*connect.Response[v1.RemoveParticipantResponse], error)
 	// COMMUNITY
 	CreateCommunity(context.Context, *connect.Request[v1.CreateCommunityRequest]) (*connect.Response[v1.CreateCommunityResponse], error)
 	EditCommunity(context.Context, *connect.Request[v1.EditCommunityRequest]) (*connect.Response[v1.EditCommunityResponse], error)
@@ -1066,6 +1083,12 @@ func NewZenaoServiceHandler(svc ZenaoServiceHandler, opts ...connect.HandlerOpti
 		ZenaoServiceExportParticipantsProcedure,
 		svc.ExportParticipants,
 		connect.WithSchema(zenaoServiceMethods.ByName("ExportParticipants")),
+		connect.WithHandlerOptions(opts...),
+	)
+	zenaoServiceRemoveParticipantHandler := connect.NewUnaryHandler(
+		ZenaoServiceRemoveParticipantProcedure,
+		svc.RemoveParticipant,
+		connect.WithSchema(zenaoServiceMethods.ByName("RemoveParticipant")),
 		connect.WithHandlerOptions(opts...),
 	)
 	zenaoServiceCreateCommunityHandler := connect.NewUnaryHandler(
@@ -1320,6 +1343,8 @@ func NewZenaoServiceHandler(svc ZenaoServiceHandler, opts ...connect.HandlerOpti
 			zenaoServiceCheckinHandler.ServeHTTP(w, r)
 		case ZenaoServiceExportParticipantsProcedure:
 			zenaoServiceExportParticipantsHandler.ServeHTTP(w, r)
+		case ZenaoServiceRemoveParticipantProcedure:
+			zenaoServiceRemoveParticipantHandler.ServeHTTP(w, r)
 		case ZenaoServiceCreateCommunityProcedure:
 			zenaoServiceCreateCommunityHandler.ServeHTTP(w, r)
 		case ZenaoServiceEditCommunityProcedure:
@@ -1467,6 +1492,10 @@ func (UnimplementedZenaoServiceHandler) Checkin(context.Context, *connect.Reques
 
 func (UnimplementedZenaoServiceHandler) ExportParticipants(context.Context, *connect.Request[v1.ExportParticipantsRequest]) (*connect.Response[v1.ExportParticipantsResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("zenao.v1.ZenaoService.ExportParticipants is not implemented"))
+}
+
+func (UnimplementedZenaoServiceHandler) RemoveParticipant(context.Context, *connect.Request[v1.RemoveParticipantRequest]) (*connect.Response[v1.RemoveParticipantResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("zenao.v1.ZenaoService.RemoveParticipant is not implemented"))
 }
 
 func (UnimplementedZenaoServiceHandler) CreateCommunity(context.Context, *connect.Request[v1.CreateCommunityRequest]) (*connect.Response[v1.CreateCommunityResponse], error) {

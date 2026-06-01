@@ -937,7 +937,10 @@
       "participants": {
         "exportCSV": "Exporter CSV",
         "openQrCodeScanner": "Scanner QR Code",
-        "no-participants": "Aucun participant pour le moment."
+        "no-participants": "Aucun participant pour le moment.",
+        "remove-participant": "Retirer le participant",
+        "toast-remove-participant-success": "Participant retiré avec succès.",
+        "toast-remove-participant-error": "Erreur lors de la suppression du participant."
       },
       "gatekeepers": {
         "no-gatekeepers": "Aucun portier assigné pour le moment.",

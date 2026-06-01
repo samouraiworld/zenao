@@ -1,10 +1,14 @@
 "use client";
 
-import { useSuspenseQuery } from "@tanstack/react-query";
+import {
+  useQuery,
+  useSuspenseInfiniteQuery,
+  useSuspenseQuery,
+} from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { Download, ScanQrCode } from "lucide-react";
 import { useAuth } from "@clerk/nextjs";
-import { useTransition } from "react";
+import { useTransition, useMemo, useCallback } from "react";
 import { parseAsInteger, useQueryStates } from "nuqs";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
@@ -19,6 +23,16 @@ import { useDataTableInstance } from "@/hooks/use-data-table-instance";
 import { DataTablePagination } from "@/components/widgets/data-table/data-table-pagination";
 import { Button } from "@/components/shadcn/button";
 import { zenaoClient } from "@/lib/zenao-client";
+import { useDashboardEventContext } from "@/components/providers/dashboard-event-context-provider";
+import useActor from "@/hooks/use-actor";
+import {
+  communitiesListByEvent,
+  communityUserRoles,
+  DEFAULT_COMMUNITIES_LIMIT,
+} from "@/lib/queries/community";
+import { useRemoveParticipant } from "@/lib/mutations/event-remove-participant";
+import { useToast } from "@/hooks/use-toast";
+import { captureException } from "@/lib/report";
 
 interface ParticipantsTableProps {
   eventId: string;
@@ -28,8 +42,64 @@ export default function ParticipantsTable({ eventId }: ParticipantsTableProps) {
   const t = useTranslations("dashboard.eventDetails.participants");
   const router = useRouter();
   const { getToken } = useAuth();
+  const { toast } = useToast();
+  const actor = useActor();
+
+  const { roles, eventInfo } = useDashboardEventContext();
+  const isOrganizer = roles.includes("organizer");
+
+  const isEventPaid = useMemo(
+    () =>
+      eventInfo.pricesGroups.some((group) =>
+        group.prices.some((price) => price.amountMinor > 0),
+      ),
+    [eventInfo.pricesGroups],
+  );
+
+  const hasEventStarted = useMemo(
+    () => Date.now() / 1000 > eventInfo.startDate,
+    [eventInfo.startDate],
+  );
+
+  const { data: communitiesPages } = useSuspenseInfiniteQuery(
+    communitiesListByEvent(eventId, DEFAULT_COMMUNITIES_LIMIT),
+  );
+  const communities = useMemo(
+    () => communitiesPages.pages.flat(),
+    [communitiesPages],
+  );
+  const communityId = communities.length > 0 ? communities[0].id : null;
+
+  // Only check community admin role if user is not already organizer
+  const { data: communityRoles } = useQuery({
+    ...communityUserRoles(communityId, actor?.actingAs),
+    enabled: !isOrganizer && !!communityId && !!actor?.actingAs,
+  });
+  const isCommunityAdmin = communityRoles?.includes("administrator") ?? false;
+
+  const canDelete =
+    !isEventPaid && !hasEventStarted && (isOrganizer || isCommunityAdmin);
+
   const { data: participants } = useSuspenseQuery(
     eventUsersWithRole(eventId, "participant"),
+  );
+
+  const { removeParticipant } = useRemoveParticipant();
+
+  const onDelete = useCallback(
+    async (userId: string) => {
+      try {
+        await removeParticipant({ eventId, userId, getToken });
+        toast({ title: t("toast-remove-participant-success") });
+      } catch (err) {
+        captureException(err);
+        toast({
+          variant: "destructive",
+          title: t("toast-remove-participant-error"),
+        });
+      }
+    },
+    [eventId, getToken, removeParticipant, t, toast],
   );
 
   const [tablePagination, setTablePagination] = useQueryStates(
@@ -43,7 +113,7 @@ export default function ParticipantsTable({ eventId }: ParticipantsTableProps) {
     },
   );
 
-  const columns = useParticipantsColumns();
+  const columns = useParticipantsColumns(canDelete ? { onDelete } : undefined);
   const table = useDataTableInstance({
     data: participants,
     columns,

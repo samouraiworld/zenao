@@ -936,7 +936,10 @@
       "participants": {
         "exportCSV": "Exportar CSV",
         "openQrCodeScanner": "Escáner QR",
-        "no-participants": "Aún no hay participantes."
+        "no-participants": "Aún no hay participantes.",
+        "remove-participant": "Eliminar participante",
+        "toast-remove-participant-success": "Participante eliminado correctamente.",
+        "toast-remove-participant-error": "Error al eliminar el participante."
       },
       "gatekeepers": {
         "no-gatekeepers": "Aún no hay controladores asignados.",
