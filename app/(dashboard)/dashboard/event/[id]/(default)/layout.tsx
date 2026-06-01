@@ -101,6 +101,6 @@ export default withEventRoleRestrictions(
   DashboardEventInfoLayoutProps,
   ["organizer", "gatekeeper"],
   {
-    notFoundOnFail: true,
+    redirectTo: (id) => `/event/${id}`,
   },
 );
