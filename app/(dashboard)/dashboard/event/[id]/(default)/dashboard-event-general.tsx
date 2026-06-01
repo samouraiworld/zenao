@@ -12,18 +12,15 @@ import RoleBasedViewMode from "@/components/widgets/permissions/view-mode";
 import { EventFormSchemaType } from "@/types/schemas";
 import { useDashboardEventEditionContext } from "@/components/providers/dashboard-event-edition-context-provider";
 
-export default function DashboardEventGeneral() {
+// Extracted so that useFormContext and useDashboardEventEditionContext are
+// only called when the FormProvider is actually mounted (organizer path).
+function DashboardEventGeneralOrganizerForm() {
   const t = useTranslations("dashboard.eventDetails.header");
-  const { eventInfo, roles } = useDashboardEventContext();
   const form = useFormContext<EventFormSchemaType>();
   const { isSubmittable, isUpdating, save } = useDashboardEventEditionContext();
 
   return (
-    <RoleBasedViewMode
-      roles={roles}
-      allowedRoles={["organizer"]}
-      fallback={<MarkdownPreview markdownString={eventInfo.description} />}
-    >
+    <>
       <DashboardEventInfo />
       <div className="my-10" />
 
@@ -41,6 +38,20 @@ export default function DashboardEventGeneral() {
           {t("saveChanges")}
         </Button>
       </form>
+    </>
+  );
+}
+
+export default function DashboardEventGeneral() {
+  const { eventInfo, roles } = useDashboardEventContext();
+
+  return (
+    <RoleBasedViewMode
+      roles={roles}
+      allowedRoles={["organizer"]}
+      fallback={<MarkdownPreview markdownString={eventInfo.description} />}
+    >
+      <DashboardEventGeneralOrganizerForm />
     </RoleBasedViewMode>
   );
 }
