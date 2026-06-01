@@ -67,7 +67,7 @@ func (g *gormZenaoDB) ListCommunitiesByUserRoles(userID string, roles []string, 
 
 	query := g.db.Model(&Community{}).
 		Distinct().
-		Joins("INNER JOIN entity_roles ON entity_roles.org_id = communities.id").
+		Joins("INNER JOIN entity_roles ON entity_roles.org_id = communities.id AND entity_roles.deleted_at IS NULL").
 		Where("entity_roles.entity_type = ? AND entity_roles.entity_id = ? AND entity_roles.org_type = ? AND entity_roles.role IN ?",
 			zeni.EntityTypeUser, userIDInt, zeni.EntityTypeCommunity, roles).
 		Order("communities.id DESC")
