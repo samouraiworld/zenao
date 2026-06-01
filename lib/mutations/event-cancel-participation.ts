@@ -56,6 +56,8 @@ export const useEventCancelParticipation = () => {
       queryClient.invalidateQueries(eventTicketsOpts);
       queryClient.invalidateQueries(eventUserRolesOpts);
       queryClient.invalidateQueries(eventUsersWithRoleOpts);
+      // Refresh the "my tickets" list so the cancelled event disappears from it
+      queryClient.invalidateQueries({ queryKey: ["eventsByParticipant"] });
     },
   });
 
