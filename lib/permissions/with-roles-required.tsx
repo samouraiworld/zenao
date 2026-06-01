@@ -23,7 +23,7 @@ export function withEventRoleRestrictions<
   Component: ServerComponent<P>,
   allowedRoles: EventUserRole[],
   options?: {
-    redirectTo?: string;
+    redirectTo?: string | ((eventId: string) => string);
     notFoundOnFail?: boolean;
   },
 ): ServerComponent<P> {
@@ -51,7 +51,11 @@ export function withEventRoleRestrictions<
         notFound();
       }
 
-      redirect(options?.redirectTo ?? "/unauthorized");
+      const redirectTarget =
+        typeof options?.redirectTo === "function"
+          ? options.redirectTo(eventId)
+          : (options?.redirectTo ?? "/unauthorized");
+      redirect(redirectTarget);
     }
 
     return <Component {...props} />;
