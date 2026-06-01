@@ -293,7 +293,7 @@ func (g *gormZenaoDB) ListEventsByUserRoles(userID string, roles []string, limit
 
 	query := g.db.Model(&Event{}).
 		Distinct().
-		Joins("INNER JOIN entity_roles ON entity_roles.org_id = events.id").
+		Joins("INNER JOIN entity_roles ON entity_roles.org_id = events.id AND entity_roles.deleted_at IS NULL").
 		Where("entity_roles.entity_type = ? AND entity_roles.entity_id = ? AND entity_roles.org_type = ? AND entity_roles.role IN ?",
 			zeni.EntityTypeUser, userIDInt, zeni.EntityTypeEvent, roles)
 
