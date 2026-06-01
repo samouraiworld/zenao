@@ -72,10 +72,21 @@ export default function EventDashboardQuickAccessBanner({
     return null;
   }
 
-  if (roles.includes("organizer")) {
+  const isOrganizer = roles.includes("organizer");
+  const isGatekeeper = roles.includes("gatekeeper");
+
+  if (isOrganizer && isGatekeeper) {
+    return (
+      <div className="flex flex-col gap-2">
+        <OrganizerQuickAccessBanner eventId={eventId} />
+        <GatekeeperQuickAccessBanner eventId={eventId} />
+      </div>
+    );
+  }
+
+  if (isOrganizer) {
     return <OrganizerQuickAccessBanner eventId={eventId} />;
   }
 
-  // Gatekeeper quick access banner
   return <GatekeeperQuickAccessBanner eventId={eventId} />;
 }
