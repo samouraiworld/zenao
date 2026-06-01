@@ -33,34 +33,12 @@ func (s *ZenaoServer) RemoveParticipant(ctx context.Context, req *connect.Reques
 			return errors.New("cannot remove a participant after the event has started")
 		}
 
-		// Check if actor is organizer of the event
 		roles, err := db.EntityRoles(zeni.EntityTypeUser, actor.ID(), zeni.EntityTypeEvent, req.Msg.EventId)
 		if err != nil {
 			return err
 		}
-
-		isOrganizer := slices.Contains(roles, zeni.RoleOrganizer)
-
-		if !isOrganizer {
-			// Check if actor is admin of a community linked to the event
-			communities, err := db.CommunitiesByEvent(req.Msg.EventId)
-			if err != nil {
-				return err
-			}
-			isCommunityAdmin := false
-			for _, community := range communities {
-				communityRoles, err := db.EntityRoles(zeni.EntityTypeUser, actor.ID(), zeni.EntityTypeCommunity, community.ID)
-				if err != nil {
-					return err
-				}
-				if slices.Contains(communityRoles, zeni.RoleAdministrator) {
-					isCommunityAdmin = true
-					break
-				}
-			}
-			if !isCommunityAdmin {
-				return errors.New("only the event organizer or a community administrator can remove participants")
-			}
+		if !slices.Contains(roles, zeni.RoleOrganizer) {
+			return errors.New("only the event organizer can remove participants")
 		}
 
 		ticket, err := db.GetEventUserTicket(req.Msg.EventId, req.Msg.UserId)

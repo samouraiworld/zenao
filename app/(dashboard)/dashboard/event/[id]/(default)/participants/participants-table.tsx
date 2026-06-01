@@ -1,10 +1,6 @@
 "use client";
 
-import {
-  useQuery,
-  useSuspenseInfiniteQuery,
-  useSuspenseQuery,
-} from "@tanstack/react-query";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { Download, ScanQrCode } from "lucide-react";
 import { useAuth } from "@clerk/nextjs";
@@ -24,12 +20,6 @@ import { DataTablePagination } from "@/components/widgets/data-table/data-table-
 import { Button } from "@/components/shadcn/button";
 import { zenaoClient } from "@/lib/zenao-client";
 import { useDashboardEventContext } from "@/components/providers/dashboard-event-context-provider";
-import useActor from "@/hooks/use-actor";
-import {
-  communitiesListByEvent,
-  communityUserRoles,
-  DEFAULT_COMMUNITIES_LIMIT,
-} from "@/lib/queries/community";
 import { useRemoveParticipant } from "@/lib/mutations/event-remove-participant";
 import { useToast } from "@/hooks/use-toast";
 import { captureException } from "@/lib/report";
@@ -43,7 +33,6 @@ export default function ParticipantsTable({ eventId }: ParticipantsTableProps) {
   const router = useRouter();
   const { getToken } = useAuth();
   const { toast } = useToast();
-  const actor = useActor();
 
   const { roles, eventInfo } = useDashboardEventContext();
   const isOrganizer = roles.includes("organizer");
@@ -61,24 +50,7 @@ export default function ParticipantsTable({ eventId }: ParticipantsTableProps) {
     [eventInfo.startDate],
   );
 
-  const { data: communitiesPages } = useSuspenseInfiniteQuery(
-    communitiesListByEvent(eventId, DEFAULT_COMMUNITIES_LIMIT),
-  );
-  const communities = useMemo(
-    () => communitiesPages.pages.flat(),
-    [communitiesPages],
-  );
-  const communityId = communities.length > 0 ? communities[0].id : null;
-
-  // Only check community admin role if user is not already organizer
-  const { data: communityRoles } = useQuery({
-    ...communityUserRoles(communityId, actor?.actingAs),
-    enabled: !isOrganizer && !!communityId && !!actor?.actingAs,
-  });
-  const isCommunityAdmin = communityRoles?.includes("administrator") ?? false;
-
-  const canDelete =
-    !isEventPaid && !hasEventStarted && (isOrganizer || isCommunityAdmin);
+  const canDelete = isOrganizer && !isEventPaid && !hasEventStarted;
 
   const { data: participants } = useSuspenseQuery(
     eventUsersWithRole(eventId, "participant"),
