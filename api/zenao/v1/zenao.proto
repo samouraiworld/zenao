@@ -33,6 +33,8 @@ service ZenaoService {
   rpc Checkin(CheckinRequest) returns (CheckinResponse);
   rpc ExportParticipants(ExportParticipantsRequest)
       returns (ExportParticipantsResponse);
+  rpc RemoveParticipant(RemoveParticipantRequest)
+      returns (RemoveParticipantResponse);
 
   // COMMUNITY
   rpc CreateCommunity(CreateCommunityRequest)
@@ -240,6 +242,13 @@ message ParticipateRequest {
 message CancelParticipationRequest { string event_id = 1; }
 
 message CancelParticipationResponse {}
+
+message RemoveParticipantRequest {
+  string event_id = 1;
+  string user_id = 2;
+}
+
+message RemoveParticipantResponse {}
 
 message ParticipateResponse { string ticket_secret = 1; }
 

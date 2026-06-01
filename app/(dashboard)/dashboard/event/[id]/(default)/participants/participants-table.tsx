@@ -4,7 +4,7 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { Download, ScanQrCode } from "lucide-react";
 import { useAuth } from "@clerk/nextjs";
-import { useTransition } from "react";
+import { useTransition, useMemo, useCallback, useState } from "react";
 import { parseAsInteger, useQueryStates } from "nuqs";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
@@ -19,6 +19,11 @@ import { useDataTableInstance } from "@/hooks/use-data-table-instance";
 import { DataTablePagination } from "@/components/widgets/data-table/data-table-pagination";
 import { Button } from "@/components/shadcn/button";
 import { zenaoClient } from "@/lib/zenao-client";
+import { useDashboardEventContext } from "@/components/providers/dashboard-event-context-provider";
+import { useRemoveParticipant } from "@/lib/mutations/event-remove-participant";
+import { useToast } from "@/hooks/use-toast";
+import { captureException } from "@/lib/report";
+import ConfirmationDialog from "@/components/dialogs/confirmation-dialog";
 
 interface ParticipantsTableProps {
   eventId: string;
@@ -28,9 +33,58 @@ export default function ParticipantsTable({ eventId }: ParticipantsTableProps) {
   const t = useTranslations("dashboard.eventDetails.participants");
   const router = useRouter();
   const { getToken } = useAuth();
+  const { toast } = useToast();
+
+  const { roles, eventInfo } = useDashboardEventContext();
+  const isOrganizer = roles.includes("organizer");
+
+  const isEventPaid = useMemo(
+    () =>
+      eventInfo.pricesGroups.some((group) =>
+        group.prices.some((price) => price.amountMinor > 0),
+      ),
+    [eventInfo.pricesGroups],
+  );
+
+  const hasEventStarted = useMemo(
+    () => Date.now() / 1000 > eventInfo.startDate,
+    [eventInfo.startDate],
+  );
+
+  const canDelete = isOrganizer && !isEventPaid && !hasEventStarted;
+
   const { data: participants } = useSuspenseQuery(
     eventUsersWithRole(eventId, "participant"),
   );
+
+  const { removeParticipant } = useRemoveParticipant();
+  const [pendingDeleteUserId, setPendingDeleteUserId] = useState<string | null>(
+    null,
+  );
+
+  const onDelete = useCallback((userId: string) => {
+    setPendingDeleteUserId(userId);
+  }, []);
+
+  const handleConfirmDelete = useCallback(async () => {
+    if (!pendingDeleteUserId) return;
+    try {
+      await removeParticipant({
+        eventId,
+        userId: pendingDeleteUserId,
+        getToken,
+      });
+      toast({ title: t("toast-remove-participant-success") });
+    } catch (err) {
+      captureException(err);
+      toast({
+        variant: "destructive",
+        title: t("toast-remove-participant-error"),
+      });
+    } finally {
+      setPendingDeleteUserId(null);
+    }
+  }, [eventId, getToken, pendingDeleteUserId, removeParticipant, t, toast]);
 
   const [tablePagination, setTablePagination] = useQueryStates(
     {
@@ -43,7 +97,7 @@ export default function ParticipantsTable({ eventId }: ParticipantsTableProps) {
     },
   );
 
-  const columns = useParticipantsColumns();
+  const columns = useParticipantsColumns(canDelete ? { onDelete } : undefined);
   const table = useDataTableInstance({
     data: participants,
     columns,
@@ -126,6 +180,14 @@ export default function ParticipantsTable({ eventId }: ParticipantsTableProps) {
             setTablePagination((prev) => ({ ...prev, limit }));
           },
         }}
+      />
+      <ConfirmationDialog
+        open={!!pendingDeleteUserId}
+        onOpenChange={(open) => !open && setPendingDeleteUserId(null)}
+        title={t("confirm-remove-participant-title")}
+        description={t("confirm-remove-participant-description")}
+        confirmText={t("confirm-remove-participant-confirm")}
+        onConfirm={handleConfirmDelete}
       />
     </div>
   );

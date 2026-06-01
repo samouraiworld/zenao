@@ -1,6 +1,7 @@
 import { ColumnDef } from "@tanstack/react-table";
 import { useMemo } from "react";
 import { Trash2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { UserAvatarWithName } from "../../user/user";
 import { Button } from "@/components/shadcn/button";
 import {
@@ -9,7 +10,15 @@ import {
   TooltipTrigger,
 } from "@/components/shadcn/tooltip";
 
-export const useParticipantsColumns = (): ColumnDef<string>[] => {
+interface UseParticipantsColumnsProps {
+  onDelete?: (userId: string) => void;
+}
+
+export const useParticipantsColumns = (
+  props?: UseParticipantsColumnsProps,
+): ColumnDef<string>[] => {
+  const t = useTranslations("dashboard.eventDetails.participants");
+
   const columns = useMemo<ColumnDef<string>[]>(
     () => [
       {
@@ -27,8 +36,38 @@ export const useParticipantsColumns = (): ColumnDef<string>[] => {
         enableHiding: false,
         enableSorting: true,
       },
+      ...(props?.onDelete
+        ? [
+            {
+              id: "actions",
+              header: () => <div>Actions</div>,
+              cell: ({ row }: { row: { original: string } }) => (
+                <Tooltip delayDuration={300}>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      className="p-0 size-8"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        props.onDelete!(row.original);
+                      }}
+                    >
+                      <Trash2 className="text-muted-foreground w-4 h-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>{t("remove-participant")}</TooltipContent>
+                </Tooltip>
+              ),
+              enableHiding: false,
+              enableSorting: false,
+              meta: {
+                className: "flex justify-end items-center px-4",
+              },
+            } satisfies ColumnDef<string>,
+          ]
+        : []),
     ],
-    [],
+    [props?.onDelete, t],
   );
 
   return columns;
