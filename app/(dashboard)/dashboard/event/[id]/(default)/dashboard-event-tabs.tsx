@@ -29,14 +29,16 @@ export default function DashboardEventTabs({
   return (
     <Tabs value={section} className="w-full min-h-[300px]">
       <TabsList className="flex w-full bg-transparent p-0 m-0 overflow-auto justify-start">
-        <Link href={`/dashboard/event/${eventId}`} scroll={false}>
-          <TabsTrigger
-            value="general"
-            className="w-fit p-2 data-[state=active]:font-semibold hover:bg-secondary/80"
-          >
-            {t("general")}
-          </TabsTrigger>
-        </Link>
+        <RoleBasedViewMode roles={roles} allowedRoles={["organizer"]}>
+          <Link href={`/dashboard/event/${eventId}`} scroll={false}>
+            <TabsTrigger
+              value="general"
+              className="w-fit p-2 data-[state=active]:font-semibold hover:bg-secondary/80"
+            >
+              {t("general")}
+            </TabsTrigger>
+          </Link>
+        </RoleBasedViewMode>
         <Link href={`/dashboard/event/${eventId}/participants`} scroll={false}>
           <TabsTrigger
             value="participants"
