@@ -42,8 +42,8 @@ function CommunityMembers({ communityId }: CommunityMembersProps) {
             >
               <Link href={`/profile/${member.entityId}`} className="block">
                 <CommunityMemberCard
-                  communityId={communityId}
                   userId={member.entityId}
+                  roles={member.roles}
                 />
               </Link>
             </Suspense>

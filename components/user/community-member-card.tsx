@@ -5,22 +5,15 @@ import { Card } from "../widgets/cards/card";
 import Text from "../widgets/texts/text";
 import { profileOptions } from "@/lib/queries/profile";
 import { deserializeWithFrontMatter } from "@/lib/serialization";
-import { profileDetailsSchema } from "@/types/schemas";
-import { communityUserRoles } from "@/lib/queries/community";
+import { CommunityUserRole, profileDetailsSchema } from "@/types/schemas";
 
 type CommunityMemberCardProps = {
-  communityId: string;
   userId: string;
+  roles: CommunityUserRole[];
 };
 
-function CommunityMemberCard({
-  communityId,
-  userId,
-}: CommunityMemberCardProps) {
+function CommunityMemberCard({ userId, roles }: CommunityMemberCardProps) {
   const { data: profile } = useSuspenseQuery(profileOptions(userId));
-  const { data: roles = [] } = useSuspenseQuery(
-    communityUserRoles(communityId, userId),
-  );
 
   if (!profile?.bio && !profile?.displayName && !profile?.avatarUri) {
     return null;
