@@ -152,7 +152,7 @@
     "email-placeholder": "Email...",
     "toast-confirmation": "You take part in the event!",
     "toast-already-registered-error": "Email(s) already registered for this event!",
-    "toast-default-error": "Error whille trying to register participants",
+    "toast-default-error": "Error while trying to register participants",
     "checkout-error-title": "Payment couldn't start",
     "checkout-error-note": "No charge was made.",
     "participants-list": "Participants list",
