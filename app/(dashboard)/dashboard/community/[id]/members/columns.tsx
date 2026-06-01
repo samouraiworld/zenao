@@ -74,23 +74,30 @@ export const useMembersColumns = (
                 row,
               }: {
                 row: { original: SafeCommunityEntityWithRoles };
-              }) => (
-                <Tooltip delayDuration={300}>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      className="p-0 size-8"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        props.onDelete!(row.original.entityId);
-                      }}
-                    >
-                      <Trash2 className="text-muted-foreground w-4 h-4" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>{t("action-tooltip-delete")}</TooltipContent>
-                </Tooltip>
-              ),
+              }) => {
+                if (row.original.roles.includes("administrator")) {
+                  return null;
+                }
+                return (
+                  <Tooltip delayDuration={300}>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        className="p-0 size-8"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          props.onDelete!(row.original.entityId);
+                        }}
+                      >
+                        <Trash2 className="text-muted-foreground w-4 h-4" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      {t("action-tooltip-delete")}
+                    </TooltipContent>
+                  </Tooltip>
+                );
+              },
               enableHiding: false,
               enableSorting: false,
               meta: {
