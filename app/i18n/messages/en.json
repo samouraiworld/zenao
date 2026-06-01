@@ -836,7 +836,9 @@
     },
     "membersTable": {
       "name-column": "Name",
-      "roles-column": "Roles"
+      "roles-column": "Roles",
+      "actions-column": "Actions",
+      "action-tooltip-delete": "Remove member"
     },
     "eventsTable": {
       "events": "Events",
@@ -896,7 +898,12 @@
         }
       },
       "members": {
-        "no-members": "No members yet."
+        "no-members": "No members yet.",
+        "toast-remove-member-success": "Member removed successfully!",
+        "toast-remove-member-error": "Error while removing member!",
+        "confirm-remove-member-title": "Remove member",
+        "confirm-remove-member-description": "Are you sure you want to remove this member from the community?",
+        "confirm-remove-member-confirm": "Remove"
       },
       "events": {
         "no-events": "No events yet."
