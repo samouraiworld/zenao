@@ -489,6 +489,7 @@ message OrderSummary {
   int64 amount_minor = 4;
   string currency_code = 5;
   int64 created_at = 6;
+  string status = 7;
 }
 
 message OrderTicketInfo {
