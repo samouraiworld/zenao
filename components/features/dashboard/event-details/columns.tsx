@@ -47,7 +47,10 @@ export const useParticipantsColumns = (
                     <Button
                       variant="ghost"
                       className="p-0 size-8"
-                      onClick={() => props.onDelete!(row.original)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        props.onDelete!(row.original);
+                      }}
                     >
                       <Trash2 className="text-muted-foreground w-4 h-4" />
                     </Button>
