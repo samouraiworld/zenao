@@ -218,19 +218,17 @@ export function EventRegistrationForm({
         setIsPending(false);
         return;
       }
-      if (
+      const isAlreadyRegistered =
         err instanceof Error &&
-        err.message !== "[unknown] user is already participant for this event"
-      ) {
+        err.message.includes("user is already participant for this event");
+      if (err instanceof Error && !isAlreadyRegistered) {
         captureException(err);
       }
       toast({
         variant: "destructive",
-        title:
-          err instanceof Error &&
-          err.message === "[unknown] user is already participant for this event"
-            ? t("toast-already-registered-error")
-            : t("toast-default-error"),
+        title: isAlreadyRegistered
+          ? t("toast-already-registered-error")
+          : t("toast-default-error"),
       });
     }
     setIsPending(false);
