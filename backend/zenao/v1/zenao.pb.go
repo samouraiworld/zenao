@@ -4495,6 +4495,7 @@ type OrderSummary struct {
 	AmountMinor   int64                  `protobuf:"varint,4,opt,name=amount_minor,json=amountMinor,proto3" json:"amount_minor,omitempty"`
 	CurrencyCode  string                 `protobuf:"bytes,5,opt,name=currency_code,json=currencyCode,proto3" json:"currency_code,omitempty"`
 	CreatedAt     int64                  `protobuf:"varint,6,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	Status        string                 `protobuf:"bytes,7,opt,name=status,proto3" json:"status,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -4569,6 +4570,13 @@ func (x *OrderSummary) GetCreatedAt() int64 {
 		return x.CreatedAt
 	}
 	return 0
+}
+
+func (x *OrderSummary) GetStatus() string {
+	if x != nil {
+		return x.Status
+	}
+	return ""
 }
 
 type OrderTicketInfo struct {
@@ -7696,7 +7704,7 @@ const file_zenao_v1_zenao_proto_rawDesc = "" +
 	"\n" +
 	"user_email\x18\x02 \x01(\tR\tuserEmail\"3\n" +
 	"\x16GetOrderDetailsRequest\x12\x19\n" +
-	"\border_id\x18\x01 \x01(\tR\aorderId\"\xc6\x01\n" +
+	"\border_id\x18\x01 \x01(\tR\aorderId\"\xde\x01\n" +
 	"\fOrderSummary\x12\x19\n" +
 	"\border_id\x18\x01 \x01(\tR\aorderId\x12\x19\n" +
 	"\bevent_id\x18\x02 \x01(\tR\aeventId\x12\x19\n" +
@@ -7704,7 +7712,8 @@ const file_zenao_v1_zenao_proto_rawDesc = "" +
 	"\famount_minor\x18\x04 \x01(\x03R\vamountMinor\x12#\n" +
 	"\rcurrency_code\x18\x05 \x01(\tR\fcurrencyCode\x12\x1d\n" +
 	"\n" +
-	"created_at\x18\x06 \x01(\x03R\tcreatedAt\"U\n" +
+	"created_at\x18\x06 \x01(\x03R\tcreatedAt\x12\x16\n" +
+	"\x06status\x18\a \x01(\tR\x06status\"U\n" +
 	"\x0fOrderTicketInfo\x12#\n" +
 	"\rticket_secret\x18\x01 \x01(\tR\fticketSecret\x12\x1d\n" +
 	"\n" +

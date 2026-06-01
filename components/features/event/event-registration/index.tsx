@@ -6,7 +6,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMemo, useState } from "react";
 import { useAuth, useUser } from "@clerk/nextjs";
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import { PaidPurchaseForm } from "./paid-purchase-form";
 import { FreeRegistrationForm } from "./free-registration-form";
 import { Form } from "@/components/shadcn/form";
@@ -17,6 +17,7 @@ import {
 import { useEventCheckout } from "@/lib/mutations/event-checkout";
 import { useToast } from "@/hooks/use-toast";
 import { eventOptions } from "@/lib/queries/event";
+import { userOrders } from "@/lib/queries/order";
 import { captureException } from "@/lib/report";
 import { emailSchema, SafeEventPriceGroup } from "@/types/schemas";
 import { userInfoOptions } from "@/lib/queries/user";
@@ -87,6 +88,24 @@ export function EventRegistrationForm({
     [data.pricesGroups],
   );
   const isPaidEvent = checkoutPrice != null;
+
+  const { data: ordersData } = useQuery({
+    ...userOrders(getToken),
+    enabled: !!userId && isPaidEvent,
+  });
+  const pendingOrder = useMemo(() => {
+    if (!ordersData?.orders) return null;
+    // Mirror the backend reuse rule (GetPendingOrderByBuyerAndEvent): any order
+    // that isn't already paid can be resumed. A "success" order means the user
+    // already paid, so it must not surface the "continue payment" path.
+    const matching = ordersData.orders.filter(
+      (o) => o.eventId === eventId && o.status !== "success",
+    );
+    if (matching.length === 0) return null;
+    return matching.reduce((latest, o) =>
+      Number(o.createdAt) > Number(latest.createdAt) ? o : latest,
+    );
+  }, [ordersData, eventId]);
   const requireEmail = !userId;
   const buyerEmail = user?.primaryEmailAddress?.emailAddress ?? "";
   const maxGuests = data.capacity - data.participants - 1;
@@ -245,6 +264,7 @@ export function EventRegistrationForm({
             eventTitle={data.title}
             isPending={isPending}
             maxGuests={maxGuests}
+            pendingOrderId={pendingOrder?.orderId}
             requireEmail={requireEmail}
             totalMinor={totalMinor}
           />

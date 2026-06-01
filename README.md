@@ -66,9 +66,11 @@ That's it! The app will be running at:
 - **Frontend**: [http://localhost:3000](http://localhost:3000)
 - **Backend**: [http://localhost:4242](http://localhost:4242)
 
-> **⚠️ Note:** The Go backend reads environment variables from your shell, not from `.env.local`. Export the Clerk secret key before running `make dev` if you modified the default key:
+> **⚠️ Note:** The Go backend reads environment variables from your shell, not from `.env.local`. Export any backend key before running `make dev`:
 > ```bash
-> export ZENAO_CLERK_SECRET_KEY=sk_test_...  # Must match CLERK_SECRET_KEY in .env.local
+> export ZENAO_CLERK_SECRET_KEY=sk_test_...        # Must match CLERK_SECRET_KEY in .env.local
+> export ZENAO_STRIPE_SECRET_KEY=sk_test_...       # Required for paid events
+> export ZENAO_APP_BASE_URL=http://localhost:3000  # Else Stripe redirects to prod (default: https://zenao.io/)
 > ```
 
 ### Option 2: Manual Setup
@@ -323,8 +325,16 @@ export ZENAO_PAID_EVENTS_ENABLED=true
 
 **2. Configure Stripe test keys:**
 ```bash
-# In .env.local
-ZENAO_STRIPE_SECRET_KEY=sk_test_your_stripe_test_key
+# Backend — must be exported in your shell (not read from .env.local)
+export ZENAO_STRIPE_SECRET_KEY=sk_test_your_stripe_test_key
+# Local app base URL used to build the Stripe success/cancel redirect URLs.
+# Without it the backend falls back to the default (https://zenao.io/) and
+# Stripe sends you to production instead of localhost after payment.
+export ZENAO_APP_BASE_URL=http://localhost:3000
+```
+
+```bash
+# Frontend — in .env.local
 NEXT_PUBLIC_STRIPE_DASHBOARD_URL=https://dashboard.stripe.com/test
 ```
 

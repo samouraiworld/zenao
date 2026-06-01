@@ -36,6 +36,7 @@ func (s *ZenaoServer) GetUserOrders(
 			AmountMinor:  order.AmountMinor,
 			CurrencyCode: order.CurrencyCode,
 			CreatedAt:    order.CreatedAt,
+			Status:       string(order.Status),
 		})
 	}
 

@@ -390,8 +390,10 @@ type DB interface {
 	UpdatePrice(paymentAccount *PaymentAccount, price *Price) error
 	CreateOrder(order *Order, attendees []*OrderAttendee) (*Order, error)
 	GetOrder(orderID string) (*Order, error)
+	GetPendingOrderByBuyerAndEvent(buyerID string, eventID string) (*Order, error)
 	ListOrdersByBuyer(buyerID string) ([]*Order, error)
 	GetOrderAttendees(orderID string) ([]*OrderAttendee, error)
+	ReplaceOrderAttendees(orderID string, attendees []*OrderAttendee) error
 	GetOrderTickets(orderID string) ([]*SoldTicket, error)
 	GetOrderPaymentAccount(orderID string) (*PaymentAccount, error)
 	UpdateOrderSetPaymentSession(orderID string, provider string, sessionID string) error

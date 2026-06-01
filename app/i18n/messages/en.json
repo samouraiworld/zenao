@@ -132,6 +132,9 @@
     "join-desc": "Welcome! To join the event, please register below.",
     "register-button": "Register",
     "checkout-button": "Continue to payment",
+    "checkout-button-continue": "Continue payment",
+    "pending-order-notice": "You have a pending order for this event.",
+    "pending-order-link": "View your pending order",
     "checkout-total-label": "Total",
     "checkout-buyer-label": "Buyer and participant",
     "checkout-guest-label": "Guest",
@@ -148,6 +151,8 @@
     "your-email": "Your email",
     "guests": "Guests",
     "cancel-my-participation": "Cancel my participation",
+    "tickets-paid": "Tickets paid",
+    "tickets-paid-no-refund": "Refunds are not available at this time.",
     "sold-out-msg": "The event is now sold out !",
     "email-placeholder": "Email...",
     "toast-confirmation": "You take part in the event!",
@@ -191,6 +196,11 @@
       "error-button": "Try again",
       "receipt-reference": "Receipt reference",
       "view-order": "View order details"
+    },
+    "checkout-confirmation-page": {
+      "title": "Payment confirmation",
+      "description": "We are finalizing your purchase and will keep this page updated.",
+      "back-to-event": "Back to event"
     }
   },
   "profile-info": {
@@ -433,8 +443,18 @@
     "quantity-label": "Tickets",
     "total-label": "Total",
     "ticket-label": "Ticket #{index}",
+    "event-label": "Event",
     "no-tickets": "No tickets are associated with this order yet.",
-    "free": "Free"
+    "free": "Free",
+    "status-label": "Status",
+    "status-paid": "Paid",
+    "status-incomplete": "To complete",
+    "payment-incomplete-title": "Payment not completed",
+    "payment-incomplete-description": "You started the checkout but did not complete it. Return to the event page to continue the payment.",
+    "continue-payment": "Continue payment",
+    "event-started-title": "Event has started",
+    "event-started-description": "This event has already started. This order can no longer be completed.",
+    "view-event": "View event"
   },
   "orders": {
     "title": "Your orders",

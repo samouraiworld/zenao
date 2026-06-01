@@ -22,11 +22,15 @@ import { useDashboardCommunityContext } from "@/components/providers/dashboard-c
 import useActor from "@/hooks/use-actor";
 import { PayoutState, VerificationState } from "@/lib/pricing";
 
-const payoutStatusBadge = {
-  [VerificationState.verified]: "secondary",
-  [VerificationState.failed]: "destructive",
-  [VerificationState.pending]: "outline",
-  [VerificationState.unknown]: "outline",
+const payoutStatusBadgeClass = {
+  [VerificationState.verified]:
+    "border-transparent bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300",
+  [VerificationState.failed]:
+    "border-transparent bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-300",
+  [VerificationState.pending]:
+    "border-transparent bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300",
+  [VerificationState.unknown]:
+    "border-transparent bg-muted text-muted-foreground",
 } as const;
 
 export default function PayoutsConfiguration() {
@@ -156,7 +160,10 @@ export default function PayoutsConfiguration() {
                 <Badge variant="outline">{t("payout-status-loading")}</Badge>
               ) : (
                 <Badge
-                  variant={payoutStatusBadge[payoutStatusKey] ?? "outline"}
+                  className={
+                    payoutStatusBadgeClass[payoutStatusKey] ??
+                    payoutStatusBadgeClass[VerificationState.unknown]
+                  }
                 >
                   {payoutStatusText[payoutStatusKey]}
                 </Badge>

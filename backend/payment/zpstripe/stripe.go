@@ -34,7 +34,14 @@ func (s *Stripe) CreateCheckoutSession(ctx context.Context, input payment.Checko
 	params := s.buildCheckoutSessionParams(input)
 	params.AddMetadata("order_id", input.OrderID)
 	params.PaymentIntentData.AddMetadata("order_id", input.OrderID)
-	params.SetIdempotencyKey(fmt.Sprintf("checkout-session.order.%s", input.OrderID))
+	// The idempotency key must change between two intentional checkout attempts
+	// for the same order: a pending order is reused across retries (same OrderID),
+	// but the session params differ each time (e.g. ExpiresAt derives from Now).
+	// Keying on OrderID alone makes Stripe reject the retry with a parameter
+	// mismatch. Including Now keeps the key stable within a single request (and
+	// thus across the SDK's network retries of that one call) while producing a
+	// fresh session on a later retry.
+	params.SetIdempotencyKey(fmt.Sprintf("checkout-session.order.%s.%d", input.OrderID, input.Now))
 	params.SetStripeAccount(input.ProviderAccountID)
 
 	session, err := CheckoutSessionNew(params)

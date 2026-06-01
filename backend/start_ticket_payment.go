@@ -109,18 +109,38 @@ func (s *ZenaoServer) StartTicketPayment(
 			return err
 		}
 
-		createdOrder, err = tx.CreateOrder(&zeni.Order{
-			CreatedAt:        nowUnix,
-			EventID:          evt.ID,
-			BuyerID:          buyerID,
-			CurrencyCode:     strings.ToUpper(strings.TrimSpace(cart.currencyCode)),
-			AmountMinor:      cart.totalAmount,
-			Status:           zeni.OrderStatusPending,
-			PaymentProvider:  paymentProvider.PlatformType(),
-			PaymentAccountID: cart.paymentAccount.ID,
-		}, orderAttendees)
+		existingOrder, err := tx.GetPendingOrderByBuyerAndEvent(buyerID, evt.ID)
 		if err != nil {
 			return err
+		}
+
+		if existingOrder != nil {
+			if err := tx.DeleteTicketHoldsByOrderID(existingOrder.ID); err != nil {
+				return err
+			}
+			if err := tx.ReplaceOrderAttendees(existingOrder.ID, orderAttendees); err != nil {
+				return err
+			}
+			existingOrder.AmountMinor = cart.totalAmount
+			existingOrder.CurrencyCode = strings.ToUpper(strings.TrimSpace(cart.currencyCode))
+			if err := tx.UpdateOrderSetStatus(existingOrder.ID, zeni.OrderStatusPending); err != nil {
+				return err
+			}
+			createdOrder = existingOrder
+		} else {
+			createdOrder, err = tx.CreateOrder(&zeni.Order{
+				CreatedAt:        nowUnix,
+				EventID:          evt.ID,
+				BuyerID:          buyerID,
+				CurrencyCode:     strings.ToUpper(strings.TrimSpace(cart.currencyCode)),
+				AmountMinor:      cart.totalAmount,
+				Status:           zeni.OrderStatusPending,
+				PaymentProvider:  paymentProvider.PlatformType(),
+				PaymentAccountID: cart.paymentAccount.ID,
+			}, orderAttendees)
+			if err != nil {
+				return err
+			}
 		}
 
 		if err := createTicketHoldsFromCart(tx, createdOrder.ID, cart, nowUnix, paymentProvider.DefaultHoldTTL()); err != nil {

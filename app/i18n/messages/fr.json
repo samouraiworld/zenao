@@ -132,6 +132,9 @@
     "join-desc": "Bienvenue ! Pour rejoindre l'événement, veuillez vous inscrire ci-dessous.",
     "register-button": "S'inscrire",
     "checkout-button": "Procéder au paiement",
+    "checkout-button-continue": "Continuer le paiement",
+    "pending-order-notice": "Vous avez une commande en cours pour cet événement.",
+    "pending-order-link": "Voir votre commande en cours",
     "checkout-total-label": "Total",
     "checkout-buyer-label": "Acheteur et participant",
     "checkout-guest-label": "Invité",
@@ -148,6 +151,8 @@
     "your-email": "Votre email",
     "guests": "Invités",
     "cancel-my-participation": "Annuler ma participation",
+    "tickets-paid": "Billets payés",
+    "tickets-paid-no-refund": "Le remboursement n'est pas disponible pour le moment.",
     "sold-out-msg": "L'événement est complet !",
     "email-placeholder": "Email...",
     "toast-confirmation": "Vous participez à l'événement !",
@@ -191,6 +196,11 @@
       "error-button": "Réessayer",
       "receipt-reference": "Référence du reçu",
       "view-order": "Voir les détails de la commande"
+    },
+    "checkout-confirmation-page": {
+      "title": "Confirmation de paiement",
+      "description": "Nous finalisons votre achat et mettrons cette page à jour.",
+      "back-to-event": "Retour à l'événement"
     }
   },
   "profile-info": {
@@ -433,8 +443,18 @@
     "quantity-label": "Billets",
     "total-label": "Total",
     "ticket-label": "Billet #{index}",
+    "event-label": "Événement",
     "no-tickets": "Aucun billet associé à cette commande pour l'instant.",
-    "free": "Gratuit"
+    "free": "Gratuit",
+    "status-label": "Statut",
+    "status-paid": "Payée",
+    "status-incomplete": "A compléter",
+    "payment-incomplete-title": "Paiement non finalisé",
+    "payment-incomplete-description": "Vous avez commencé le paiement mais ne l'avez pas finalisé. Retournez sur la page de l'événement pour continuer le paiement.",
+    "continue-payment": "Continuer le paiement",
+    "event-started-title": "L'événement a commencé",
+    "event-started-description": "Cet événement a déjà commencé. Cette commande ne peut plus être complétée.",
+    "view-event": "Voir l'événement"
   },
   "orders": {
     "title": "Vos commandes",

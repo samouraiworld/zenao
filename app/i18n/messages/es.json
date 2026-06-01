@@ -132,6 +132,9 @@
     "join-desc": "¡Bienvenido! Para unirte al evento, por favor regístrate a continuación.",
     "register-button": "Registrarse",
     "checkout-button": "Continuar al pago",
+    "checkout-button-continue": "Continuar pago",
+    "pending-order-notice": "Tienes un pedido pendiente para este evento.",
+    "pending-order-link": "Ver tu pedido pendiente",
     "checkout-total-label": "Total",
     "checkout-buyer-label": "Comprador y participante",
     "checkout-guest-label": "Invitado",
@@ -148,6 +151,8 @@
     "your-email": "Tu email",
     "guests": "Invitados",
     "cancel-my-participation": "Cancelar mi participación",
+    "tickets-paid": "Entradas pagadas",
+    "tickets-paid-no-refund": "Los reembolsos no están disponibles por el momento.",
     "sold-out-msg": "¡El evento está agotado!",
     "email-placeholder": "Email...",
     "toast-confirmation": "¡Participas en el evento!",
@@ -191,6 +196,11 @@
       "error-button": "Intentar de nuevo",
       "receipt-reference": "Referencia del recibo",
       "view-order": "Ver detalles del pedido"
+    },
+    "checkout-confirmation-page": {
+      "title": "Confirmación de pago",
+      "description": "Estamos finalizando tu compra y mantendremos esta página actualizada.",
+      "back-to-event": "Volver al evento"
     }
   },
   "profile-info": {
@@ -433,8 +443,18 @@
     "quantity-label": "Entradas",
     "total-label": "Total",
     "ticket-label": "Entrada #{index}",
+    "event-label": "Evento",
     "no-tickets": "Aún no hay entradas asociadas con este pedido.",
-    "free": "Gratis"
+    "free": "Gratis",
+    "status-label": "Estado",
+    "status-paid": "Pagado",
+    "status-incomplete": "Por completar",
+    "payment-incomplete-title": "Pago no completado",
+    "payment-incomplete-description": "Iniciaste el pago pero no lo completaste. Vuelve a la página del evento para reiniciar el pago.",
+    "continue-payment": "Reiniciar pago",
+    "event-started-title": "El evento ha comenzado",
+    "event-started-description": "Este evento ya ha comenzado. Este pedido ya no puede completarse.",
+    "view-event": "Ver evento"
   },
   "orders": {
     "title": "Tus pedidos",
