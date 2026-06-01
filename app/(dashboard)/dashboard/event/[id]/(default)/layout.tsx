@@ -66,7 +66,7 @@ async function DashboardEventInfoLayoutProps({
     </div>
   );
 
-  if (roles.includes("gatekeeper")) {
+  if (roles.includes("gatekeeper") && !roles.includes("organizer")) {
     return (
       <HydrationBoundary state={dehydrate(queryClient)}>
         <DashboardEventContextProvider
