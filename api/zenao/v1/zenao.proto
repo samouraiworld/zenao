@@ -48,6 +48,8 @@ service ZenaoService {
       returns (GetCommunityAdministratorsResponse);
   rpc JoinCommunity(JoinCommunityRequest) returns (JoinCommunityResponse);
   rpc LeaveCommunity(LeaveCommunityRequest) returns (LeaveCommunityResponse);
+  rpc RemoveCommunityMember(RemoveCommunityMemberRequest)
+      returns (RemoveCommunityMemberResponse);
   rpc AddEventToCommunity(AddEventToCommunityRequest)
       returns (AddEventToCommunityResponse);
   rpc RemoveEventFromCommunity(RemoveEventFromCommunityRequest)
@@ -702,6 +704,12 @@ message JoinCommunityResponse {}
 
 message LeaveCommunityRequest { string community_id = 1; }
 message LeaveCommunityResponse {}
+
+message RemoveCommunityMemberRequest {
+  string community_id = 1;
+  string user_id = 2;
+}
+message RemoveCommunityMemberResponse {}
 
 message AddEventToCommunityRequest {
   string community_id = 1;

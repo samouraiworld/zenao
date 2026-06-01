@@ -3,6 +3,8 @@
 import { parseAsInteger, useQueryStates } from "nuqs";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
+import { useCallback, useState } from "react";
+import { useAuth } from "@clerk/nextjs";
 import { useMembersColumns } from "./columns";
 import { DataTable as DataTableNew } from "@/components/widgets/data-table/data-table";
 import { useDataTableInstance } from "@/hooks/use-data-table-instance";
@@ -13,13 +15,58 @@ import {
 import Text from "@/components/widgets/texts/text";
 import { DataTablePagination } from "@/components/widgets/data-table/data-table-pagination";
 import { useDashboardCommunityContext } from "@/components/providers/dashboard-community-context-provider";
+import { useRemoveCommunityMember } from "@/lib/mutations/community-remove-member";
+import { useToast } from "@/hooks/use-toast";
+import { captureException } from "@/lib/report";
+import ConfirmationDialog from "@/components/dialogs/confirmation-dialog";
 
 export default function MembersTable() {
   const t = useTranslations("dashboard.communityDetails.members");
-  const { communityId } = useDashboardCommunityContext();
+  const { communityId, roles } = useDashboardCommunityContext();
+  const { getToken } = useAuth();
+  const { toast } = useToast();
+
+  const isAdmin = roles.includes("administrator");
+
   const { data: members } = useSuspenseQuery(
     communityUsersWithRoles(communityId, ["member"]),
   );
+
+  const { removeCommunityMember, isPending } = useRemoveCommunityMember();
+  const [pendingDeleteUserId, setPendingDeleteUserId] = useState<string | null>(
+    null,
+  );
+
+  const onDelete = useCallback((userId: string) => {
+    setPendingDeleteUserId(userId);
+  }, []);
+
+  const handleConfirmDelete = useCallback(async () => {
+    if (!pendingDeleteUserId) return;
+    try {
+      await removeCommunityMember({
+        communityId,
+        userId: pendingDeleteUserId,
+        getToken,
+      });
+      toast({ title: t("toast-remove-member-success") });
+    } catch (err) {
+      captureException(err);
+      toast({
+        variant: "destructive",
+        title: t("toast-remove-member-error"),
+      });
+    } finally {
+      setPendingDeleteUserId(null);
+    }
+  }, [
+    communityId,
+    getToken,
+    pendingDeleteUserId,
+    removeCommunityMember,
+    t,
+    toast,
+  ]);
 
   const [tablePagination, setTablePagination] = useQueryStates(
     {
@@ -32,7 +79,7 @@ export default function MembersTable() {
     },
   );
 
-  const columns = useMembersColumns();
+  const columns = useMembersColumns(isAdmin ? { onDelete } : undefined);
   const table = useDataTableInstance({
     data: members,
     columns,
@@ -87,6 +134,15 @@ export default function MembersTable() {
           },
         }}
         table={table}
+      />
+      <ConfirmationDialog
+        open={!!pendingDeleteUserId}
+        onOpenChange={(open) => !open && setPendingDeleteUserId(null)}
+        title={t("confirm-remove-member-title")}
+        description={t("confirm-remove-member-description")}
+        confirmText={t("confirm-remove-member-confirm")}
+        onConfirm={handleConfirmDelete}
+        isPending={isPending}
       />
     </div>
   );

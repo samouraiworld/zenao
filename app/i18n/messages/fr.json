@@ -836,7 +836,9 @@
     },
     "membersTable": {
       "name-column": "Nom",
-      "roles-column": "Rôles"
+      "roles-column": "Rôles",
+      "actions-column": "Actions",
+      "action-tooltip-delete": "Retirer le membre"
     },
     "eventsTable": {
       "events": "Événements",
@@ -896,7 +898,12 @@
         }
       },
       "members": {
-        "no-members": "Aucun membre pour le moment."
+        "no-members": "Aucun membre pour le moment.",
+        "toast-remove-member-success": "Membre retiré avec succès !",
+        "toast-remove-member-error": "Erreur lors du retrait du membre !",
+        "confirm-remove-member-title": "Retirer le membre",
+        "confirm-remove-member-description": "Êtes-vous sûr de vouloir retirer ce membre de la communauté ?",
+        "confirm-remove-member-confirm": "Retirer"
       },
       "events": {
         "no-events": "Aucun événement pour le moment."
