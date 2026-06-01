@@ -106,6 +106,9 @@ const (
 	// ZenaoServiceLeaveCommunityProcedure is the fully-qualified name of the ZenaoService's
 	// LeaveCommunity RPC.
 	ZenaoServiceLeaveCommunityProcedure = "/zenao.v1.ZenaoService/LeaveCommunity"
+	// ZenaoServiceRemoveCommunityMemberProcedure is the fully-qualified name of the ZenaoService's
+	// RemoveCommunityMember RPC.
+	ZenaoServiceRemoveCommunityMemberProcedure = "/zenao.v1.ZenaoService/RemoveCommunityMember"
 	// ZenaoServiceAddEventToCommunityProcedure is the fully-qualified name of the ZenaoService's
 	// AddEventToCommunity RPC.
 	ZenaoServiceAddEventToCommunityProcedure = "/zenao.v1.ZenaoService/AddEventToCommunity"
@@ -210,6 +213,7 @@ type ZenaoServiceClient interface {
 	GetCommunityAdministrators(context.Context, *connect.Request[v1.GetCommunityAdministratorsRequest]) (*connect.Response[v1.GetCommunityAdministratorsResponse], error)
 	JoinCommunity(context.Context, *connect.Request[v1.JoinCommunityRequest]) (*connect.Response[v1.JoinCommunityResponse], error)
 	LeaveCommunity(context.Context, *connect.Request[v1.LeaveCommunityRequest]) (*connect.Response[v1.LeaveCommunityResponse], error)
+	RemoveCommunityMember(context.Context, *connect.Request[v1.RemoveCommunityMemberRequest]) (*connect.Response[v1.RemoveCommunityMemberResponse], error)
 	AddEventToCommunity(context.Context, *connect.Request[v1.AddEventToCommunityRequest]) (*connect.Response[v1.AddEventToCommunityResponse], error)
 	RemoveEventFromCommunity(context.Context, *connect.Request[v1.RemoveEventFromCommunityRequest]) (*connect.Response[v1.RemoveEventFromCommunityResponse], error)
 	// TEAM
@@ -404,6 +408,12 @@ func NewZenaoServiceClient(httpClient connect.HTTPClient, baseURL string, opts .
 			httpClient,
 			baseURL+ZenaoServiceLeaveCommunityProcedure,
 			connect.WithSchema(zenaoServiceMethods.ByName("LeaveCommunity")),
+			connect.WithClientOptions(opts...),
+		),
+		removeCommunityMember: connect.NewClient[v1.RemoveCommunityMemberRequest, v1.RemoveCommunityMemberResponse](
+			httpClient,
+			baseURL+ZenaoServiceRemoveCommunityMemberProcedure,
+			connect.WithSchema(zenaoServiceMethods.ByName("RemoveCommunityMember")),
 			connect.WithClientOptions(opts...),
 		),
 		addEventToCommunity: connect.NewClient[v1.AddEventToCommunityRequest, v1.AddEventToCommunityResponse](
@@ -610,6 +620,7 @@ type zenaoServiceClient struct {
 	getCommunityAdministrators     *connect.Client[v1.GetCommunityAdministratorsRequest, v1.GetCommunityAdministratorsResponse]
 	joinCommunity                  *connect.Client[v1.JoinCommunityRequest, v1.JoinCommunityResponse]
 	leaveCommunity                 *connect.Client[v1.LeaveCommunityRequest, v1.LeaveCommunityResponse]
+	removeCommunityMember          *connect.Client[v1.RemoveCommunityMemberRequest, v1.RemoveCommunityMemberResponse]
 	addEventToCommunity            *connect.Client[v1.AddEventToCommunityRequest, v1.AddEventToCommunityResponse]
 	removeEventFromCommunity       *connect.Client[v1.RemoveEventFromCommunityRequest, v1.RemoveEventFromCommunityResponse]
 	createTeam                     *connect.Client[v1.CreateTeamRequest, v1.CreateTeamResponse]
@@ -764,6 +775,11 @@ func (c *zenaoServiceClient) JoinCommunity(ctx context.Context, req *connect.Req
 // LeaveCommunity calls zenao.v1.ZenaoService.LeaveCommunity.
 func (c *zenaoServiceClient) LeaveCommunity(ctx context.Context, req *connect.Request[v1.LeaveCommunityRequest]) (*connect.Response[v1.LeaveCommunityResponse], error) {
 	return c.leaveCommunity.CallUnary(ctx, req)
+}
+
+// RemoveCommunityMember calls zenao.v1.ZenaoService.RemoveCommunityMember.
+func (c *zenaoServiceClient) RemoveCommunityMember(ctx context.Context, req *connect.Request[v1.RemoveCommunityMemberRequest]) (*connect.Response[v1.RemoveCommunityMemberResponse], error) {
+	return c.removeCommunityMember.CallUnary(ctx, req)
 }
 
 // AddEventToCommunity calls zenao.v1.ZenaoService.AddEventToCommunity.
@@ -941,6 +957,7 @@ type ZenaoServiceHandler interface {
 	GetCommunityAdministrators(context.Context, *connect.Request[v1.GetCommunityAdministratorsRequest]) (*connect.Response[v1.GetCommunityAdministratorsResponse], error)
 	JoinCommunity(context.Context, *connect.Request[v1.JoinCommunityRequest]) (*connect.Response[v1.JoinCommunityResponse], error)
 	LeaveCommunity(context.Context, *connect.Request[v1.LeaveCommunityRequest]) (*connect.Response[v1.LeaveCommunityResponse], error)
+	RemoveCommunityMember(context.Context, *connect.Request[v1.RemoveCommunityMemberRequest]) (*connect.Response[v1.RemoveCommunityMemberResponse], error)
 	AddEventToCommunity(context.Context, *connect.Request[v1.AddEventToCommunityRequest]) (*connect.Response[v1.AddEventToCommunityResponse], error)
 	RemoveEventFromCommunity(context.Context, *connect.Request[v1.RemoveEventFromCommunityRequest]) (*connect.Response[v1.RemoveEventFromCommunityResponse], error)
 	// TEAM
@@ -1131,6 +1148,12 @@ func NewZenaoServiceHandler(svc ZenaoServiceHandler, opts ...connect.HandlerOpti
 		ZenaoServiceLeaveCommunityProcedure,
 		svc.LeaveCommunity,
 		connect.WithSchema(zenaoServiceMethods.ByName("LeaveCommunity")),
+		connect.WithHandlerOptions(opts...),
+	)
+	zenaoServiceRemoveCommunityMemberHandler := connect.NewUnaryHandler(
+		ZenaoServiceRemoveCommunityMemberProcedure,
+		svc.RemoveCommunityMember,
+		connect.WithSchema(zenaoServiceMethods.ByName("RemoveCommunityMember")),
 		connect.WithHandlerOptions(opts...),
 	)
 	zenaoServiceAddEventToCommunityHandler := connect.NewUnaryHandler(
@@ -1359,6 +1382,8 @@ func NewZenaoServiceHandler(svc ZenaoServiceHandler, opts ...connect.HandlerOpti
 			zenaoServiceJoinCommunityHandler.ServeHTTP(w, r)
 		case ZenaoServiceLeaveCommunityProcedure:
 			zenaoServiceLeaveCommunityHandler.ServeHTTP(w, r)
+		case ZenaoServiceRemoveCommunityMemberProcedure:
+			zenaoServiceRemoveCommunityMemberHandler.ServeHTTP(w, r)
 		case ZenaoServiceAddEventToCommunityProcedure:
 			zenaoServiceAddEventToCommunityHandler.ServeHTTP(w, r)
 		case ZenaoServiceRemoveEventFromCommunityProcedure:
@@ -1524,6 +1549,10 @@ func (UnimplementedZenaoServiceHandler) JoinCommunity(context.Context, *connect.
 
 func (UnimplementedZenaoServiceHandler) LeaveCommunity(context.Context, *connect.Request[v1.LeaveCommunityRequest]) (*connect.Response[v1.LeaveCommunityResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("zenao.v1.ZenaoService.LeaveCommunity is not implemented"))
+}
+
+func (UnimplementedZenaoServiceHandler) RemoveCommunityMember(context.Context, *connect.Request[v1.RemoveCommunityMemberRequest]) (*connect.Response[v1.RemoveCommunityMemberResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("zenao.v1.ZenaoService.RemoveCommunityMember is not implemented"))
 }
 
 func (UnimplementedZenaoServiceHandler) AddEventToCommunity(context.Context, *connect.Request[v1.AddEventToCommunityRequest]) (*connect.Response[v1.AddEventToCommunityResponse], error) {
