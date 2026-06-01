@@ -938,6 +938,9 @@
         "openQrCodeScanner": "Escáner QR",
         "no-participants": "Aún no hay participantes.",
         "remove-participant": "Eliminar participante",
+        "confirm-remove-participant-title": "¿Eliminar participante?",
+        "confirm-remove-participant-description": "Esta acción eliminará al participante del evento. Esta acción no se puede deshacer.",
+        "confirm-remove-participant-confirm": "Eliminar",
         "toast-remove-participant-success": "Participante eliminado correctamente.",
         "toast-remove-participant-error": "Error al eliminar el participante."
       },

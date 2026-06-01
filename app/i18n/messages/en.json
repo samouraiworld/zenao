@@ -939,6 +939,9 @@
         "openQrCodeScanner": "QR Code Scanner",
         "no-participants": "No participants yet.",
         "remove-participant": "Remove participant",
+        "confirm-remove-participant-title": "Remove participant?",
+        "confirm-remove-participant-description": "This will remove the participant from the event. This action cannot be undone.",
+        "confirm-remove-participant-confirm": "Remove",
         "toast-remove-participant-success": "Participant removed successfully.",
         "toast-remove-participant-error": "Error while removing participant."
       },

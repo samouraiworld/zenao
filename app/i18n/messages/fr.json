@@ -939,6 +939,9 @@
         "openQrCodeScanner": "Scanner QR Code",
         "no-participants": "Aucun participant pour le moment.",
         "remove-participant": "Retirer le participant",
+        "confirm-remove-participant-title": "Retirer le participant ?",
+        "confirm-remove-participant-description": "Cette action retirera le participant de l'événement. Cette action est irréversible.",
+        "confirm-remove-participant-confirm": "Retirer",
         "toast-remove-participant-success": "Participant retiré avec succès.",
         "toast-remove-participant-error": "Erreur lors de la suppression du participant."
       },

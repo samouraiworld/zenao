@@ -4,7 +4,7 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { Download, ScanQrCode } from "lucide-react";
 import { useAuth } from "@clerk/nextjs";
-import { useTransition, useMemo, useCallback } from "react";
+import { useTransition, useMemo, useCallback, useState } from "react";
 import { parseAsInteger, useQueryStates } from "nuqs";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
@@ -23,6 +23,7 @@ import { useDashboardEventContext } from "@/components/providers/dashboard-event
 import { useRemoveParticipant } from "@/lib/mutations/event-remove-participant";
 import { useToast } from "@/hooks/use-toast";
 import { captureException } from "@/lib/report";
+import ConfirmationDialog from "@/components/dialogs/confirmation-dialog";
 
 interface ParticipantsTableProps {
   eventId: string;
@@ -57,22 +58,33 @@ export default function ParticipantsTable({ eventId }: ParticipantsTableProps) {
   );
 
   const { removeParticipant } = useRemoveParticipant();
-
-  const onDelete = useCallback(
-    async (userId: string) => {
-      try {
-        await removeParticipant({ eventId, userId, getToken });
-        toast({ title: t("toast-remove-participant-success") });
-      } catch (err) {
-        captureException(err);
-        toast({
-          variant: "destructive",
-          title: t("toast-remove-participant-error"),
-        });
-      }
-    },
-    [eventId, getToken, removeParticipant, t, toast],
+  const [pendingDeleteUserId, setPendingDeleteUserId] = useState<string | null>(
+    null,
   );
+
+  const onDelete = useCallback((userId: string) => {
+    setPendingDeleteUserId(userId);
+  }, []);
+
+  const handleConfirmDelete = useCallback(async () => {
+    if (!pendingDeleteUserId) return;
+    try {
+      await removeParticipant({
+        eventId,
+        userId: pendingDeleteUserId,
+        getToken,
+      });
+      toast({ title: t("toast-remove-participant-success") });
+    } catch (err) {
+      captureException(err);
+      toast({
+        variant: "destructive",
+        title: t("toast-remove-participant-error"),
+      });
+    } finally {
+      setPendingDeleteUserId(null);
+    }
+  }, [eventId, getToken, pendingDeleteUserId, removeParticipant, t, toast]);
 
   const [tablePagination, setTablePagination] = useQueryStates(
     {
@@ -168,6 +180,14 @@ export default function ParticipantsTable({ eventId }: ParticipantsTableProps) {
             setTablePagination((prev) => ({ ...prev, limit }));
           },
         }}
+      />
+      <ConfirmationDialog
+        open={!!pendingDeleteUserId}
+        onOpenChange={(open) => !open && setPendingDeleteUserId(null)}
+        title={t("confirm-remove-participant-title")}
+        description={t("confirm-remove-participant-description")}
+        confirmText={t("confirm-remove-participant-confirm")}
+        onConfirm={handleConfirmDelete}
       />
     </div>
   );
