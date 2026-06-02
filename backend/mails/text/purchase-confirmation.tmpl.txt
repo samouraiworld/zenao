@@ -17,4 +17,24 @@ ADDRESS
 
 {{.LocationText}}
 
+ORDER SUMMARY
+
+Order number: {{.OrderID}}
+
+Amount paid: {{.AmountText}}
+
+Sold by: {{.SellerName}}
+
+{{if .SupportEmail}}
+
+Support: {{.SupportEmail}}
+
+{{end}}{{if .SellerAddress}}
+
+Address: {{.SellerAddress}}
+
+{{end}}
+
+{{.LegalNote}}
+
 See the event {{.EventURL}}

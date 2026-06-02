@@ -67,7 +67,7 @@ func execGenPdfTicket(genPdfTicketConf *genPdfTicketConfig) error {
 		return err
 	}
 
-	pdf, err := GeneratePDFTicket(event, genPdfTicketConf.ticketSecret, "John Doe", "john.doe@example.com", time.Now(), logger)
+	pdf, err := GeneratePDFTicket(event, genPdfTicketConf.ticketSecret, "John Doe", "john.doe@example.com", time.Now(), nil, logger)
 	if err != nil {
 		return err
 	}
@@ -84,7 +84,21 @@ func execGenPdfTicket(genPdfTicketConf *genPdfTicketConfig) error {
 	return nil
 }
 
-func GeneratePDFTicket(event *zeni.Event, ticketSecret string, DisplayName string, email string, purchaseDate time.Time, logger *zap.Logger) ([]byte, error) {
+// qrCodePNG renders a ticket secret as a PNG QR code, used both inline in
+// ticket emails and as a fallback alongside the attached PDF. The quiet zone
+// (border) is kept here for reliable scanning from a phone screen.
+func qrCodePNG(content string, size int) ([]byte, error) {
+	qr, err := qrcode.New(content, qrcode.Medium)
+	if err != nil {
+		return nil, fmt.Errorf("failed to generate QR code: %w", err)
+	}
+	return qr.PNG(size)
+}
+
+// GeneratePDFTicket renders a printable PDF ticket. qrPNG is an optional
+// pre-rendered QR PNG (encoding ticketSecret) so callers that also embed the QR
+// inline in an email can reuse a single encode; when empty it is generated here.
+func GeneratePDFTicket(event *zeni.Event, ticketSecret string, DisplayName string, email string, purchaseDate time.Time, qrPNG []byte, logger *zap.Logger) ([]byte, error) {
 	pdf := fpdf.New("P", "mm", "A4", "")
 	tr := pdf.UnicodeTranslatorFromDescriptor("cp1252")
 
@@ -153,22 +167,16 @@ func GeneratePDFTicket(event *zeni.Event, ticketSecret string, DisplayName strin
 	qrX := pageWidth - qrSize - widthMargin
 	qrY := infoY + 10
 
-	qrCode, err := qrcode.New(ticketSecret, qrcode.Medium)
-	if err != nil {
-		return nil, fmt.Errorf("failed to generate QR code: %w", err)
+	if len(qrPNG) == 0 {
+		qrPNG, err = qrCodePNG(ticketSecret, ticketEmailQRSize)
+		if err != nil {
+			return nil, err
+		}
 	}
-	tmpFile, err := os.CreateTemp("", "ticket-qr-*.png")
-	if err != nil {
-		return nil, fmt.Errorf("failed to create temporary file: %w", err)
-	}
-	defer os.Remove(tmpFile.Name())
-	defer tmpFile.Close()
-	qrCode.DisableBorder = true
-	if err := qrCode.WriteFile(125, tmpFile.Name()); err != nil {
-		return nil, fmt.Errorf("failed to write QR code to file: %w", err)
-	}
-
-	pdf.ImageOptions(tmpFile.Name(), qrX, qrY, qrSize, qrSize, false, fpdf.ImageOptions{
+	qrName := "ticket-qr-" + ticketSecret
+	pdf.RegisterImageOptionsReader(qrName, fpdf.ImageOptions{ImageType: "PNG"}, bytes.NewReader(qrPNG))
+	pdf.ImageOptions(qrName, qrX, qrY, qrSize, qrSize, false, fpdf.ImageOptions{
+		ImageType:             "PNG",
 		ReadDpi:               true,
 		AllowNegativePosition: false,
 	}, 0, "")

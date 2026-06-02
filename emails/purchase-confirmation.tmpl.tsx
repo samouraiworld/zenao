@@ -60,6 +60,27 @@ export const PurchaseConfirmationEmail = () => (
           </Row>
           <Row>
             <Column>
+              <Section style={order.box}>
+                <Text style={order.title}>ORDER SUMMARY</Text>
+                <Text style={order.line}>Order number: {"{{.OrderID}}"}</Text>
+                <Text style={order.line}>Amount paid: {"{{.AmountText}}"}</Text>
+                <Text style={order.line}>Sold by: {"{{.SellerName}}"}</Text>
+                {"{{if .SupportEmail}}"}
+                <Text style={order.line}>Support: {"{{.SupportEmail}}"}</Text>
+                {"{{end}}"}
+                {"{{if .SellerAddress}}"}
+                <Text style={order.line}>Address: {"{{.SellerAddress}}"}</Text>
+                {"{{end}}"}
+              </Section>
+            </Column>
+          </Row>
+          <Row>
+            <Column>
+              <Text style={order.legal}>{"{{.LegalNote}}"}</Text>
+            </Column>
+          </Row>
+          <Row>
+            <Column>
               <Button href="{{.EventURL}}" style={details.seeEventButton}>
                 See the event
               </Button>
@@ -136,5 +157,42 @@ const details = {
     paddingTop: 14,
     paddingBottom: 14,
     fontWeight: 500,
+  },
+} as const;
+
+const order = {
+  box: {
+    marginTop: 8,
+    marginBottom: 8,
+    backgroundColor: "#F5F5F5",
+    borderRadius: 4,
+    padding: 16,
+  },
+  title: {
+    fontSize: 12,
+    lineHeight: 1.3,
+    color: "#666666",
+    fontWeight: 500,
+    letterSpacing: 0.5,
+    margin: 0,
+    marginBottom: 12,
+  },
+  line: {
+    fontSize: 14,
+    lineHeight: 1.5,
+    fontWeight: 400,
+    letterSpacing: -0.2,
+    margin: 0,
+    marginBottom: 4,
+  },
+  legal: {
+    fontSize: 12,
+    lineHeight: 1.4,
+    color: "#666666",
+    fontWeight: 400,
+    letterSpacing: -0.1,
+    margin: 0,
+    marginTop: 8,
+    marginBottom: 8,
   },
 } as const;

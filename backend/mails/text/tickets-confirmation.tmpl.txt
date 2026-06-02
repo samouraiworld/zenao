@@ -17,4 +17,17 @@ ADDRESS
 
 {{.LocationText}}
 
+{{if .Tickets}}
+
+
+YOUR TICKETS:
+
+Show the QR code at the entrance. A printable PDF version is also attached to this email.
+
+{{range .Tickets}}
+
+{{.Label}}
+
+{{end}}{{end}}
+
 See the event {{.EventURL}}

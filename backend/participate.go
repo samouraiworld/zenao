@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"slices"
 	"sync"
-	"time"
 
 	"connectrpc.com/connect"
 	"github.com/resend/resend-go/v2"
@@ -175,14 +174,11 @@ func (s *ZenaoServer) Participate(ctx context.Context, req *connect.Request[zena
 			)
 			defer span.End()
 
-			htmlStr, text, err := ticketsConfirmationMailContent(evt, "Welcome! Tickets are attached to this email.")
-			if err != nil {
-				s.Logger.Error("generate-participate-email-content", zap.Error(err))
-				return
-			}
-
-			attachments := make([]*resend.Attachment, 0, len(tickets))
-
+			// Bundle every ticket (the buyer's own plus any guest's) into a
+			// single email addressed to the buyer. The QR codes are entry
+			// tokens, so they are never sent to guest-provided emails which
+			// could contain a typo and leak access.
+			items := make([]ticketEmailItem, 0, len(tickets))
 			func() {
 				_, span := tracer.Start(
 					ctx,
@@ -190,30 +186,36 @@ func (s *ZenaoServer) Participate(ctx context.Context, req *connect.Request[zena
 					trace.WithSpanKind(trace.SpanKindClient),
 				)
 				defer span.End()
-				for i, ticket := range tickets {
-					pdfData, err := GeneratePDFTicket(evt, ticket.Secret(), buyer.DisplayName, authUser.Email, time.Now(), s.Logger)
-					if err != nil {
-						s.Logger.Error("generate-ticket-pdf", zap.Error(err), zap.String("ticket-id", ticket.Secret()))
-						continue
+				for i := range tickets {
+					email := authUser.Email
+					if i > 0 {
+						// participants[1:] map to authGuests in order.
+						email = authGuests[i-1].Email
 					}
-					attachments = append(attachments, &resend.Attachment{
-						Content:     pdfData,
-						Filename:    fmt.Sprintf("ticket_%s_%s_%d.pdf", buyer.ID, evt.ID, i),
-						ContentType: "application/pdf",
-					})
-					icsData := GenerateICS(evt, s.MailSender, s.Logger)
-					attachments = append(attachments, &resend.Attachment{
-						Content:     icsData,
-						Filename:    fmt.Sprintf("zenao_events_%s.ics", evt.ID),
-						ContentType: "text/calendar",
+					items = append(items, ticketEmailItem{
+						Secret:      tickets[i].Secret(),
+						DisplayName: participants[i].DisplayName,
+						Email:       email,
 					})
 				}
 			}()
 
+			qrs, attachments, err := buildTicketEmailAttachments(evt, items, s.MailSender, s.Logger)
+			if err != nil {
+				s.Logger.Error("generate-participate-attachments", zap.Error(err), zap.String("event-id", evt.ID), zap.String("buyer-id", buyer.ID))
+				return
+			}
+
+			htmlStr, text, err := ticketsConfirmationMailContent(evt, "Welcome! Your tickets are attached and shown below.", qrs)
+			if err != nil {
+				s.Logger.Error("generate-participate-email-content", zap.Error(err))
+				return
+			}
+
 			// XXX: Replace sender name with organizer name
 			if _, err := s.MailClient.Emails.SendWithContext(ctx, &resend.SendEmailRequest{
 				From:        fmt.Sprintf("Zenao <%s>", s.MailSender),
-				To:          append(req.Msg.Guests, authUser.Email),
+				To:          []string{authUser.Email},
 				Subject:     fmt.Sprintf("%s - Confirmation", evt.Title),
 				Html:        htmlStr,
 				Text:        text,

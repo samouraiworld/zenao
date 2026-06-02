@@ -8,6 +8,7 @@ import (
 	"net/http/httptest"
 	"net/url"
 	"sync"
+	"sync/atomic"
 	"testing"
 	"time"
 
@@ -166,10 +167,11 @@ func setupPaymentConfirmationFixtureWithAttendees(t *testing.T, attendeeEmails [
 	return db, sqlDB, orderID, sessionID.String, checkoutAuth
 }
 
-func newTestResendClient(t *testing.T) (*resend.Client, *int) {
-	count := 0
+func newTestResendClient(t *testing.T) (*resend.Client, *atomic.Int64) {
+	// atomic because ticket emails are sent from a background goroutine.
+	count := &atomic.Int64{}
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		count++
+		count.Add(1)
 		w.Header().Set("Content-Type", "application/json")
 		_, _ = w.Write([]byte(`{"id":"email_123"}`))
 	}))
@@ -180,7 +182,7 @@ func newTestResendClient(t *testing.T) (*resend.Client, *int) {
 	require.NoError(t, err)
 	client.BaseURL = baseURL
 
-	return client, &count
+	return client, count
 }
 
 func TestConfirmTicketPaymentSuccessUpdatesOrderAndSendsEmailOnce(t *testing.T) {
@@ -229,7 +231,9 @@ func TestConfirmTicketPaymentSuccessUpdatesOrderAndSendsEmailOnce(t *testing.T) 
 	require.Equal(t, string(zeni.OrderStatusSuccess), status)
 	require.Equal(t, "pi_test_123", intent.String)
 	require.True(t, confirmed.Valid)
-	require.Equal(t, 1, *sendCount)
+	// 1 purchase confirmation email (sent synchronously) + 1 ticket email
+	// bundling the order (sent from a background goroutine, hence Eventually).
+	require.Eventually(t, func() bool { return sendCount.Load() == 2 }, 2*time.Second, 10*time.Millisecond)
 
 	_, err = server.ConfirmTicketPayment(
 		context.Background(),
@@ -239,7 +243,8 @@ func TestConfirmTicketPaymentSuccessUpdatesOrderAndSendsEmailOnce(t *testing.T) 
 		}),
 	)
 	require.NoError(t, err)
-	require.Equal(t, 1, *sendCount)
+	// Re-confirming must not resend the purchase or ticket emails.
+	require.Never(t, func() bool { return sendCount.Load() != 2 }, 200*time.Millisecond, 20*time.Millisecond)
 }
 
 func TestConfirmTicketPaymentPendingSkipsEmail(t *testing.T) {
@@ -283,7 +288,7 @@ func TestConfirmTicketPaymentPendingSkipsEmail(t *testing.T) {
 	require.NoError(t, row.Scan(&status, &confirmed))
 	require.Equal(t, string(zeni.OrderStatusPending), status)
 	require.False(t, confirmed.Valid)
-	require.Equal(t, 0, *sendCount)
+	require.Equal(t, int64(0), sendCount.Load())
 }
 
 func TestConfirmTicketPaymentStripeErrorDoesNotUpdateOrder(t *testing.T) {
