@@ -242,6 +242,9 @@ func toAuthUser(clerkUser *clerk.User) *zeni.AuthUser {
 			email = clerkUser.EmailAddresses[emailIdx].EmailAddress
 		}
 	}
+	if email == "" && len(clerkUser.EmailAddresses) > 0 {
+		email = clerkUser.EmailAddresses[0].EmailAddress
+	}
 
 	return &zeni.AuthUser{ID: clerkUser.ID, Banned: clerkUser.Banned, Email: email}
 }

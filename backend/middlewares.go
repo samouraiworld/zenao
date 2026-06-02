@@ -68,7 +68,7 @@ func (s *ZenaoServer) EnsureUsersFromEmails(
 	}
 
 	userIDs := make(map[string]*zeni.User, len(authUsers))
-	for _, authUser := range authUsers {
+	for i, authUser := range authUsers {
 		if authUser.Banned {
 			return nil, fmt.Errorf("user %s is banned", authUser.Email)
 		}
@@ -79,7 +79,7 @@ func (s *ZenaoServer) EnsureUsersFromEmails(
 		if user == nil {
 			return nil, errors.New("failed to create user")
 		}
-		normalizedEmail := strings.ToLower(strings.TrimSpace(authUser.Email))
+		normalizedEmail := strings.ToLower(strings.TrimSpace(emails[i]))
 		userIDs[normalizedEmail] = user
 	}
 	return userIDs, nil
