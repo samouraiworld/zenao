@@ -378,6 +378,41 @@ table "payment_accounts" {
     null = true
     type = datetime
   }
+  column "business_name" {
+    null    = false
+    type    = text
+    default = ""
+  }
+  column "legal_name" {
+    null    = false
+    type    = text
+    default = ""
+  }
+  column "support_email" {
+    null    = false
+    type    = text
+    default = ""
+  }
+  column "support_phone" {
+    null    = false
+    type    = text
+    default = ""
+  }
+  column "support_url" {
+    null    = false
+    type    = text
+    default = ""
+  }
+  column "business_address" {
+    null    = false
+    type    = text
+    default = ""
+  }
+  column "country" {
+    null    = false
+    type    = text
+    default = ""
+  }
   primary_key {
     columns = [column.id]
   }
