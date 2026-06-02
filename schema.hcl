@@ -61,6 +61,10 @@ table "users" {
     null = true
     type = text
   }
+  column "email" {
+    null = true
+    type = text
+  }
   column "display_name" {
     null = true
     type = text
@@ -85,6 +89,10 @@ table "users" {
   }
   primary_key {
     columns = [column.id]
+  }
+  index "idx_users_email" {
+    unique  = true
+    columns = [column.email]
   }
   index "idx_users_auth_id" {
     unique  = true
