@@ -61,39 +61,49 @@ func (s *ZenaoServer) GetOrderDetails(
 	if err != nil {
 		return nil, err
 	}
-	authIDByUserID := map[string]string{}
+	// Resolve emails by internal user id: registered users get theirs from the
+	// auth provider, guests carry it directly on the DB user.
+	emailByUserID := map[string]string{}
+	authIDToUserIDs := map[string][]string{}
+	addUser := func(userID, authID, guestEmail string) {
+		userID = strings.TrimSpace(userID)
+		if userID == "" {
+			return
+		}
+		if _, done := emailByUserID[userID]; done {
+			return
+		}
+		if strings.TrimSpace(authID) == "" {
+			emailByUserID[userID] = guestEmail
+			return
+		}
+		authIDToUserIDs[authID] = append(authIDToUserIDs[authID], userID)
+	}
 	for _, user := range attendeeUsers {
 		if user != nil {
-			authIDByUserID[user.ID] = user.AuthID
+			addUser(user.ID, user.AuthID, user.Email)
+		}
+	}
+	for _, ticket := range tickets {
+		if ticket != nil && ticket.User != nil {
+			addUser(ticket.User.ID, ticket.User.AuthID, ticket.User.Email)
 		}
 	}
 
-	emailsByID := map[string]string{}
-	authIDsSet := map[string]struct{}{}
-	for _, ticket := range tickets {
-		if ticket == nil || ticket.User == nil || strings.TrimSpace(ticket.User.AuthID) == "" {
-			continue
-		}
-		authIDsSet[ticket.User.AuthID] = struct{}{}
-	}
-	for _, authID := range authIDByUserID {
-		if strings.TrimSpace(authID) == "" {
-			continue
-		}
-		authIDsSet[authID] = struct{}{}
-	}
-	authIDs := make([]string, 0, len(authIDsSet))
-	for authID := range authIDsSet {
+	authIDs := make([]string, 0, len(authIDToUserIDs))
+	for authID := range authIDToUserIDs {
 		authIDs = append(authIDs, authID)
 	}
-
-	users, err := s.Auth.GetUsersFromIDs(ctx, authIDs)
+	authUsers, err := s.Auth.GetUsersFromIDs(ctx, authIDs)
 	if err != nil {
 		return nil, err
 	}
-	for _, user := range users {
-		if user != nil {
-			emailsByID[user.ID] = user.Email
+	for _, user := range authUsers {
+		if user == nil {
+			continue
+		}
+		for _, userID := range authIDToUserIDs[user.ID] {
+			emailByUserID[userID] = user.Email
 		}
 	}
 
@@ -108,7 +118,7 @@ func (s *ZenaoServer) GetOrderDetails(
 		}
 
 		if ticket.User != nil {
-			ticketInfo.UserEmail = emailsByID[ticket.User.AuthID]
+			ticketInfo.UserEmail = emailByUserID[ticket.User.ID]
 		}
 
 		ticketInfos = append(ticketInfos, ticketInfo)
@@ -120,7 +130,7 @@ func (s *ZenaoServer) GetOrderDetails(
 			continue
 		}
 		attendeeInfos = append(attendeeInfos, &zenaov1.OrderAttendeeInfo{
-			UserEmail: emailsByID[authIDByUserID[attendee.UserID]],
+			UserEmail: emailByUserID[attendee.UserID],
 			PriceId:   attendee.PriceID,
 		})
 	}

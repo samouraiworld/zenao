@@ -175,6 +175,45 @@ func (c *clerkZenaoAuth) EnsureUsersExists(ctx context.Context, emails []string)
 	})
 }
 
+// GetUsersFromEmails implements zeni.Auth.
+func (c *clerkZenaoAuth) GetUsersFromEmails(ctx context.Context, emails []string) (map[string]*zeni.AuthUser, error) {
+	if len(emails) == 0 {
+		return map[string]*zeni.AuthUser{}, nil
+	}
+
+	spanCtx, span := otel.Tracer("czauth").Start(
+		ctx,
+		"czauth.GetUsersFromEmails",
+		trace.WithSpanKind(trace.SpanKindClient),
+	)
+	defer span.End()
+	ctx = spanCtx
+
+	emails = mapsl.Map(emails, strings.ToLower)
+
+	existing, err := c.client.List(ctx, &user.ListParams{EmailAddresses: emails})
+	if err != nil {
+		return nil, err
+	}
+
+	found := make(map[string]*zeni.AuthUser, len(existing.Users))
+	for _, u := range existing.Users {
+		authUser := toAuthUser(u)
+		for _, cm := range u.EmailAddresses {
+			found[strings.ToLower(cm.EmailAddress)] = authUser
+		}
+	}
+
+	// Keep only the requested emails (a Clerk user may carry extra addresses).
+	result := make(map[string]*zeni.AuthUser, len(emails))
+	for _, email := range emails {
+		if authUser, ok := found[email]; ok {
+			result[email] = authUser
+		}
+	}
+	return result, nil
+}
+
 // WithAuth implements zeni.Auth.
 func (c *clerkZenaoAuth) WithAuth() func(http.Handler) http.Handler {
 	return authn.NewMiddleware(func(_ context.Context, req *http.Request) (any, error) {

@@ -11,7 +11,6 @@ import (
 	"time"
 
 	"connectrpc.com/connect"
-	"github.com/samouraiworld/zenao/backend/mapsl"
 	zenaov1 "github.com/samouraiworld/zenao/backend/zenao/v1"
 	"github.com/samouraiworld/zenao/backend/zeni"
 	"go.uber.org/zap"
@@ -43,8 +42,15 @@ func (s *ZenaoServer) ExportParticipants(ctx context.Context, req *connect.Reque
 		return nil, err
 	}
 
-	idsList := mapsl.Map(tickets, func(t *zeni.SoldTicket) string { return t.User.AuthID })
-	authParticipants, err := s.Auth.GetUsersFromIDs(ctx, idsList)
+	// Registered participants get their email from the auth provider; guests carry
+	// it directly on the DB user.
+	authIDs := make([]string, 0, len(tickets))
+	for _, t := range tickets {
+		if t.User != nil && t.User.AuthID != "" {
+			authIDs = append(authIDs, t.User.AuthID)
+		}
+	}
+	authParticipants, err := s.Auth.GetUsersFromIDs(ctx, authIDs)
 	if err != nil {
 		return nil, err
 	}
@@ -62,12 +68,18 @@ func (s *ZenaoServer) ExportParticipants(ctx context.Context, req *connect.Reque
 
 	var ticketDataList []ticketData
 	for _, t := range tickets {
-		email := mailMap[t.User.AuthID]
+		if t.User == nil {
+			continue
+		}
+		email := t.User.Email
+		if t.User.AuthID != "" {
+			email = mailMap[t.User.AuthID]
+		}
 		if email == "" {
-			s.Logger.Warn("export-participants-fail-to-retrieve-auth-user",
+			s.Logger.Warn("export-participants-fail-to-retrieve-user-email",
 				zap.String("event-id", req.Msg.EventId),
 				zap.String("actor-id", actor.ID()),
-				zap.String("auth-user-id", t.User.AuthID))
+				zap.String("user-id", t.User.ID))
 			continue
 		}
 

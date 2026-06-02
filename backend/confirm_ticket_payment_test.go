@@ -28,7 +28,9 @@ func setupPaymentConfirmationFixture(t *testing.T) (zeni.DB, *sql.DB, string, st
 	return setupPaymentConfirmationFixtureWithAttendees(t, []string{"buyer@example.com"})
 }
 
-func setupPaymentConfirmationFixtureWithAttendees(t *testing.T, attendeeEmails []string) (zeni.DB, *sql.DB, string, string, *ticketPaymentStubAuth) {
+// registeredAttendees lists attendee emails that should have an auth account
+// (i.e. resolved as registered users instead of guests) before checkout runs.
+func setupPaymentConfirmationFixtureWithAttendees(t *testing.T, attendeeEmails []string, registeredAttendees ...string) (zeni.DB, *sql.DB, string, string, *ticketPaymentStubAuth) {
 	db, sqlDB := ztesting.SetupTestDB(t)
 	organizerAuth := &ticketPaymentStubAuth{}
 	organizerAuth.user = organizerAuth.ensureAuthUser("org@example.com")
@@ -121,6 +123,12 @@ func setupPaymentConfirmationFixtureWithAttendees(t *testing.T, attendeeEmails [
 
 	if len(attendeeEmails) == 0 {
 		attendeeEmails = []string{"buyer@example.com"}
+	}
+
+	// Pre-register selected attendees so they resolve as registered users (with an
+	// auth account) rather than guests during checkout.
+	for _, email := range registeredAttendees {
+		checkoutAuth.ensureAuthUser(email)
 	}
 
 	lineItems := make([]*zenaov1.StartTicketPaymentLineItem, 0, len(attendeeEmails))

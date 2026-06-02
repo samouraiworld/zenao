@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"strconv"
+	"strings"
 	"time"
 
 	zenaov1 "github.com/samouraiworld/zenao/backend/zenao/v1"
@@ -68,6 +69,75 @@ func (g *gormZenaoDB) GetUser(authID string) (*zeni.User, error) {
 		}
 		return nil, err
 	}
+	return dbUserToZeniDBUser(&user), nil
+}
+
+// GetUserByEmail implements zeni.DB.
+// It only matches guest users (registered users keep their email in the auth provider, not in the DB).
+func (g *gormZenaoDB) GetUserByEmail(email string) (*zeni.User, error) {
+	email = strings.ToLower(strings.TrimSpace(email))
+	if email == "" {
+		return nil, nil
+	}
+	var user User
+	if err := g.db.Where("email = ?", email).First(&user).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return dbUserToZeniDBUser(&user), nil
+}
+
+// CreateGuestUser implements zeni.DB.
+// A guest user has no auth provider account; it is identified by its email.
+func (g *gormZenaoDB) CreateGuestUser(email string) (*zeni.User, error) {
+	email = strings.ToLower(strings.TrimSpace(email))
+	if email == "" {
+		return nil, errors.New("email is required")
+	}
+
+	user := &User{
+		Email:     &email,
+		Bio:       "Zenao managed user",
+		AvatarURI: userDefaultAvatar,
+	}
+
+	if err := g.db.Create(user).Error; err != nil {
+		return nil, err
+	}
+
+	user.DisplayName = fmt.Sprintf("Zenao user #%d", user.ID)
+	if err := g.db.Model(user).
+		Update("display_name", user.DisplayName).Error; err != nil {
+		return nil, err
+	}
+
+	return dbUserToZeniDBUser(user), nil
+}
+
+// PromoteGuestUser implements zeni.DB.
+// It links an existing guest user to an auth provider account, clearing its standalone email.
+func (g *gormZenaoDB) PromoteGuestUser(userID string, authID string) (*zeni.User, error) {
+	userIDInt, err := strconv.ParseUint(userID, 10, 64)
+	if err != nil {
+		return nil, fmt.Errorf("parse user id: %w", err)
+	}
+
+	var user User
+	if err := g.db.First(&user, userIDInt).Error; err != nil {
+		return nil, fmt.Errorf("get guest user: %w", err)
+	}
+
+	if err := g.db.Model(&user).Updates(map[string]interface{}{
+		"auth_id": authID,
+		"email":   nil,
+	}).Error; err != nil {
+		return nil, fmt.Errorf("promote guest user: %w", err)
+	}
+
+	user.AuthID = &authID
+	user.Email = nil
 	return dbUserToZeniDBUser(&user), nil
 }
 

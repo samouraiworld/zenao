@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strings"
 	"testing"
 	"time"
 
@@ -78,6 +79,20 @@ func (a *ticketPaymentStubAuth) EnsureUsersExists(ctx context.Context, emails []
 		users = append(users, a.ensureAuthUser(email))
 	}
 	return users, nil
+}
+
+// GetUsersFromEmails is lookup-only: it returns auth users only for emails that
+// were explicitly registered via ensureAuthUser. Unknown emails are treated as
+// guests (no auth account), matching production behavior.
+func (a *ticketPaymentStubAuth) GetUsersFromEmails(ctx context.Context, emails []string) (map[string]*zeni.AuthUser, error) {
+	result := make(map[string]*zeni.AuthUser, len(emails))
+	for _, email := range emails {
+		normalized := strings.ToLower(strings.TrimSpace(email))
+		if existing, ok := a.knownAuth[normalized]; ok {
+			result[normalized] = existing
+		}
+	}
+	return result, nil
 }
 
 func (a *ticketPaymentStubAuth) WithAuth() func(http.Handler) http.Handler {
@@ -230,17 +245,20 @@ func TestStartTicketPaymentCreatesOrderAndHold(t *testing.T) {
 	require.True(t, sessionID.Valid)
 	require.Equal(t, "cs_test_123", sessionID.String)
 
-	userRows, err := sqlDB.Query("SELECT id, auth_id FROM users WHERE auth_id IN (?, ?)", "auth-buyer@example.com", "auth-guest@example.com")
+	// Unregistered attendees are provisioned as guest users (no auth account):
+	// they carry an email and a null auth_id.
+	userRows, err := sqlDB.Query("SELECT id, email, auth_id FROM users WHERE email IN (?, ?)", "buyer@example.com", "guest@example.com")
 	require.NoError(t, err)
 	t.Cleanup(func() { _ = userRows.Close() })
 	userIDs := make(map[string]int64)
 	for userRows.Next() {
 		var id int64
+		var email sql.NullString
 		var authID sql.NullString
-		require.NoError(t, userRows.Scan(&id, &authID))
-		if authID.Valid {
-			userIDs[authID.String] = id
-		}
+		require.NoError(t, userRows.Scan(&id, &email, &authID))
+		require.True(t, email.Valid)
+		require.False(t, authID.Valid)
+		userIDs[email.String] = id
 	}
 	require.NoError(t, userRows.Err())
 	require.Len(t, userIDs, 2)
@@ -263,8 +281,8 @@ func TestStartTicketPaymentCreatesOrderAndHold(t *testing.T) {
 	}
 	require.NoError(t, attendeeRows.Err())
 	require.Len(t, records, 2)
-	require.Contains(t, []int64{userIDs["auth-buyer@example.com"], userIDs["auth-guest@example.com"]}, records[0].userID)
-	require.Contains(t, []int64{userIDs["auth-buyer@example.com"], userIDs["auth-guest@example.com"]}, records[1].userID)
+	require.Contains(t, []int64{userIDs["buyer@example.com"], userIDs["guest@example.com"]}, records[0].userID)
+	require.Contains(t, []int64{userIDs["buyer@example.com"], userIDs["guest@example.com"]}, records[1].userID)
 	require.Equal(t, int64(2500), records[0].amountMinor)
 	require.Equal(t, int64(2500), records[1].amountMinor)
 	require.Equal(t, "EUR", records[0].currencyCode)
@@ -954,8 +972,10 @@ func TestStartTicketPaymentUsesFirstEmailForBuyerWhenLoggedOut(t *testing.T) {
 	row := sqlDB.QueryRow("SELECT buyer_id FROM orders ORDER BY created_at DESC LIMIT 1")
 	require.NoError(t, row.Scan(&buyerID))
 
+	// Logged out: the first attendee email becomes the buyer, provisioned as a
+	// guest user (no auth account) identified by its email.
 	var expectedBuyerID int64
-	userRow := sqlDB.QueryRow("SELECT id FROM users WHERE auth_id = ?", "auth-first@example.com")
+	userRow := sqlDB.QueryRow("SELECT id FROM users WHERE email = ?", "first@example.com")
 	require.NoError(t, userRow.Scan(&expectedBuyerID))
 
 	require.Equal(t, expectedBuyerID, buyerID)

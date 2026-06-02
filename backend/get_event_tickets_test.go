@@ -15,9 +15,12 @@ import (
 )
 
 func TestGetEventTicketsAccess(t *testing.T) {
+	// guest@example.com is a registered attendee here: the second part of the test
+	// authenticates as them to check per-attendee ticket access.
 	db, sqlDB, orderID, sessionID, checkoutAuth := setupPaymentConfirmationFixtureWithAttendees(
 		t,
 		[]string{"buyer@example.com", "guest@example.com"},
+		"guest@example.com",
 	)
 
 	eventID := fetchEventIDForOrder(t, sqlDB, orderID)

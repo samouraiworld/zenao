@@ -114,6 +114,7 @@ type User struct {
 	CreatedAt   time.Time
 	ID          string
 	AuthID      string
+	Email       string // set for guest users (no Clerk account)
 	DisplayName string
 	Bio         string
 	AvatarURI   string
@@ -371,8 +372,10 @@ type DB interface {
 
 	CreateUser(authID string) (*User, error)
 	GetUser(authID string) (*User, error)
+	GetUserByEmail(email string) (*User, error)
+	CreateGuestUser(email string) (*User, error)
+	PromoteGuestUser(userID string, authID string) (*User, error)
 	GetUsersByIDs(ids []string) ([]*User, error)
-	// XXX: add EnsureUsersExist
 
 	EditUser(userID string, req *zenaov1.EditUserRequest) error
 	PromoteUser(userID string, plan Plan) error
@@ -485,6 +488,9 @@ type DB interface {
 type Auth interface {
 	GetUser(ctx context.Context) *AuthUser
 	GetUsersFromIDs(ctx context.Context, ids []string) ([]*AuthUser, error)
+	// GetUsersFromEmails returns existing auth users for the given emails (lookup only, no creation).
+	// The result is keyed by normalized (lowercased) email; emails without an account are absent.
+	GetUsersFromEmails(ctx context.Context, emails []string) (map[string]*AuthUser, error)
 
 	EnsureUserExists(ctx context.Context, email string) (*AuthUser, error)
 	EnsureUsersExists(ctx context.Context, emails []string) ([]*AuthUser, error)

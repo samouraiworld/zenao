@@ -217,7 +217,11 @@ func (s *ZenaoServer) sendOrderTicketsEmail(ctx context.Context, order *zeni.Ord
 		email := ""
 		displayName := ""
 		if ticket.User != nil {
-			email = emailByAuthID[ticket.User.AuthID]
+			if ticket.User.AuthID != "" {
+				email = emailByAuthID[ticket.User.AuthID]
+			} else {
+				email = ticket.User.Email
+			}
 			displayName = ticket.User.DisplayName
 		}
 		items = append(items, ticketEmailItem{
@@ -283,14 +287,24 @@ func (s *ZenaoServer) resolvePaymentSeller(ctx context.Context, order *zeni.Orde
 	return seller
 }
 
-// userEmail resolves a Zenao user ID to its authenticated email address.
+// userEmail resolves a Zenao user ID to its email address, supporting both
+// registered users (email lives in the auth provider) and guests (email stored
+// on the DB user).
 func (s *ZenaoServer) userEmail(ctx context.Context, userID string) (string, error) {
 	users, err := s.DB.WithContext(ctx).GetUsersByIDs([]string{userID})
 	if err != nil {
 		return "", err
 	}
-	if len(users) == 0 || users[0] == nil || strings.TrimSpace(users[0].AuthID) == "" {
-		return "", errors.New("user auth id not found")
+	if len(users) == 0 || users[0] == nil {
+		return "", errors.New("user not found")
+	}
+
+	// Guest user: no auth account, email is stored directly on the DB user.
+	if strings.TrimSpace(users[0].AuthID) == "" {
+		if email := strings.TrimSpace(users[0].Email); email != "" {
+			return email, nil
+		}
+		return "", errors.New("user email not found")
 	}
 
 	authUsers, err := s.Auth.GetUsersFromIDs(ctx, []string{users[0].AuthID})

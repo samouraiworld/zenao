@@ -22,7 +22,8 @@ const userDefaultAvatar = "ipfs://bafybeidrbpiyfvwsel6fxb7wl4p64tymnhgd7xnt3nowq
 
 type User struct {
 	gorm.Model          // this ID should be used for any database related logic (like querying)
-	AuthID      *string `gorm:"uniqueIndex"` // this ID should be only used for user identification & creation (auth provider id: clerk, auth0, etc). nil for teams.
+	AuthID      *string `gorm:"uniqueIndex"` // this ID should be only used for user identification & creation (auth provider id: clerk, auth0, etc). nil for teams and guests.
+	Email       *string `gorm:"uniqueIndex"` // set for guest users (no Clerk account); nil for registered users (email is in Clerk)
 	DisplayName string
 	Bio         string
 	AvatarURI   string
@@ -153,6 +154,10 @@ func dbUserToZeniDBUser(dbuser *User) *zeni.User {
 	if dbuser.AuthID != nil {
 		authID = *dbuser.AuthID
 	}
+	email := ""
+	if dbuser.Email != nil {
+		email = *dbuser.Email
+	}
 	u := &zeni.User{
 		ID:          fmt.Sprintf("%d", dbuser.ID),
 		CreatedAt:   dbuser.CreatedAt,
@@ -160,6 +165,7 @@ func dbUserToZeniDBUser(dbuser *User) *zeni.User {
 		Bio:         dbuser.Bio,
 		AvatarURI:   dbuser.AvatarURI,
 		AuthID:      authID,
+		Email:       email,
 		Plan:        zeni.Plan(dbuser.Plan),
 		IsTeam:      dbuser.IsTeam,
 	}
