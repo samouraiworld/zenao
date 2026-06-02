@@ -43,16 +43,51 @@ func (s *ZenaoServer) GetOrderDetails(
 		return nil, err
 	}
 
+	attendees, err := s.DB.GetOrderAttendees(orderID)
+	if err != nil {
+		return nil, err
+	}
+
+	// Order attendees only carry the internal DB user id, so resolve it to the
+	// auth id used to look up emails. Tickets already preload the auth id.
+	attendeeUserIDs := make([]string, 0, len(attendees))
+	for _, attendee := range attendees {
+		if attendee == nil || strings.TrimSpace(attendee.UserID) == "" {
+			continue
+		}
+		attendeeUserIDs = append(attendeeUserIDs, attendee.UserID)
+	}
+	attendeeUsers, err := s.DB.GetUsersByIDs(attendeeUserIDs)
+	if err != nil {
+		return nil, err
+	}
+	authIDByUserID := map[string]string{}
+	for _, user := range attendeeUsers {
+		if user != nil {
+			authIDByUserID[user.ID] = user.AuthID
+		}
+	}
+
 	emailsByID := map[string]string{}
-	userIDs := make([]string, 0, len(tickets))
+	authIDsSet := map[string]struct{}{}
 	for _, ticket := range tickets {
 		if ticket == nil || ticket.User == nil || strings.TrimSpace(ticket.User.AuthID) == "" {
 			continue
 		}
-		userIDs = append(userIDs, ticket.User.AuthID)
+		authIDsSet[ticket.User.AuthID] = struct{}{}
+	}
+	for _, authID := range authIDByUserID {
+		if strings.TrimSpace(authID) == "" {
+			continue
+		}
+		authIDsSet[authID] = struct{}{}
+	}
+	authIDs := make([]string, 0, len(authIDsSet))
+	for authID := range authIDsSet {
+		authIDs = append(authIDs, authID)
 	}
 
-	users, err := s.Auth.GetUsersFromIDs(ctx, userIDs)
+	users, err := s.Auth.GetUsersFromIDs(ctx, authIDs)
 	if err != nil {
 		return nil, err
 	}
@@ -79,6 +114,17 @@ func (s *ZenaoServer) GetOrderDetails(
 		ticketInfos = append(ticketInfos, ticketInfo)
 	}
 
+	attendeeInfos := make([]*zenaov1.OrderAttendeeInfo, 0, len(attendees))
+	for _, attendee := range attendees {
+		if attendee == nil {
+			continue
+		}
+		attendeeInfos = append(attendeeInfos, &zenaov1.OrderAttendeeInfo{
+			UserEmail: emailsByID[authIDByUserID[attendee.UserID]],
+			PriceId:   attendee.PriceID,
+		})
+	}
+
 	return connect.NewResponse(&zenaov1.GetOrderDetailsResponse{
 		Order: &zenaov1.OrderSummary{
 			OrderId:      order.ID,
@@ -88,6 +134,7 @@ func (s *ZenaoServer) GetOrderDetails(
 			CurrencyCode: order.CurrencyCode,
 			CreatedAt:    order.CreatedAt,
 		},
-		Tickets: ticketInfos,
+		Tickets:   ticketInfos,
+		Attendees: attendeeInfos,
 	}), nil
 }

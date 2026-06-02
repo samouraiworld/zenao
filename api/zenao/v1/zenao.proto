@@ -497,9 +497,18 @@ message OrderTicketInfo {
   string user_email = 2;
 }
 
+message OrderAttendeeInfo {
+  string user_email = 1;
+  string price_id = 2;
+}
+
 message GetOrderDetailsResponse {
   OrderSummary order = 1;
   repeated OrderTicketInfo tickets = 2;
+  // attendees holds the email of every attendee on the order, including before
+  // payment is confirmed (i.e. when tickets is still empty). Used to resume a
+  // pending checkout with the originally selected guests pre-filled.
+  repeated OrderAttendeeInfo attendees = 3;
 }
 
 message GetUserOrdersRequest {}
