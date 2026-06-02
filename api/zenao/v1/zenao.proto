@@ -646,6 +646,14 @@ message GetCommunityPayoutStatusResponse {
   string onboarding_state = 5;
   string platform_account_id = 6;
   repeated string currencies = 7;
+  // Merchant legal/business profile mirrored from the connected Stripe account.
+  string business_name = 8;
+  string legal_name = 9;
+  string support_email = 10;
+  string support_phone = 11;
+  string support_url = 12;
+  string business_address = 13;
+  string country = 14;
 }
 
 message CreateTeamRequest { string display_name = 1; }

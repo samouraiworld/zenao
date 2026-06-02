@@ -46,6 +46,13 @@ func (g *gormZenaoDB) UpsertPaymentAccount(account *zeni.PaymentAccount) (*zeni.
 		StartedAt:         account.StartedAt,
 		VerificationState: account.VerificationState,
 		LastVerifiedAt:    account.LastVerifiedAt,
+		BusinessName:      account.BusinessName,
+		LegalName:         account.LegalName,
+		SupportEmail:      account.SupportEmail,
+		SupportPhone:      account.SupportPhone,
+		SupportURL:        account.SupportURL,
+		BusinessAddress:   account.BusinessAddress,
+		Country:           account.Country,
 	}
 
 	now := time.Now().UTC()
@@ -60,6 +67,13 @@ func (g *gormZenaoDB) UpsertPaymentAccount(account *zeni.PaymentAccount) (*zeni.
 			"started_at":          account.StartedAt,
 			"verification_state":  account.VerificationState,
 			"last_verified_at":    account.LastVerifiedAt,
+			"business_name":       account.BusinessName,
+			"legal_name":          account.LegalName,
+			"support_email":       account.SupportEmail,
+			"support_phone":       account.SupportPhone,
+			"support_url":         account.SupportURL,
+			"business_address":    account.BusinessAddress,
+			"country":             account.Country,
 			"updated_at":          now,
 		}),
 	}).Create(&newAccount).Error

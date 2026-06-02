@@ -28,6 +28,62 @@ func shouldRefreshStripeAccountVerification(lastVerifiedAt *time.Time, now time.
 	return now.Sub(*lastVerifiedAt) >= ttl
 }
 
+// stripeAccountBusinessProfile is the merchant legal/business profile mirrored
+// from a connected Stripe account, used on the payouts page and purchase emails.
+type stripeAccountBusinessProfile struct {
+	businessName string
+	legalName    string
+	supportEmail string
+	supportPhone string
+	supportURL   string
+	address      string
+	country      string
+}
+
+func deriveStripeAccountBusinessProfile(acct *stripe.Account) stripeAccountBusinessProfile {
+	profile := stripeAccountBusinessProfile{}
+	if acct == nil {
+		return profile
+	}
+
+	profile.country = acct.Country
+
+	if acct.BusinessProfile != nil {
+		profile.businessName = strings.TrimSpace(acct.BusinessProfile.Name)
+		profile.supportEmail = strings.TrimSpace(acct.BusinessProfile.SupportEmail)
+		profile.supportPhone = strings.TrimSpace(acct.BusinessProfile.SupportPhone)
+		profile.supportURL = strings.TrimSpace(acct.BusinessProfile.SupportURL)
+		profile.address = formatStripeAddress(acct.BusinessProfile.SupportAddress)
+	}
+
+	if acct.Company != nil {
+		profile.legalName = strings.TrimSpace(acct.Company.Name)
+		if profile.address == "" {
+			profile.address = formatStripeAddress(acct.Company.Address)
+		}
+	}
+
+	if profile.address == "" && acct.Individual != nil {
+		profile.address = formatStripeAddress(acct.Individual.Address)
+	}
+
+	return profile
+}
+
+// formatStripeAddress renders a Stripe address as a single human-readable line.
+func formatStripeAddress(addr *stripe.Address) string {
+	if addr == nil {
+		return ""
+	}
+	parts := make([]string, 0, 6)
+	for _, p := range []string{addr.Line1, addr.Line2, addr.PostalCode, addr.City, addr.State, addr.Country} {
+		if p = strings.TrimSpace(p); p != "" {
+			parts = append(parts, p)
+		}
+	}
+	return strings.Join(parts, ", ")
+}
+
 func deriveStripeAccountVerificationState(acct *stripe.Account) string {
 	if acct == nil {
 		return zeni.PaymentVerificationStatePending
@@ -99,6 +155,13 @@ func (s *ZenaoServer) GetCommunityPayoutStatus(
 		OnboardingState:   accountData.OnboardingState,
 		PlatformAccountId: accountData.PlatformAccountID,
 		Currencies:        zeni.ListSupportedStripeCurrencies(),
+		BusinessName:      accountData.BusinessName,
+		LegalName:         accountData.LegalName,
+		SupportEmail:      accountData.SupportEmail,
+		SupportPhone:      accountData.SupportPhone,
+		SupportUrl:        accountData.SupportURL,
+		BusinessAddress:   accountData.BusinessAddress,
+		Country:           accountData.Country,
 	}
 
 	if accountData.LastVerifiedAt != nil {
@@ -129,6 +192,7 @@ func (s *ZenaoServer) GetCommunityPayoutStatus(
 		onboardingState = zeni.PaymentOnboardingStateCompleted
 	}
 	lastVerifiedAt := now
+	profile := deriveStripeAccountBusinessProfile(stripeAcct)
 
 	if err := s.DB.TxWithSpan(ctx, "db.UpdatePaymentAccountVerification", func(tx zeni.DB) error {
 		_, err = tx.UpsertPaymentAccount(&zeni.PaymentAccount{
@@ -139,6 +203,13 @@ func (s *ZenaoServer) GetCommunityPayoutStatus(
 			StartedAt:         accountData.StartedAt,
 			VerificationState: verificationState,
 			LastVerifiedAt:    &lastVerifiedAt,
+			BusinessName:      profile.businessName,
+			LegalName:         profile.legalName,
+			SupportEmail:      profile.supportEmail,
+			SupportPhone:      profile.supportPhone,
+			SupportURL:        profile.supportURL,
+			BusinessAddress:   profile.address,
+			Country:           profile.country,
 		})
 
 		return err
@@ -151,6 +222,13 @@ func (s *ZenaoServer) GetCommunityPayoutStatus(
 	response.IsStale = false
 	response.OnboardingState = onboardingState
 	response.PlatformAccountId = accountData.PlatformAccountID
+	response.BusinessName = profile.businessName
+	response.LegalName = profile.legalName
+	response.SupportEmail = profile.supportEmail
+	response.SupportPhone = profile.supportPhone
+	response.SupportUrl = profile.supportURL
+	response.BusinessAddress = profile.address
+	response.Country = profile.country
 
 	return connect.NewResponse(response), nil
 }

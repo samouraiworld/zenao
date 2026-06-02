@@ -775,7 +775,16 @@
     "payout-status-never": "Pas encore vérifié",
     "payout-status-stale": "Les données peuvent être obsolètes",
     "payout-status-refresh-error": "Impossible d'actualiser depuis Stripe. Affichage du dernier statut connu.",
-    "stripe-dashboard-missing-account": "Aucun compte Stripe connecté, veuillez en connecter un pour activer les paiements."
+    "stripe-dashboard-missing-account": "Aucun compte Stripe connecté, veuillez en connecter un pour activer les paiements.",
+    "business-details-label": "Informations de l'entreprise",
+    "business-details-description": "Synchronisées depuis votre compte Stripe. Affichées aux acheteurs comme vendeur sur les billets et reçus.",
+    "business-name-label": "Nom commercial",
+    "legal-name-label": "Raison sociale",
+    "support-email-label": "Email de support",
+    "support-phone-label": "Téléphone de support",
+    "support-url-label": "Site web de support",
+    "business-address-label": "Adresse",
+    "country-label": "Pays"
   },
   "portfolio": {
     "error-file-uploading": "Erreur lors du téléchargement du fichier",

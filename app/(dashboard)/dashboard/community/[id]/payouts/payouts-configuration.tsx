@@ -142,6 +142,23 @@ export default function PayoutsConfiguration() {
     ? payoutStatusLabel
     : VerificationState.unknown;
 
+  console.log("payoutStatuspayoutStatus", payoutStatus);
+
+  const businessDetails = [
+    { label: t("business-name-label"), value: payoutStatus?.businessName },
+    { label: t("legal-name-label"), value: payoutStatus?.legalName },
+    { label: t("support-email-label"), value: payoutStatus?.supportEmail },
+    { label: t("support-phone-label"), value: payoutStatus?.supportPhone },
+    { label: t("support-url-label"), value: payoutStatus?.supportUrl },
+    {
+      label: t("business-address-label"),
+      value: payoutStatus?.businessAddress,
+    },
+    { label: t("country-label"), value: payoutStatus?.country },
+  ].filter((detail) => !!detail.value?.trim());
+
+  console.log("businessDetailsbusinessDetailsbusinessDetails", businessDetails);
+
   return (
     <SettingsSection
       title={t("payments-section")}
@@ -211,6 +228,29 @@ export default function PayoutsConfiguration() {
           </div>
         </div>
       </Card>
+      {isOnboardingComplete && businessDetails.length > 0 && (
+        <Card className="p-6">
+          <div className="flex flex-col gap-2">
+            <Heading level={4}>{t("business-details-label")}</Heading>
+            <p className="text-sm text-muted-foreground">
+              {t("business-details-description")}
+            </p>
+            <dl className="flex flex-col gap-2 pt-2">
+              {businessDetails.map((detail) => (
+                <div
+                  key={detail.label}
+                  className="flex flex-col gap-0.5 sm:flex-row sm:gap-2"
+                >
+                  <dt className="text-sm font-medium text-muted-foreground sm:w-40 sm:shrink-0">
+                    {detail.label}
+                  </dt>
+                  <dd className="text-sm break-words">{detail.value}</dd>
+                </div>
+              ))}
+            </dl>
+          </div>
+        </Card>
+      )}
     </SettingsSection>
   );
 }

@@ -775,7 +775,16 @@
     "payout-status-never": "Not checked yet",
     "payout-status-stale": "Data may be stale",
     "payout-status-refresh-error": "Unable to refresh from Stripe. Showing last known status.",
-    "stripe-dashboard-missing-account": "No Stripe account connected, please connect one to enable payouts."
+    "stripe-dashboard-missing-account": "No Stripe account connected, please connect one to enable payouts.",
+    "business-details-label": "Business details",
+    "business-details-description": "Synced from your Stripe account. Shown to buyers as the seller of record on tickets and receipts.",
+    "business-name-label": "Business name",
+    "legal-name-label": "Legal name",
+    "support-email-label": "Support email",
+    "support-phone-label": "Support phone",
+    "support-url-label": "Support website",
+    "business-address-label": "Address",
+    "country-label": "Country"
   },
   "portfolio": {
     "error-file-uploading": "Error while uploading file",

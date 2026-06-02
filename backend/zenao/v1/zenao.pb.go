@@ -6202,8 +6202,16 @@ type GetCommunityPayoutStatusResponse struct {
 	OnboardingState   string                 `protobuf:"bytes,5,opt,name=onboarding_state,json=onboardingState,proto3" json:"onboarding_state,omitempty"`
 	PlatformAccountId string                 `protobuf:"bytes,6,opt,name=platform_account_id,json=platformAccountId,proto3" json:"platform_account_id,omitempty"`
 	Currencies        []string               `protobuf:"bytes,7,rep,name=currencies,proto3" json:"currencies,omitempty"`
-	unknownFields     protoimpl.UnknownFields
-	sizeCache         protoimpl.SizeCache
+	// Merchant legal/business profile mirrored from the connected Stripe account.
+	BusinessName    string `protobuf:"bytes,8,opt,name=business_name,json=businessName,proto3" json:"business_name,omitempty"`
+	LegalName       string `protobuf:"bytes,9,opt,name=legal_name,json=legalName,proto3" json:"legal_name,omitempty"`
+	SupportEmail    string `protobuf:"bytes,10,opt,name=support_email,json=supportEmail,proto3" json:"support_email,omitempty"`
+	SupportPhone    string `protobuf:"bytes,11,opt,name=support_phone,json=supportPhone,proto3" json:"support_phone,omitempty"`
+	SupportUrl      string `protobuf:"bytes,12,opt,name=support_url,json=supportUrl,proto3" json:"support_url,omitempty"`
+	BusinessAddress string `protobuf:"bytes,13,opt,name=business_address,json=businessAddress,proto3" json:"business_address,omitempty"`
+	Country         string `protobuf:"bytes,14,opt,name=country,proto3" json:"country,omitempty"`
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
 }
 
 func (x *GetCommunityPayoutStatusResponse) Reset() {
@@ -6283,6 +6291,55 @@ func (x *GetCommunityPayoutStatusResponse) GetCurrencies() []string {
 		return x.Currencies
 	}
 	return nil
+}
+
+func (x *GetCommunityPayoutStatusResponse) GetBusinessName() string {
+	if x != nil {
+		return x.BusinessName
+	}
+	return ""
+}
+
+func (x *GetCommunityPayoutStatusResponse) GetLegalName() string {
+	if x != nil {
+		return x.LegalName
+	}
+	return ""
+}
+
+func (x *GetCommunityPayoutStatusResponse) GetSupportEmail() string {
+	if x != nil {
+		return x.SupportEmail
+	}
+	return ""
+}
+
+func (x *GetCommunityPayoutStatusResponse) GetSupportPhone() string {
+	if x != nil {
+		return x.SupportPhone
+	}
+	return ""
+}
+
+func (x *GetCommunityPayoutStatusResponse) GetSupportUrl() string {
+	if x != nil {
+		return x.SupportUrl
+	}
+	return ""
+}
+
+func (x *GetCommunityPayoutStatusResponse) GetBusinessAddress() string {
+	if x != nil {
+		return x.BusinessAddress
+	}
+	return ""
+}
+
+func (x *GetCommunityPayoutStatusResponse) GetCountry() string {
+	if x != nil {
+		return x.Country
+	}
+	return ""
 }
 
 type CreateTeamRequest struct {
@@ -7816,7 +7873,7 @@ const file_zenao_v1_zenao_proto_rawDesc = "" +
 	"&StartCommunityStripeOnboardingResponse\x12%\n" +
 	"\x0eonboarding_url\x18\x01 \x01(\tR\ronboardingUrl\"D\n" +
 	"\x1fGetCommunityPayoutStatusRequest\x12!\n" +
-	"\fcommunity_id\x18\x01 \x01(\tR\vcommunityId\"\xb6\x02\n" +
+	"\fcommunity_id\x18\x01 \x01(\tR\vcommunityId\"\xaa\x04\n" +
 	" GetCommunityPayoutStatusResponse\x12-\n" +
 	"\x12verification_state\x18\x01 \x01(\tR\x11verificationState\x12(\n" +
 	"\x10last_verified_at\x18\x02 \x01(\x03R\x0elastVerifiedAt\x12\x19\n" +
@@ -7826,7 +7883,17 @@ const file_zenao_v1_zenao_proto_rawDesc = "" +
 	"\x13platform_account_id\x18\x06 \x01(\tR\x11platformAccountId\x12\x1e\n" +
 	"\n" +
 	"currencies\x18\a \x03(\tR\n" +
-	"currencies\"6\n" +
+	"currencies\x12#\n" +
+	"\rbusiness_name\x18\b \x01(\tR\fbusinessName\x12\x1d\n" +
+	"\n" +
+	"legal_name\x18\t \x01(\tR\tlegalName\x12#\n" +
+	"\rsupport_email\x18\n" +
+	" \x01(\tR\fsupportEmail\x12#\n" +
+	"\rsupport_phone\x18\v \x01(\tR\fsupportPhone\x12\x1f\n" +
+	"\vsupport_url\x18\f \x01(\tR\n" +
+	"supportUrl\x12)\n" +
+	"\x10business_address\x18\r \x01(\tR\x0fbusinessAddress\x12\x18\n" +
+	"\acountry\x18\x0e \x01(\tR\acountry\"6\n" +
 	"\x11CreateTeamRequest\x12!\n" +
 	"\fdisplay_name\x18\x01 \x01(\tR\vdisplayName\"-\n" +
 	"\x12CreateTeamResponse\x12\x17\n" +

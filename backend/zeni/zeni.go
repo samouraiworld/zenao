@@ -246,6 +246,16 @@ type PaymentAccount struct {
 	StartedAt         time.Time
 	VerificationState string
 	LastVerifiedAt    *time.Time
+	// Legal/business profile of the merchant of record, mirrored from the
+	// connected Stripe account at onboarding completion and refreshed on the
+	// verification cycle. Used for the payouts page and purchase emails.
+	BusinessName    string
+	LegalName       string
+	SupportEmail    string
+	SupportPhone    string
+	SupportURL      string
+	BusinessAddress string
+	Country         string
 }
 
 type EntityRole struct {
