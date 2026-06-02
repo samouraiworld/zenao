@@ -365,6 +365,16 @@ This forwards Stripe webhook events (e.g., `checkout.session.completed`) to your
 - Capacity control uses sold count + active holds vs capacity
 - Expired holds are cleaned before capacity checks
 
+### Enabling Paid Events on Staging
+
+Use the **Configure Staging Stripe** GitHub Actions workflow to configure Stripe on the staging server and set the correct Netlify preview URL as `ZENAO_APP_BASE_URL` (required for Stripe redirect URLs after onboarding/checkout).
+
+1. Go to **Actions** → **Configure Staging Stripe** → **Run workflow**
+2. Enter the PR number (e.g. `1083`) — the workflow builds the Netlify URL automatically
+3. The workflow sets `ZENAO_STRIPE_SECRET_KEY`, `ZENAO_PAID_EVENTS_ENABLED=true`, and `ZENAO_APP_BASE_URL`, then restarts the backend
+
+> **Note:** Re-run the workflow whenever you switch to a different PR/preview URL.
+
 ### Rate Limiting
 
 The backend includes per-IP rate limiting (10 requests/second, burst of 20) on all mutation endpoints. This protects against abuse of payment, event creation, and participation endpoints.
