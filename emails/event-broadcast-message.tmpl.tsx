@@ -29,7 +29,7 @@ export const EventBroadcastMessageEmail = () => (
           <Row>
             <Column>
               <Section style={messageBox}>
-                <Text style={messageText}>{"{{.Message}}"}</Text>
+                <div style={messageText}>{"{{.Message}}"}</div>
               </Section>
             </Column>
           </Row>
@@ -119,7 +119,6 @@ const messageText = {
   lineHeight: 1.6,
   margin: 0,
   color: "#333333",
-  whiteSpace: "pre-line",
 } as const;
 
 const footer = {
