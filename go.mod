@@ -24,6 +24,7 @@ require (
 	github.com/resend/resend-go/v2 v2.27.0
 	github.com/ringsaturn/tzf v0.16.1
 	github.com/rs/cors v1.11.1
+	github.com/russross/blackfriday/v2 v2.1.0
 	github.com/skip2/go-qrcode v0.0.0-20200617195104-da1b6568686e
 	github.com/stretchr/testify v1.11.1
 	github.com/stripe/stripe-go/v84 v84.0.0
@@ -319,7 +320,6 @@ require (
 	github.com/ringsaturn/tzf-rel-lite v0.0.2025-a // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
 	github.com/rogpeppe/go-internal v1.14.1 // indirect
-	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/ryancurrah/gomodguard v1.3.5 // indirect
 	github.com/ryanrolds/sqlclosecheck v0.5.1 // indirect
 	github.com/sanposhiho/wastedassign/v2 v2.1.0 // indirect

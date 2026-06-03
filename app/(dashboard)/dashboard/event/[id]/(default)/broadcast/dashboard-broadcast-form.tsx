@@ -19,6 +19,10 @@ import { FormFieldCheckbox } from "@/components/widgets/form/form-field-checkbox
 import { ButtonWithChildren } from "@/components/widgets/buttons/button-with-children";
 import { Form } from "@/components/shadcn/form";
 import { captureException } from "@/lib/report";
+import { Tabs, TabsContent } from "@/components/shadcn/tabs";
+import TabsIconsList from "@/components/widgets/tabs/tabs-icons-list";
+import { getMarkdownEditorTabs } from "@/lib/markdown-editor";
+import { MarkdownPreview } from "@/components/widgets/markdown-preview";
 
 interface DashboardBroadcastFormProps {
   eventId: string;
@@ -37,19 +41,44 @@ function BroadcastEmailForm({
   isDisabled: boolean;
 } & React.ComponentProps<"form">) {
   const t = useTranslations("broadcast-email-form");
+  const message = form.watch("message");
 
   return (
     <form onSubmit={onSubmit} className={cn("flex flex-col gap-2", className)}>
-      <FormFieldTextArea
-        control={form.control}
-        name="message"
-        placeholder={t("message-input-placeholder")}
-        label={t("message-input-label")}
-        className="min-h-[100px] max-h-[500px]"
-        maxLength={5000}
-        wordCounter
-        disabled={isDisabled}
-      />
+      <Tabs defaultValue="write" className="w-full">
+        <div className="flex flex-row items-center justify-between mb-1">
+          <span className="text-sm font-medium">
+            {t("message-input-label")}
+          </span>
+          <TabsIconsList
+            tabs={getMarkdownEditorTabs({
+              writeLabel: t("write-tab"),
+              previewLabel: t("preview-tab"),
+            })}
+            className="rounded p-0 h-fit"
+          />
+        </div>
+        <TabsContent value="write" tabIndex={-1}>
+          <FormFieldTextArea
+            control={form.control}
+            name="message"
+            placeholder={t("message-input-placeholder")}
+            className="min-h-[100px] max-h-[500px]"
+            maxLength={5000}
+            wordCounter
+            disabled={isDisabled}
+          />
+        </TabsContent>
+        <TabsContent value="preview">
+          {message.trim() === "" ? (
+            <div className="w-full h-32 flex items-center justify-center text-sm text-muted-foreground">
+              {t("preview-empty")}
+            </div>
+          ) : (
+            <MarkdownPreview markdownString={message} />
+          )}
+        </TabsContent>
+      </Tabs>
       <div className="mb-4">
         <FormFieldCheckbox
           control={form.control}

@@ -640,7 +640,10 @@
     "attach-ticket-label": "Attach ticket to the message",
     "toast-email-sent-success": "Email sent !",
     "toast-email-sent-error": "Error while trying to send the email",
-    "no-participant-error": "You can't send any message because nobody is going to your event yet"
+    "no-participant-error": "You can't send any message because nobody is going to your event yet",
+    "write-tab": "Write",
+    "preview-tab": "Preview",
+    "preview-empty": "Nothing to preview"
   },
   "event-community-section": {
     "organized-by": "Organized by community"
