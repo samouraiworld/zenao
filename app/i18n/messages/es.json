@@ -639,7 +639,10 @@
     "attach-ticket-label": "Adjuntar entrada al mensaje",
     "toast-email-sent-success": "¡Email enviado!",
     "toast-email-sent-error": "Error al intentar enviar el email",
-    "no-participant-error": "No puedes enviar ningún mensaje porque nadie asiste a tu evento todavía"
+    "no-participant-error": "No puedes enviar ningún mensaje porque nadie asiste a tu evento todavía",
+    "write-tab": "Escribir",
+    "preview-tab": "Vista previa",
+    "preview-empty": "Nada que mostrar"
   },
   "event-community-section": {
     "organized-by": "Organizado por la comunidad"

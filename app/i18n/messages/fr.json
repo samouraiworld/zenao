@@ -640,7 +640,10 @@
     "attach-ticket-label": "Joindre le billet au message",
     "toast-email-sent-success": "Email envoyé !",
     "toast-email-sent-error": "Erreur lors de l'envoi de l'email",
-    "no-participant-error": "Vous ne pouvez envoyer aucun message car personne ne participe encore à votre événement"
+    "no-participant-error": "Vous ne pouvez envoyer aucun message car personne ne participe encore à votre événement",
+    "write-tab": "Écrire",
+    "preview-tab": "Aperçu",
+    "preview-empty": "Rien à afficher"
   },
   "event-community-section": {
     "organized-by": "Organisé par la communauté"

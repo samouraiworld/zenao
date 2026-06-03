@@ -8,6 +8,7 @@ import (
 	texttemplate "text/template"
 	"time"
 
+	"github.com/russross/blackfriday/v2"
 	"github.com/samouraiworld/zenao/backend/zeni"
 )
 
@@ -232,7 +233,7 @@ func formatAmountMinor(amountMinor int64, currencyCode string) string {
 type eventBroadcast struct {
 	EventName string
 	ImageURL  string
-	Message   string
+	Message   template.HTML
 	EventURL  string
 }
 
@@ -240,7 +241,7 @@ func eventBroadcastMailContent(event *zeni.Event, message string) (string, strin
 	data := eventBroadcast{
 		ImageURL:  web2URL(event.ImageURI) + "?img-width=960&img-height=540&img-fit=cover&dpr=2",
 		EventName: event.Title,
-		Message:   message,
+		Message:   template.HTML(blackfriday.Run([]byte(message))),
 		EventURL:  eventPublicURL(event.ID),
 	}
 
