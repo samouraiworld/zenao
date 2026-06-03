@@ -142,8 +142,6 @@ export default function PayoutsConfiguration() {
     ? payoutStatusLabel
     : VerificationState.unknown;
 
-  console.log("payoutStatuspayoutStatus", payoutStatus);
-
   const businessDetails = [
     { label: t("business-name-label"), value: payoutStatus?.businessName },
     { label: t("legal-name-label"), value: payoutStatus?.legalName },
@@ -156,8 +154,6 @@ export default function PayoutsConfiguration() {
     },
     { label: t("country-label"), value: payoutStatus?.country },
   ].filter((detail) => !!detail.value?.trim());
-
-  console.log("businessDetailsbusinessDetailsbusinessDetails", businessDetails);
 
   return (
     <SettingsSection
