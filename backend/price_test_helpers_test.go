@@ -28,6 +28,10 @@ func (a *priceStubAuth) EnsureUsersExists(ctx context.Context, emails []string) 
 	return nil, nil
 }
 
+func (a *priceStubAuth) GetUsersFromEmails(ctx context.Context, emails []string) (map[string]*zeni.AuthUser, error) {
+	return map[string]*zeni.AuthUser{}, nil
+}
+
 func (a *priceStubAuth) WithAuth() func(http.Handler) http.Handler {
 	return func(handler http.Handler) http.Handler { return handler }
 }

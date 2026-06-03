@@ -22,11 +22,15 @@ import { useDashboardCommunityContext } from "@/components/providers/dashboard-c
 import useActor from "@/hooks/use-actor";
 import { PayoutState, VerificationState } from "@/lib/pricing";
 
-const payoutStatusBadge = {
-  [VerificationState.verified]: "secondary",
-  [VerificationState.failed]: "destructive",
-  [VerificationState.pending]: "outline",
-  [VerificationState.unknown]: "outline",
+const payoutStatusBadgeClass = {
+  [VerificationState.verified]:
+    "border-transparent bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300",
+  [VerificationState.failed]:
+    "border-transparent bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-300",
+  [VerificationState.pending]:
+    "border-transparent bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300",
+  [VerificationState.unknown]:
+    "border-transparent bg-muted text-muted-foreground",
 } as const;
 
 export default function PayoutsConfiguration() {
@@ -138,6 +142,23 @@ export default function PayoutsConfiguration() {
     ? payoutStatusLabel
     : VerificationState.unknown;
 
+  console.log("payoutStatuspayoutStatus", payoutStatus);
+
+  const businessDetails = [
+    { label: t("business-name-label"), value: payoutStatus?.businessName },
+    { label: t("legal-name-label"), value: payoutStatus?.legalName },
+    { label: t("support-email-label"), value: payoutStatus?.supportEmail },
+    { label: t("support-phone-label"), value: payoutStatus?.supportPhone },
+    { label: t("support-url-label"), value: payoutStatus?.supportUrl },
+    {
+      label: t("business-address-label"),
+      value: payoutStatus?.businessAddress,
+    },
+    { label: t("country-label"), value: payoutStatus?.country },
+  ].filter((detail) => !!detail.value?.trim());
+
+  console.log("businessDetailsbusinessDetailsbusinessDetails", businessDetails);
+
   return (
     <SettingsSection
       title={t("payments-section")}
@@ -156,7 +177,10 @@ export default function PayoutsConfiguration() {
                 <Badge variant="outline">{t("payout-status-loading")}</Badge>
               ) : (
                 <Badge
-                  variant={payoutStatusBadge[payoutStatusKey] ?? "outline"}
+                  className={
+                    payoutStatusBadgeClass[payoutStatusKey] ??
+                    payoutStatusBadgeClass[VerificationState.unknown]
+                  }
                 >
                   {payoutStatusText[payoutStatusKey]}
                 </Badge>
@@ -204,6 +228,29 @@ export default function PayoutsConfiguration() {
           </div>
         </div>
       </Card>
+      {isOnboardingComplete && businessDetails.length > 0 && (
+        <Card className="p-6">
+          <div className="flex flex-col gap-2">
+            <Heading level={4}>{t("business-details-label")}</Heading>
+            <p className="text-sm text-muted-foreground">
+              {t("business-details-description")}
+            </p>
+            <dl className="flex flex-col gap-2 pt-2">
+              {businessDetails.map((detail) => (
+                <div
+                  key={detail.label}
+                  className="flex flex-col gap-0.5 sm:flex-row sm:gap-2"
+                >
+                  <dt className="text-sm font-medium text-muted-foreground sm:w-40 sm:shrink-0">
+                    {detail.label}
+                  </dt>
+                  <dd className="text-sm break-words">{detail.value}</dd>
+                </div>
+              ))}
+            </dl>
+          </div>
+        </Card>
+      )}
     </SettingsSection>
   );
 }

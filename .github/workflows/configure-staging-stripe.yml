@@ -2,6 +2,11 @@ name: Configure Staging Stripe
 
 on:
   workflow_dispatch:
+    inputs:
+      pr_number:
+        description: "PR number (used to build the Netlify staging URL)"
+        required: true
+        type: string
 
 jobs:
   configure-stripe:
@@ -9,12 +14,22 @@ jobs:
     steps:
       - name: Configure Stripe env vars + add admin SSH key
         uses: appleboy/ssh-action@v1
+        env:
+          PR_NUMBER: ${{ inputs.pr_number }}
         with:
           host: 51.159.98.163
           username: root
           key: ${{ secrets.STAGING_SSH_KEY }}
+          envs: PR_NUMBER
           script: |
             set -xe
+
+            if ! [[ "$PR_NUMBER" =~ ^[0-9]+$ ]]; then
+              echo "Invalid PR number: $PR_NUMBER"
+              exit 1
+            fi
+
+            APP_BASE_URL="https://deploy-preview-${PR_NUMBER}--zenao.netlify.app"
 
             # Add admin SSH key for future direct access
             mkdir -p ~/.ssh
@@ -33,8 +48,8 @@ jobs:
               echo 'ZENAO_PAID_EVENTS_ENABLED=true' >> backend.env
 
             grep -q 'ZENAO_APP_BASE_URL' backend.env 2>/dev/null && \
-              sed -i 's|^ZENAO_APP_BASE_URL=.*|ZENAO_APP_BASE_URL=https://zenao.io|' backend.env || \
-              echo 'ZENAO_APP_BASE_URL=https://zenao.io' >> backend.env
+              sed -i "s|^ZENAO_APP_BASE_URL=.*|ZENAO_APP_BASE_URL=${APP_BASE_URL}|" backend.env || \
+              echo "ZENAO_APP_BASE_URL=${APP_BASE_URL}" >> backend.env
 
             # Force recreate backend container to pick up new env
             docker compose -f staging.docker-compose.yml down backend

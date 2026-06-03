@@ -66,9 +66,11 @@ That's it! The app will be running at:
 - **Frontend**: [http://localhost:3000](http://localhost:3000)
 - **Backend**: [http://localhost:4242](http://localhost:4242)
 
-> **⚠️ Note:** The Go backend reads environment variables from your shell, not from `.env.local`. Export the Clerk secret key before running `make dev` if you modified the default key:
+> **⚠️ Note:** The Go backend reads environment variables from your shell, not from `.env.local`. Export any backend key before running `make dev`:
 > ```bash
-> export ZENAO_CLERK_SECRET_KEY=sk_test_...  # Must match CLERK_SECRET_KEY in .env.local
+> export ZENAO_CLERK_SECRET_KEY=sk_test_...        # Must match CLERK_SECRET_KEY in .env.local
+> export ZENAO_STRIPE_SECRET_KEY=sk_test_...       # Required for paid events
+> export ZENAO_APP_BASE_URL=http://localhost:3000  # Else Stripe redirects to prod (default: https://zenao.io/)
 > ```
 
 ### Option 2: Manual Setup
@@ -323,8 +325,16 @@ export ZENAO_PAID_EVENTS_ENABLED=true
 
 **2. Configure Stripe test keys:**
 ```bash
-# In .env.local
-ZENAO_STRIPE_SECRET_KEY=sk_test_your_stripe_test_key
+# Backend — must be exported in your shell (not read from .env.local)
+export ZENAO_STRIPE_SECRET_KEY=sk_test_your_stripe_test_key
+# Local app base URL used to build the Stripe success/cancel redirect URLs.
+# Without it the backend falls back to the default (https://zenao.io/) and
+# Stripe sends you to production instead of localhost after payment.
+export ZENAO_APP_BASE_URL=http://localhost:3000
+```
+
+```bash
+# Frontend — in .env.local
 NEXT_PUBLIC_STRIPE_DASHBOARD_URL=https://dashboard.stripe.com/test
 ```
 
@@ -354,6 +364,16 @@ This forwards Stripe webhook events (e.g., `checkout.session.completed`) to your
 - Ticket issuance is idempotent with `ON CONFLICT DO NOTHING`
 - Capacity control uses sold count + active holds vs capacity
 - Expired holds are cleaned before capacity checks
+
+### Enabling Paid Events on Staging
+
+Use the **Configure Staging Stripe** GitHub Actions workflow to configure Stripe on the staging server and set the correct Netlify preview URL as `ZENAO_APP_BASE_URL` (required for Stripe redirect URLs after onboarding/checkout).
+
+1. Go to **Actions** → **Configure Staging Stripe** → **Run workflow**
+2. Enter the PR number (e.g. `1083`) — the workflow builds the Netlify URL automatically
+3. The workflow sets `ZENAO_STRIPE_SECRET_KEY`, `ZENAO_PAID_EVENTS_ENABLED=true`, and `ZENAO_APP_BASE_URL`, then restarts the backend
+
+> **Note:** Re-run the workflow whenever you switch to a different PR/preview URL.
 
 ### Rate Limiting
 

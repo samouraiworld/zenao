@@ -108,12 +108,18 @@ export function PaymentStatusBanner() {
   }
 
   const styles = {
-    processing: "border-amber-200 bg-amber-50 text-amber-900",
-    checking: "border-amber-200 bg-amber-50 text-amber-900",
-    success: "border-emerald-200 bg-emerald-50 text-emerald-900",
-    pending: "border-slate-200 bg-slate-50 text-slate-900",
-    canceled: "border-red-200 bg-red-50 text-red-900",
-    error: "border-red-200 bg-red-50 text-red-900",
+    processing:
+      "border-amber-200 bg-amber-50 text-amber-900 dark:border-amber-900/50 dark:bg-amber-950/40 dark:text-amber-100",
+    checking:
+      "border-amber-200 bg-amber-50 text-amber-900 dark:border-amber-900/50 dark:bg-amber-950/40 dark:text-amber-100",
+    success:
+      "border-emerald-200 bg-emerald-50 text-emerald-900 dark:border-emerald-900/50 dark:bg-emerald-950/40 dark:text-emerald-100",
+    pending:
+      "border-slate-200 bg-slate-50 text-slate-900 dark:border-border dark:bg-secondary dark:text-foreground",
+    canceled:
+      "border-red-200 bg-red-50 text-red-900 dark:border-red-900/50 dark:bg-red-950/40 dark:text-red-100",
+    error:
+      "border-red-200 bg-red-50 text-red-900 dark:border-red-900/50 dark:bg-red-950/40 dark:text-red-100",
   } as const;
 
   const className = styles[status];

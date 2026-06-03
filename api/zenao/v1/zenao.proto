@@ -489,6 +489,7 @@ message OrderSummary {
   int64 amount_minor = 4;
   string currency_code = 5;
   int64 created_at = 6;
+  string status = 7;
 }
 
 message OrderTicketInfo {
@@ -496,9 +497,18 @@ message OrderTicketInfo {
   string user_email = 2;
 }
 
+message OrderAttendeeInfo {
+  string user_email = 1;
+  string price_id = 2;
+}
+
 message GetOrderDetailsResponse {
   OrderSummary order = 1;
   repeated OrderTicketInfo tickets = 2;
+  // attendees holds the email of every attendee on the order, including before
+  // payment is confirmed (i.e. when tickets is still empty). Used to resume a
+  // pending checkout with the originally selected guests pre-filled.
+  repeated OrderAttendeeInfo attendees = 3;
 }
 
 message GetUserOrdersRequest {}
@@ -645,6 +655,14 @@ message GetCommunityPayoutStatusResponse {
   string onboarding_state = 5;
   string platform_account_id = 6;
   repeated string currencies = 7;
+  // Merchant legal/business profile mirrored from the connected Stripe account.
+  string business_name = 8;
+  string legal_name = 9;
+  string support_email = 10;
+  string support_phone = 11;
+  string support_url = 12;
+  string business_address = 13;
+  string country = 14;
 }
 
 message CreateTeamRequest { string display_name = 1; }

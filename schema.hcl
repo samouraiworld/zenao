@@ -61,6 +61,10 @@ table "users" {
     null = true
     type = text
   }
+  column "email" {
+    null = true
+    type = text
+  }
   column "display_name" {
     null = true
     type = text
@@ -85,6 +89,10 @@ table "users" {
   }
   primary_key {
     columns = [column.id]
+  }
+  index "idx_users_email" {
+    unique  = true
+    columns = [column.email]
   }
   index "idx_users_auth_id" {
     unique  = true
@@ -377,6 +385,41 @@ table "payment_accounts" {
   column "last_verified_at" {
     null = true
     type = datetime
+  }
+  column "business_name" {
+    null    = false
+    type    = text
+    default = ""
+  }
+  column "legal_name" {
+    null    = false
+    type    = text
+    default = ""
+  }
+  column "support_email" {
+    null    = false
+    type    = text
+    default = ""
+  }
+  column "support_phone" {
+    null    = false
+    type    = text
+    default = ""
+  }
+  column "support_url" {
+    null    = false
+    type    = text
+    default = ""
+  }
+  column "business_address" {
+    null    = false
+    type    = text
+    default = ""
+  }
+  column "country" {
+    null    = false
+    type    = text
+    default = ""
   }
   primary_key {
     columns = [column.id]

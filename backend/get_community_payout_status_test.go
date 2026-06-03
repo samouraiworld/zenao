@@ -110,6 +110,10 @@ func (a *stubAuth) EnsureUsersExists(ctx context.Context, emails []string) ([]*z
 	return nil, errors.New("not implemented")
 }
 
+func (a *stubAuth) GetUsersFromEmails(ctx context.Context, emails []string) (map[string]*zeni.AuthUser, error) {
+	return nil, errors.New("not implemented")
+}
+
 func (a *stubAuth) WithAuth() func(http.Handler) http.Handler {
 	return func(handler http.Handler) http.Handler { return handler }
 }

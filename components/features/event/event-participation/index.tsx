@@ -1,9 +1,11 @@
 "use client";
 
-import { SignedIn, SignedOut, SignInButton } from "@clerk/nextjs";
+import { SignedIn, SignedOut, SignInButton, useAuth } from "@clerk/nextjs";
 import { createContext, useContext, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
+import { Tickets } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
 import { EventRegistrationForm } from "../event-registration";
 import { EventUserRole } from "@/lib/queries/event-users";
 import { GuestRegistrationSuccessDialog } from "@/components/dialogs/guest-registration-success-dialog";
@@ -13,6 +15,7 @@ import { Button } from "@/components/shadcn/button";
 import { CancelRegistrationConfirmationDialog } from "@/components/dialogs/cancel-registration-confirmation-dialog";
 import { useAnalyticsEvents } from "@/hooks/use-analytics-events";
 import { SafeEventInfo } from "@/types/schemas";
+import { userOrders } from "@/lib/queries/order";
 
 type EventParticipationContextType = {
   password: string;
@@ -152,9 +155,31 @@ EventParticipation.SoldOut = function EventParticipationSoldOut() {
 
 EventParticipation.Participant = function EventParticipationParticipant() {
   const { trackEvent } = useAnalyticsEvents();
-  const { eventId, isParticipant, isStarted } = useEventParticipation();
+  const { eventId, eventData, isParticipant, isStarted } =
+    useEventParticipation();
   const [confirmCancelDialogOpen, setConfirmCancelDialogOpen] = useState(false);
   const t = useTranslations("event");
+  const { getToken, userId } = useAuth();
+
+  const isPaidEvent = useMemo(
+    () =>
+      eventData.pricesGroups
+        ?.flatMap((g) => g.prices)
+        .some((p) => p.amountMinor > 0),
+    [eventData.pricesGroups],
+  );
+
+  const { data: ordersData } = useQuery({
+    ...userOrders(getToken),
+    enabled: !!userId && isParticipant && isPaidEvent,
+  });
+
+  const hasPaidOrder = useMemo(() => {
+    if (!ordersData?.orders) return false;
+    return ordersData.orders.some(
+      (o) => o.eventId === eventId && o.status === "success",
+    );
+  }, [ordersData, eventId]);
 
   if (!isParticipant) return null;
 
@@ -174,18 +199,30 @@ EventParticipation.Participant = function EventParticipationParticipant() {
             </Heading>
             {!isStarted && (
               <SignedIn>
-                <>
-                  <Text variant="secondary">
-                    {"Not going to the event anymore ?"}
-                  </Text>
-                  <Button
-                    variant="link"
-                    className="justify-normal px-0"
-                    onClick={() => setConfirmCancelDialogOpen(true)}
-                  >
-                    {t("cancel-my-participation")}
-                  </Button>
-                </>
+                {hasPaidOrder ? (
+                  <div className="flex flex-col gap-1">
+                    <div className="inline-flex items-center gap-1.5 rounded-full bg-emerald-100 px-3 py-1 text-sm font-medium text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-100 w-fit">
+                      <Tickets className="h-4 w-4" />
+                      {t("tickets-paid")}
+                    </div>
+                    <Text variant="secondary" size="sm">
+                      {t("tickets-paid-no-refund")}
+                    </Text>
+                  </div>
+                ) : (
+                  <>
+                    <Text variant="secondary">
+                      {"Not going to the event anymore ?"}
+                    </Text>
+                    <Button
+                      variant="link"
+                      className="justify-normal px-0"
+                      onClick={() => setConfirmCancelDialogOpen(true)}
+                    >
+                      {t("cancel-my-participation")}
+                    </Button>
+                  </>
+                )}
               </SignedIn>
             )}
           </div>

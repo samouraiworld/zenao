@@ -190,6 +190,42 @@ func (g *gormZenaoDB) createOrderAttendees(orderID string, attendees []*zeni.Ord
 	return g.db.Create(&dbAttendees).Error
 }
 
+// GetPendingOrderByBuyerAndEvent implements zeni.DB.
+func (g *gormZenaoDB) GetPendingOrderByBuyerAndEvent(buyerID string, eventID string) (*zeni.Order, error) {
+	g, span := g.trace("gzdb.GetPendingOrderByBuyerAndEvent")
+	defer span.End()
+
+	buyerIDInt, err := strconv.ParseUint(buyerID, 10, 64)
+	if err != nil {
+		return nil, fmt.Errorf("parse buyer id: %w", err)
+	}
+	eventIDInt, err := strconv.ParseUint(eventID, 10, 64)
+	if err != nil {
+		return nil, fmt.Errorf("parse event id: %w", err)
+	}
+
+	var order Order
+	err = g.db.
+		Where("buyer_id = ? AND event_id = ? AND status != ?", buyerIDInt, eventIDInt, string(zeni.OrderStatusSuccess)).
+		Order("created_at DESC, id DESC").
+		First(&order).Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return dbOrderToZeniOrder(&order), nil
+}
+
+// ReplaceOrderAttendees implements zeni.DB.
+func (g *gormZenaoDB) ReplaceOrderAttendees(orderID string, attendees []*zeni.OrderAttendee) error {
+	if err := g.db.Where("order_id = ?", orderID).Delete(&OrderAttendee{}).Error; err != nil {
+		return err
+	}
+	return g.createOrderAttendees(orderID, attendees)
+}
+
 // GetOrder implements zeni.DB.
 func (g *gormZenaoDB) GetOrder(orderID string) (*zeni.Order, error) {
 	g, span := g.trace("gzdb.GetOrder")

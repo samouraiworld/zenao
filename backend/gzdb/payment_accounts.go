@@ -18,6 +18,13 @@ type PaymentAccount struct {
 	StartedAt         time.Time `gorm:"not null"`
 	VerificationState string    `gorm:"not null;default:pending"`
 	LastVerifiedAt    *time.Time
+	BusinessName      string `gorm:"not null;default:''"`
+	LegalName         string `gorm:"not null;default:''"`
+	SupportEmail      string `gorm:"not null;default:''"`
+	SupportPhone      string `gorm:"not null;default:''"`
+	SupportURL        string `gorm:"not null;default:''"`
+	BusinessAddress   string `gorm:"not null;default:''"`
+	Country           string `gorm:"not null;default:''"`
 }
 
 func dbPaymentAccountToZeniPaymentAccount(dbAccount *PaymentAccount) *zeni.PaymentAccount {
@@ -35,5 +42,12 @@ func dbPaymentAccountToZeniPaymentAccount(dbAccount *PaymentAccount) *zeni.Payme
 		StartedAt:         dbAccount.StartedAt,
 		VerificationState: dbAccount.VerificationState,
 		LastVerifiedAt:    dbAccount.LastVerifiedAt,
+		BusinessName:      dbAccount.BusinessName,
+		LegalName:         dbAccount.LegalName,
+		SupportEmail:      dbAccount.SupportEmail,
+		SupportPhone:      dbAccount.SupportPhone,
+		SupportURL:        dbAccount.SupportURL,
+		BusinessAddress:   dbAccount.BusinessAddress,
+		Country:           dbAccount.Country,
 	}
 }

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useTranslations } from "next-intl";
 import { ScreenContainerCentered } from "@/components/layout/screen-container";
 import { PaymentStatusBanner } from "@/components/features/event/event-registration/payment-status-banner";
 import {
@@ -30,6 +31,7 @@ const normalizeReturnPath = (value: string | null) => {
 };
 
 export default function CheckoutConfirmationPage() {
+  const t = useTranslations("event.checkout-confirmation-page");
   const searchParams = useSearchParams();
   const returnPath = normalizeReturnPath(searchParams.get("return_path"));
   const eventId = useMemo(() => {
@@ -46,11 +48,9 @@ export default function CheckoutConfirmationPage() {
       <div className="flex w-full flex-col items-center gap-6">
         <div className="w-full max-w-xl text-center">
           <Heading level={1} size="2xl" className="mb-2">
-            Payment confirmation
+            {t("title")}
           </Heading>
-          <Text variant="secondary">
-            We are finalizing your purchase and will keep this page updated.
-          </Text>
+          <Text variant="secondary">{t("description")}</Text>
         </div>
 
         <div className="w-full max-w-xl">
@@ -79,7 +79,7 @@ export default function CheckoutConfirmationPage() {
 
         <Link href={returnPath} className="w-full max-w-xs">
           <Button variant="outline" className="w-full">
-            Back to event
+            {t("back-to-event")}
           </Button>
         </Link>
       </div>

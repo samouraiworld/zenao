@@ -43,22 +43,67 @@ func (s *ZenaoServer) GetOrderDetails(
 		return nil, err
 	}
 
-	emailsByID := map[string]string{}
-	userIDs := make([]string, 0, len(tickets))
-	for _, ticket := range tickets {
-		if ticket == nil || ticket.User == nil || strings.TrimSpace(ticket.User.AuthID) == "" {
-			continue
-		}
-		userIDs = append(userIDs, ticket.User.AuthID)
-	}
-
-	users, err := s.Auth.GetUsersFromIDs(ctx, userIDs)
+	attendees, err := s.DB.GetOrderAttendees(orderID)
 	if err != nil {
 		return nil, err
 	}
-	for _, user := range users {
+
+	// Order attendees only carry the internal DB user id, so resolve it to the
+	// auth id used to look up emails. Tickets already preload the auth id.
+	attendeeUserIDs := make([]string, 0, len(attendees))
+	for _, attendee := range attendees {
+		if attendee == nil || strings.TrimSpace(attendee.UserID) == "" {
+			continue
+		}
+		attendeeUserIDs = append(attendeeUserIDs, attendee.UserID)
+	}
+	attendeeUsers, err := s.DB.GetUsersByIDs(attendeeUserIDs)
+	if err != nil {
+		return nil, err
+	}
+	// Resolve emails by internal user id: registered users get theirs from the
+	// auth provider, guests carry it directly on the DB user.
+	emailByUserID := map[string]string{}
+	authIDToUserIDs := map[string][]string{}
+	addUser := func(userID, authID, guestEmail string) {
+		userID = strings.TrimSpace(userID)
+		if userID == "" {
+			return
+		}
+		if _, done := emailByUserID[userID]; done {
+			return
+		}
+		if strings.TrimSpace(authID) == "" {
+			emailByUserID[userID] = guestEmail
+			return
+		}
+		authIDToUserIDs[authID] = append(authIDToUserIDs[authID], userID)
+	}
+	for _, user := range attendeeUsers {
 		if user != nil {
-			emailsByID[user.ID] = user.Email
+			addUser(user.ID, user.AuthID, user.Email)
+		}
+	}
+	for _, ticket := range tickets {
+		if ticket != nil && ticket.User != nil {
+			addUser(ticket.User.ID, ticket.User.AuthID, ticket.User.Email)
+		}
+	}
+
+	authIDs := make([]string, 0, len(authIDToUserIDs))
+	for authID := range authIDToUserIDs {
+		authIDs = append(authIDs, authID)
+	}
+	authUsers, err := s.Auth.GetUsersFromIDs(ctx, authIDs)
+	if err != nil {
+		return nil, err
+	}
+	for _, user := range authUsers {
+		if user == nil {
+			continue
+		}
+		for _, userID := range authIDToUserIDs[user.ID] {
+			emailByUserID[userID] = user.Email
 		}
 	}
 
@@ -73,10 +118,21 @@ func (s *ZenaoServer) GetOrderDetails(
 		}
 
 		if ticket.User != nil {
-			ticketInfo.UserEmail = emailsByID[ticket.User.AuthID]
+			ticketInfo.UserEmail = emailByUserID[ticket.User.ID]
 		}
 
 		ticketInfos = append(ticketInfos, ticketInfo)
+	}
+
+	attendeeInfos := make([]*zenaov1.OrderAttendeeInfo, 0, len(attendees))
+	for _, attendee := range attendees {
+		if attendee == nil {
+			continue
+		}
+		attendeeInfos = append(attendeeInfos, &zenaov1.OrderAttendeeInfo{
+			UserEmail: emailByUserID[attendee.UserID],
+			PriceId:   attendee.PriceID,
+		})
 	}
 
 	return connect.NewResponse(&zenaov1.GetOrderDetailsResponse{
@@ -88,6 +144,7 @@ func (s *ZenaoServer) GetOrderDetails(
 			CurrencyCode: order.CurrencyCode,
 			CreatedAt:    order.CreatedAt,
 		},
-		Tickets: ticketInfos,
+		Tickets:   ticketInfos,
+		Attendees: attendeeInfos,
 	}), nil
 }

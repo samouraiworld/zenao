@@ -58,6 +58,35 @@ export const TicketsConfirmationEmail = () => (
               />
             </Column>
           </Row>
+          {"{{if .Tickets}}"}
+          <Row>
+            <Column>
+              <Heading style={tickets.headingText}>Your tickets:</Heading>
+              <Text style={tickets.hint}>
+                Show the QR code at the entrance. A printable PDF version is
+                also attached to this email.
+              </Text>
+            </Column>
+          </Row>
+          {"{{range .Tickets}}"}
+          <Row>
+            <Column>
+              <Section style={tickets.box}>
+                {/* Plain <img> (not react-email <Img>) so the build does not
+                    hoist a top-level preload <link href="{{.Src}}">, which
+                    would reference a field that only exists inside the range. */}
+                <img
+                  src="{{.Src}}"
+                  width={200}
+                  height={200}
+                  alt="Ticket QR code"
+                  style={tickets.qr}
+                />
+                <Text style={tickets.label}>{"{{.Label}}"}</Text>
+              </Section>
+            </Column>
+          </Row>
+          {"{{end}}{{end}}"}
           <Row>
             <Column>
               <Button href="{{.EventURL}}" style={details.seeEventButton}>
@@ -136,5 +165,45 @@ const details = {
     paddingTop: 14,
     paddingBottom: 14,
     fontWeight: 500,
+  },
+} as const;
+
+const tickets = {
+  headingText: {
+    fontSize: 22,
+    lineHeight: 1.3,
+    fontWeight: 500,
+    letterSpacing: -0.6,
+    margin: 0,
+    marginTop: 16,
+    marginBottom: 8,
+  },
+  hint: {
+    fontSize: 13,
+    lineHeight: 1.4,
+    color: "#666666",
+    margin: 0,
+    marginBottom: 16,
+  },
+  box: {
+    marginTop: 8,
+    marginBottom: 8,
+    backgroundColor: "#F5F5F5",
+    borderRadius: 4,
+    padding: 16,
+  },
+  qr: {
+    display: "block",
+    margin: "0 auto",
+  },
+  label: {
+    fontSize: 14,
+    lineHeight: 1.3,
+    fontWeight: 500,
+    letterSpacing: -0.2,
+    margin: 0,
+    marginTop: 12,
+    textAlign: "center",
+    wordBreak: "break-word",
   },
 } as const;

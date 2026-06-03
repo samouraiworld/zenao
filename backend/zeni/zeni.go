@@ -114,6 +114,7 @@ type User struct {
 	CreatedAt   time.Time
 	ID          string
 	AuthID      string
+	Email       string // set for guest users (no Clerk account)
 	DisplayName string
 	Bio         string
 	AvatarURI   string
@@ -246,6 +247,16 @@ type PaymentAccount struct {
 	StartedAt         time.Time
 	VerificationState string
 	LastVerifiedAt    *time.Time
+	// Legal/business profile of the merchant of record, mirrored from the
+	// connected Stripe account at onboarding completion and refreshed on the
+	// verification cycle. Used for the payouts page and purchase emails.
+	BusinessName    string
+	LegalName       string
+	SupportEmail    string
+	SupportPhone    string
+	SupportURL      string
+	BusinessAddress string
+	Country         string
 }
 
 type EntityRole struct {
@@ -361,8 +372,10 @@ type DB interface {
 
 	CreateUser(authID string) (*User, error)
 	GetUser(authID string) (*User, error)
+	GetUserByEmail(email string) (*User, error)
+	CreateGuestUser(email string) (*User, error)
+	PromoteGuestUser(userID string, authID string) (*User, error)
 	GetUsersByIDs(ids []string) ([]*User, error)
-	// XXX: add EnsureUsersExist
 
 	EditUser(userID string, req *zenaov1.EditUserRequest) error
 	PromoteUser(userID string, plan Plan) error
@@ -390,8 +403,10 @@ type DB interface {
 	UpdatePrice(paymentAccount *PaymentAccount, price *Price) error
 	CreateOrder(order *Order, attendees []*OrderAttendee) (*Order, error)
 	GetOrder(orderID string) (*Order, error)
+	GetPendingOrderByBuyerAndEvent(buyerID string, eventID string) (*Order, error)
 	ListOrdersByBuyer(buyerID string) ([]*Order, error)
 	GetOrderAttendees(orderID string) ([]*OrderAttendee, error)
+	ReplaceOrderAttendees(orderID string, attendees []*OrderAttendee) error
 	GetOrderTickets(orderID string) ([]*SoldTicket, error)
 	GetOrderPaymentAccount(orderID string) (*PaymentAccount, error)
 	UpdateOrderSetPaymentSession(orderID string, provider string, sessionID string) error
@@ -473,6 +488,9 @@ type DB interface {
 type Auth interface {
 	GetUser(ctx context.Context) *AuthUser
 	GetUsersFromIDs(ctx context.Context, ids []string) ([]*AuthUser, error)
+	// GetUsersFromEmails returns existing auth users for the given emails (lookup only, no creation).
+	// The result is keyed by normalized (lowercased) email; emails without an account are absent.
+	GetUsersFromEmails(ctx context.Context, emails []string) (map[string]*AuthUser, error)
 
 	EnsureUserExists(ctx context.Context, email string) (*AuthUser, error)
 	EnsureUsersExists(ctx context.Context, emails []string) ([]*AuthUser, error)

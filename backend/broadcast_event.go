@@ -100,7 +100,7 @@ func (s *ZenaoServer) BroadcastEvent(
 		attachments := make([]*resend.Attachment, 0, len(tickets))
 		if req.Msg.AttachTicket {
 			for i, ticket := range tickets[authParticipant.ID] {
-				pdfData, err := GeneratePDFTicket(evt, ticket.Ticket.Secret(), ticket.User.DisplayName, authParticipant.Email, ticket.CreatedAt, s.Logger)
+				pdfData, err := GeneratePDFTicket(evt, ticket.Ticket.Secret(), ticket.User.DisplayName, authParticipant.Email, ticket.CreatedAt, nil, s.Logger)
 				if err != nil {
 					s.Logger.Error("generate-ticket-pdf", zap.Error(err), zap.String("ticket-id", ticket.Ticket.Secret()))
 					return nil, err

@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"errors"
+	"fmt"
 	"strings"
 	"time"
 
@@ -141,6 +142,179 @@ func (s *ZenaoServer) issueTicketsAfterConfirmation(ctx context.Context, order *
 		zap.String("order-id", order.ID),
 		zap.Int("issued-count", issuedCount),
 	)
+
+	// Tickets just transitioned to "issued": this block runs exactly once per
+	// order (the early-return above guards re-entry), so it is safe to deliver
+	// the ticket email here without resending it on every confirm poll.
+	//
+	// Building the email generates a PDF per ticket and can be slow for large
+	// orders, so it runs off the request path. The issued transition is already
+	// committed, so the confirm endpoint can return immediately. A detached
+	// context keeps the send alive after the request context is cancelled.
+	emailCtx := context.WithoutCancel(issueCtx)
+	go func() {
+		if err := s.sendOrderTicketsEmail(emailCtx, order); err != nil {
+			s.Logger.Error("send-order-tickets-email", zap.Error(err), zap.String("order-id", order.ID))
+		}
+	}()
+}
+
+// sendOrderTicketsEmail delivers a single email to the buyer with every ticket
+// of the order: each one as an inline QR code in the body and as an attached
+// PDF, plus an ICS calendar invite. The QR codes (entry tokens) go only to the
+// buyer, never to attendee-provided emails, following standard ticketing
+// practice (the buyer paid and controls distribution).
+func (s *ZenaoServer) sendOrderTicketsEmail(ctx context.Context, order *zeni.Order) error {
+	if s.MailClient == nil || s.Auth == nil || order == nil {
+		return nil
+	}
+
+	buyerEmail, err := s.userEmail(ctx, order.BuyerID)
+	if err != nil {
+		return err
+	}
+
+	tickets, err := s.DB.WithContext(ctx).GetOrderTickets(order.ID)
+	if err != nil {
+		return err
+	}
+	if len(tickets) == 0 {
+		return errors.New("order has no tickets")
+	}
+
+	evt, err := s.DB.WithContext(ctx).GetEvent(order.EventID)
+	if err != nil {
+		return err
+	}
+	if evt == nil {
+		return errors.New("event not found")
+	}
+
+	// Resolve attendee emails to label each ticket inside the buyer's own email.
+	authIDs := make([]string, 0, len(tickets))
+	for _, ticket := range tickets {
+		if ticket == nil || ticket.User == nil || strings.TrimSpace(ticket.User.AuthID) == "" {
+			continue
+		}
+		authIDs = append(authIDs, ticket.User.AuthID)
+	}
+	authUsers, err := s.Auth.GetUsersFromIDs(ctx, authIDs)
+	if err != nil {
+		return err
+	}
+	emailByAuthID := make(map[string]string, len(authUsers))
+	for _, user := range authUsers {
+		if user != nil {
+			emailByAuthID[user.ID] = user.Email
+		}
+	}
+
+	items := make([]ticketEmailItem, 0, len(tickets))
+	for _, ticket := range tickets {
+		if ticket == nil || ticket.Ticket == nil {
+			continue
+		}
+		email := ""
+		displayName := ""
+		if ticket.User != nil {
+			if ticket.User.AuthID != "" {
+				email = emailByAuthID[ticket.User.AuthID]
+			} else {
+				email = ticket.User.Email
+			}
+			displayName = ticket.User.DisplayName
+		}
+		items = append(items, ticketEmailItem{
+			Secret:      ticket.Ticket.Secret(),
+			DisplayName: displayName,
+			Email:       email,
+		})
+	}
+
+	qrs, attachments, err := buildTicketEmailAttachments(evt, items, s.MailSender, s.Logger)
+	if err != nil {
+		return err
+	}
+
+	htmlStr, text, err := ticketsConfirmationMailContent(evt, "Your tickets are attached and shown below.", qrs)
+	if err != nil {
+		return err
+	}
+
+	tracer := otel.Tracer("mail")
+	mailCtx, span := tracer.Start(ctx, "mail.OrderTickets", trace.WithSpanKind(trace.SpanKindClient))
+	defer span.End()
+
+	// XXX: Replace sender name with organizer name
+	_, err = s.MailClient.Emails.SendWithContext(mailCtx, &resend.SendEmailRequest{
+		From:        fmt.Sprintf("Zenao <%s>", s.MailSender),
+		To:          []string{buyerEmail},
+		Subject:     fmt.Sprintf("%s - Your tickets", evt.Title),
+		Html:        htmlStr,
+		Text:        text,
+		Attachments: attachments,
+	})
+	return err
+}
+
+// resolvePaymentSeller builds the merchant-of-record details shown to the buyer.
+// It prefers the Stripe business profile mirrored on the payment account and
+// falls back to the community display name.
+func (s *ZenaoServer) resolvePaymentSeller(ctx context.Context, order *zeni.Order) paymentSeller {
+	seller := paymentSeller{}
+
+	if communities, err := s.DB.WithContext(ctx).CommunitiesByEvent(order.EventID); err != nil {
+		s.Logger.Error("resolve-payment-seller", zap.Error(err), zap.String("order-id", order.ID))
+	} else if len(communities) > 0 && communities[0] != nil {
+		seller.Name = communities[0].DisplayName
+	}
+
+	account, err := s.DB.WithContext(ctx).GetOrderPaymentAccount(order.ID)
+	if err != nil {
+		s.Logger.Error("resolve-payment-seller", zap.Error(err), zap.String("order-id", order.ID))
+		return seller
+	}
+	if account != nil {
+		if name := strings.TrimSpace(account.BusinessName); name != "" {
+			seller.Name = name
+		} else if name := strings.TrimSpace(account.LegalName); name != "" {
+			seller.Name = name
+		}
+		seller.SupportEmail = strings.TrimSpace(account.SupportEmail)
+		seller.Address = strings.TrimSpace(account.BusinessAddress)
+	}
+
+	return seller
+}
+
+// userEmail resolves a Zenao user ID to its email address, supporting both
+// registered users (email lives in the auth provider) and guests (email stored
+// on the DB user).
+func (s *ZenaoServer) userEmail(ctx context.Context, userID string) (string, error) {
+	users, err := s.DB.WithContext(ctx).GetUsersByIDs([]string{userID})
+	if err != nil {
+		return "", err
+	}
+	if len(users) == 0 || users[0] == nil {
+		return "", errors.New("user not found")
+	}
+
+	// Guest user: no auth account, email is stored directly on the DB user.
+	if strings.TrimSpace(users[0].AuthID) == "" {
+		if email := strings.TrimSpace(users[0].Email); email != "" {
+			return email, nil
+		}
+		return "", errors.New("user email not found")
+	}
+
+	authUsers, err := s.Auth.GetUsersFromIDs(ctx, []string{users[0].AuthID})
+	if err != nil {
+		return "", err
+	}
+	if len(authUsers) == 0 || authUsers[0] == nil || strings.TrimSpace(authUsers[0].Email) == "" {
+		return "", errors.New("user email not found")
+	}
+	return authUsers[0].Email, nil
 }
 
 func (s *ZenaoServer) issueOrderTickets(ctx context.Context, order *zeni.Order) (int, error) {
@@ -257,20 +431,9 @@ func (s *ZenaoServer) sendPurchaseConfirmationEmail(ctx context.Context, order *
 		return nil
 	}
 
-	users, err := s.DB.WithContext(ctx).GetUsersByIDs([]string{order.BuyerID})
+	buyerEmail, err := s.userEmail(ctx, order.BuyerID)
 	if err != nil {
 		return err
-	}
-	if len(users) == 0 || users[0] == nil || strings.TrimSpace(users[0].AuthID) == "" {
-		return errors.New("buyer auth id not found")
-	}
-
-	authUsers, err := s.Auth.GetUsersFromIDs(ctx, []string{users[0].AuthID})
-	if err != nil {
-		return err
-	}
-	if len(authUsers) == 0 || authUsers[0] == nil || strings.TrimSpace(authUsers[0].Email) == "" {
-		return errors.New("buyer email not found")
 	}
 
 	evt, err := s.DB.WithContext(ctx).GetEvent(order.EventID)
@@ -281,7 +444,9 @@ func (s *ZenaoServer) sendPurchaseConfirmationEmail(ctx context.Context, order *
 		return errors.New("event not found")
 	}
 
-	htmlStr, text, err := purchaseConfirmationMailContent(evt, "Purchase confirmed! Your tickets will arrive in a separate email.")
+	seller := s.resolvePaymentSeller(ctx, order)
+
+	htmlStr, text, err := purchaseConfirmationMailContent(evt, order, seller, "Purchase confirmed! Your tickets will arrive in a separate email.")
 	if err != nil {
 		return err
 	}
@@ -293,7 +458,7 @@ func (s *ZenaoServer) sendPurchaseConfirmationEmail(ctx context.Context, order *
 	_, err = s.MailClient.Emails.SendWithContext(mailCtx, &resend.SendEmailRequest{
 		// XXX: Replace sender name with organizer name
 		From:    "Zenao <" + s.MailSender + ">",
-		To:      []string{authUsers[0].Email},
+		To:      []string{buyerEmail},
 		Subject: evt.Title + " - Purchase confirmed",
 		Html:    htmlStr,
 		Text:    text,

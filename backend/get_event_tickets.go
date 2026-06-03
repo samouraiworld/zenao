@@ -26,30 +26,36 @@ func (s *ZenaoServer) GetEventTickets(
 		return nil, err
 	}
 
-	userIDs := []string{}
-	ticketsWithUser := []*zeni.SoldTicket{}
-	ticketsWithoutUser := []*zeni.SoldTicket{}
-
+	// Collect auth IDs of registered attendees; guests have no auth account and
+	// carry their email directly on the DB user.
+	authIDs := []string{}
 	for _, tk := range tickets {
-		if tk.User == nil {
-			ticketsWithoutUser = append(ticketsWithoutUser, tk)
-			continue
+		if tk.User != nil && tk.User.AuthID != "" {
+			authIDs = append(authIDs, tk.User.AuthID)
 		}
-		userIDs = append(userIDs, tk.User.AuthID)
-		ticketsWithUser = append(ticketsWithUser, tk)
 	}
 
-	users, err := s.Auth.GetUsersFromIDs(ctx, userIDs)
+	authUsers, err := s.Auth.GetUsersFromIDs(ctx, authIDs)
 	if err != nil {
 		return nil, err
 	}
+	emailByAuthID := make(map[string]string, len(authUsers))
+	for _, u := range authUsers {
+		emailByAuthID[u.ID] = u.Email
+	}
 
-	ticketsInfo := mapsl.MapIndex(ticketsWithUser, func(i int, tk *zeni.SoldTicket) *zenaov1.TicketInfo {
-		return &zenaov1.TicketInfo{TicketSecret: tk.Ticket.Secret(), UserEmail: users[i].Email}
+	ticketsInfo := mapsl.Map(tickets, func(tk *zeni.SoldTicket) *zenaov1.TicketInfo {
+		info := &zenaov1.TicketInfo{TicketSecret: tk.Ticket.Secret()}
+		if tk.User == nil {
+			return info
+		}
+		if tk.User.AuthID != "" {
+			info.UserEmail = emailByAuthID[tk.User.AuthID]
+		} else {
+			info.UserEmail = tk.User.Email
+		}
+		return info
 	})
-	ticketsInfo = append(ticketsInfo, mapsl.Map(ticketsWithoutUser, func(tk *zeni.SoldTicket) *zenaov1.TicketInfo {
-		return &zenaov1.TicketInfo{TicketSecret: tk.Ticket.Secret()}
-	})...)
 
 	return connect.NewResponse(&zenaov1.GetEventTicketsResponse{
 		TicketsInfo: ticketsInfo,

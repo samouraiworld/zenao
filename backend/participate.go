@@ -5,8 +5,8 @@ import (
 	"errors"
 	"fmt"
 	"slices"
+	"strings"
 	"sync"
-	"time"
 
 	"connectrpc.com/connect"
 	"github.com/resend/resend-go/v2"
@@ -21,7 +21,7 @@ import (
 func (s *ZenaoServer) Participate(ctx context.Context, req *connect.Request[zenaov1.ParticipateRequest]) (*connect.Response[zenaov1.ParticipateResponse], error) {
 	var (
 		buyer        *zeni.User
-		authUser     *zeni.AuthUser
+		buyerEmail   string
 		actingAsTeam bool
 		err          error
 	)
@@ -34,33 +34,40 @@ func (s *ZenaoServer) Participate(ctx context.Context, req *connect.Request[zena
 			return nil, err
 		}
 		buyer = actor.ActingAs
-		authUser = actor.AuthUser
+		buyerEmail = actor.AuthUser.Email
 		actingAsTeam = true
-	} else {
-		authUser = s.Auth.GetUser(ctx)
-		if authUser == nil {
-			if req.Msg.Email == "" {
-				return nil, errors.New("no user and no email")
-			}
-			authUser, err = s.Auth.EnsureUserExists(ctx, req.Msg.Email)
-			if err != nil {
-				return nil, err
-			}
-		} else if req.Msg.Email != "" {
+	} else if authUser := s.Auth.GetUser(ctx); authUser != nil {
+		if req.Msg.Email != "" {
 			return nil, errors.New("authenticating and providing an email are mutually exclusive")
 		}
-
 		if err := validateEmailAddress(authUser.Email); err != nil {
 			return nil, err
 		}
-
 		if authUser.Banned {
 			return nil, errors.New("user is banned")
 		}
-
 		buyer, err = s.EnsureUserExists(ctx, authUser)
 		if err != nil {
 			return nil, err
+		}
+		buyerEmail = authUser.Email
+	} else {
+		if req.Msg.Email == "" {
+			return nil, errors.New("no user and no email")
+		}
+		if err := validateEmailAddress(req.Msg.Email); err != nil {
+			return nil, err
+		}
+		// Unauthenticated buyer: resolve via the guest model (no auth account
+		// unless the email is already registered).
+		buyerEmail = strings.ToLower(strings.TrimSpace(req.Msg.Email))
+		buyerUsers, err := s.EnsureUsersFromEmails(ctx, []string{buyerEmail})
+		if err != nil {
+			return nil, err
+		}
+		buyer = buyerUsers[buyerEmail]
+		if buyer == nil {
+			return nil, errors.New("failed to resolve buyer")
 		}
 	}
 
@@ -74,30 +81,33 @@ func (s *ZenaoServer) Participate(ctx context.Context, req *connect.Request[zena
 		return nil, err
 	}
 
-	authGuests, err := s.Auth.EnsureUsersExists(ctx, req.Msg.Guests)
+	// Resolve guests via the guest model: registered emails reuse their auth
+	// account, the rest become DB-only guest users (no auth provider seat).
+	guestUsers, err := s.EnsureUsersFromEmails(ctx, req.Msg.Guests)
 	if err != nil {
 		return nil, err
 	}
 
+	buyerKey := strings.ToLower(strings.TrimSpace(buyerEmail))
 	participants := []*zeni.User{buyer}
-	for _, authGuest := range authGuests {
-		if authGuest.Banned {
-			return nil, fmt.Errorf("user %s is banned", authGuest.Email)
-		}
-		if authGuest.ID == authUser.ID {
+	participantEmails := []string{buyerEmail}
+	seen := map[string]struct{}{buyerKey: {}}
+	for _, email := range req.Msg.Guests {
+		key := strings.ToLower(strings.TrimSpace(email))
+		if key == buyerKey {
 			return nil, errors.New("guest is buyer")
 		}
-
-		if slices.ContainsFunc(participants, func(added *zeni.User) bool { return authGuest.ID == added.AuthID }) {
+		if _, dup := seen[key]; dup {
 			return nil, errors.New("duplicate guest")
 		}
+		seen[key] = struct{}{}
 
-		// XXX: support batch
-		guest, err := s.EnsureUserExists(ctx, authGuest)
-		if err != nil {
-			return nil, err
+		guest := guestUsers[key]
+		if guest == nil {
+			return nil, errors.New("failed to resolve guest")
 		}
 		participants = append(participants, guest)
+		participantEmails = append(participantEmails, key)
 	}
 
 	tickets, err := mapsl.MapRangeErr(len(participants), zeni.NewTicket)
@@ -175,14 +185,11 @@ func (s *ZenaoServer) Participate(ctx context.Context, req *connect.Request[zena
 			)
 			defer span.End()
 
-			htmlStr, text, err := ticketsConfirmationMailContent(evt, "Welcome! Tickets are attached to this email.")
-			if err != nil {
-				s.Logger.Error("generate-participate-email-content", zap.Error(err))
-				return
-			}
-
-			attachments := make([]*resend.Attachment, 0, len(tickets))
-
+			// Bundle every ticket (the buyer's own plus any guest's) into a
+			// single email addressed to the buyer. The QR codes are entry
+			// tokens, so they are never sent to guest-provided emails which
+			// could contain a typo and leak access.
+			items := make([]ticketEmailItem, 0, len(tickets))
 			func() {
 				_, span := tracer.Start(
 					ctx,
@@ -190,30 +197,31 @@ func (s *ZenaoServer) Participate(ctx context.Context, req *connect.Request[zena
 					trace.WithSpanKind(trace.SpanKindClient),
 				)
 				defer span.End()
-				for i, ticket := range tickets {
-					pdfData, err := GeneratePDFTicket(evt, ticket.Secret(), buyer.DisplayName, authUser.Email, time.Now(), s.Logger)
-					if err != nil {
-						s.Logger.Error("generate-ticket-pdf", zap.Error(err), zap.String("ticket-id", ticket.Secret()))
-						continue
-					}
-					attachments = append(attachments, &resend.Attachment{
-						Content:     pdfData,
-						Filename:    fmt.Sprintf("ticket_%s_%s_%d.pdf", buyer.ID, evt.ID, i),
-						ContentType: "application/pdf",
-					})
-					icsData := GenerateICS(evt, s.MailSender, s.Logger)
-					attachments = append(attachments, &resend.Attachment{
-						Content:     icsData,
-						Filename:    fmt.Sprintf("zenao_events_%s.ics", evt.ID),
-						ContentType: "text/calendar",
+				for i := range tickets {
+					items = append(items, ticketEmailItem{
+						Secret:      tickets[i].Secret(),
+						DisplayName: participants[i].DisplayName,
+						Email:       participantEmails[i],
 					})
 				}
 			}()
 
+			qrs, attachments, err := buildTicketEmailAttachments(evt, items, s.MailSender, s.Logger)
+			if err != nil {
+				s.Logger.Error("generate-participate-attachments", zap.Error(err), zap.String("event-id", evt.ID), zap.String("buyer-id", buyer.ID))
+				return
+			}
+
+			htmlStr, text, err := ticketsConfirmationMailContent(evt, "Welcome! Your tickets are attached and shown below.", qrs)
+			if err != nil {
+				s.Logger.Error("generate-participate-email-content", zap.Error(err))
+				return
+			}
+
 			// XXX: Replace sender name with organizer name
 			if _, err := s.MailClient.Emails.SendWithContext(ctx, &resend.SendEmailRequest{
 				From:        fmt.Sprintf("Zenao <%s>", s.MailSender),
-				To:          append(req.Msg.Guests, authUser.Email),
+				To:          []string{buyerEmail},
 				Subject:     fmt.Sprintf("%s - Confirmation", evt.Title),
 				Html:        htmlStr,
 				Text:        text,
