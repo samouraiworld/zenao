@@ -651,6 +651,7 @@
     "check-in-confirmation-dialog": {
       "title-success": "Entrada verificada",
       "description-error": "Error al intentar validar tu entrada",
+      "description-invalid-ticket": "Este código QR no es una entrada válida",
       "title-error": "Entrada inválida",
       "description-success": "Puedes entrar al recinto",
       "close": "Cerrar"
@@ -658,8 +659,9 @@
     "last-ticket-scanned": "Última entrada firmada",
     "checkin-count": "Total de entradas verificadas",
     "history-title": "Entradas escaneadas del evento",
-    "no-tickets-scanned": "Aún no se han escaneado entradas",
-    "signature": "Firma"
+    "no-tickets-scanned": "Ninguna entrada escaneada en este dispositivo",
+    "signature": "Firma",
+    "toggle-flashlight": "Encender/apagar la linterna"
   },
   "cancel-registration-confirmation-dialog": {
     "title": "Cancelar tu participación",
