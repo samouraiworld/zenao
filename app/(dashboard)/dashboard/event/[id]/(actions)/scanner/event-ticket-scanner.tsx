@@ -1,13 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { z } from "zod";
+import { ConnectError } from "@connectrpc/connect";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useAuth } from "@clerk/nextjs";
 import * as ed from "@noble/ed25519";
 import { useTranslations } from "next-intl";
-import { Scanner } from "@yudiel/react-qr-scanner";
-import { Loader2, RefreshCcw } from "lucide-react";
+import { Loader2, RefreshCcw, Zap, ZapOff } from "lucide-react";
+import BarcodeScanner from "./scanner";
 import { CheckinConfirmationDialog } from "@/components/dialogs/check-in-confirmation-dialog";
 import { useEventCheckIn } from "@/lib/mutations/event-management";
 import { userInfoOptions } from "@/lib/queries/user";
@@ -55,6 +56,30 @@ export function EventTicketScanner({
 
   const [history, setHistory] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [scannerError, setScannerError] = useState<string | null>(null);
+  const [torch, setTorch] = useState(false);
+  const cameraContainerRef = useRef<HTMLDivElement>(null);
+
+  // React doesn't reliably set the `muted` *attribute* on <video> elements, so
+  // Android Chrome blocks autoplay and the react-webcam preview stays black
+  // (desktop autoplay is laxer, which is why it works there). Force the
+  // attributes on the rendered <video> and kick off playback when the stream
+  // attaches.
+  useEffect(() => {
+    const video = cameraContainerRef.current?.querySelector("video");
+    if (!video) {
+      return;
+    }
+    video.muted = true;
+    video.setAttribute("muted", "");
+    video.setAttribute("playsinline", "");
+    const play = () => {
+      video.play().catch(() => {});
+    };
+    play();
+    video.addEventListener("loadedmetadata", play);
+    return () => video.removeEventListener("loadedmetadata", play);
+  }, []);
 
   const updateHistory = (newSig: string) => {
     setLastSignature(newSig);
@@ -106,8 +131,15 @@ export function EventTicketScanner({
 
       updateHistory(signature);
     } catch (err) {
-      console.error("Error", err);
-      if (err instanceof Error) {
+      console.error("checkin error", err);
+      if (err instanceof z.ZodError) {
+        // The scanned QR isn't a ticket secret (wrong format/length).
+        setError(t("check-in-confirmation-dialog.description-invalid-ticket"));
+      } else if (err instanceof ConnectError) {
+        // Backend rejection (already checked in, unknown ticket, ...).
+        // rawMessage drops the "[code]" prefix that ConnectError.message adds.
+        setError(err.rawMessage);
+      } else if (err instanceof Error) {
         setError(err.message);
       } else {
         setError(t("check-in-confirmation-dialog.description-error"));
@@ -137,14 +169,58 @@ export function EventTicketScanner({
 
       <div className="w-full grid grid-cols-2 gap-8">
         <div className="md:max-w-[650px] max-md:col-span-2 self-start">
-          <Scanner
-            onScan={(result) => handleQRCodeValue(result[0].rawValue)}
-            allowMultiple
-            paused={isLoading || confirmDialogOpen}
-            classNames={{
-              container: "md:max-w-[650px] max-md:col-span-2 self-center",
-            }}
-          />
+          <div
+            ref={cameraContainerRef}
+            className="relative aspect-square w-full overflow-hidden rounded bg-black [&_video]:absolute [&_video]:inset-0 [&_video]:h-full [&_video]:w-full [&_video]:object-cover"
+          >
+            <BarcodeScanner
+              facingMode="environment"
+              torch={torch}
+              // BarcodeScanner streams continuously: onUpdate fires on every
+              // frame, with a result only when a code is decoded (otherwise the
+              // first arg is a NotFoundException we ignore). We gate on the
+              // loading/dialog state rather than stopping the stream, to avoid
+              // re-initialising the camera (slow and flickery on mobile).
+              onUpdate={(_err, result) => {
+                if (!result || isLoading || confirmDialogOpen) {
+                  return;
+                }
+                setScannerError(null);
+                handleQRCodeValue(result.getText());
+              }}
+              onError={(err) => {
+                console.error("scanner camera error", err);
+                setScannerError(typeof err === "string" ? err : err.message);
+              }}
+            />
+
+            {/* Scanning viewfinder (corner brackets) */}
+            <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+              <div className="relative h-2/3 w-2/3">
+                <span className="absolute left-0 top-0 h-8 w-8 rounded-tl-lg border-l-4 border-t-4 border-white/90" />
+                <span className="absolute right-0 top-0 h-8 w-8 rounded-tr-lg border-r-4 border-t-4 border-white/90" />
+                <span className="absolute bottom-0 left-0 h-8 w-8 rounded-bl-lg border-b-4 border-l-4 border-white/90" />
+                <span className="absolute bottom-0 right-0 h-8 w-8 rounded-br-lg border-b-4 border-r-4 border-white/90" />
+              </div>
+            </div>
+
+            {/* Flashlight toggle */}
+            <Button
+              type="button"
+              variant="secondary"
+              size="icon"
+              onClick={() => setTorch((value) => !value)}
+              aria-label={t("toggle-flashlight")}
+              className="absolute bottom-3 right-3 z-10 rounded-full opacity-90"
+            >
+              {torch ? <ZapOff /> : <Zap />}
+            </Button>
+          </div>
+          {scannerError && (
+            <div className="mt-2 rounded bg-destructive/10 p-3">
+              <Text className="text-destructive">Camera: {scannerError}</Text>
+            </div>
+          )}
         </div>
 
         <div className="flex flex-col h-full max-md:col-span-2 gap-6">

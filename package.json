@@ -56,7 +56,6 @@
     "@types/tz-lookup": "^6.1.2",
     "@vercel/otel": "^2.1.0",
     "@yornaath/batshit": "^0.11.1",
-    "@yudiel/react-qr-scanner": "^2.3.1",
     "bech32": "^2.0.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",

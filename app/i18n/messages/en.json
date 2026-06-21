@@ -652,6 +652,7 @@
     "check-in-confirmation-dialog": {
       "title-success": "Ticket verified",
       "description-error": "Error while trying to validate your ticket",
+      "description-invalid-ticket": "This QR code is not a valid ticket",
       "title-error": "Invalid ticket",
       "description-success": "You can enter the venue",
       "close": "Close"
@@ -659,8 +660,9 @@
     "last-ticket-scanned": "Last ticket signed",
     "checkin-count": "Total tickets checked-in",
     "history-title": "Scanned tickets for event",
-    "no-tickets-scanned": "No tickets scanned yet",
-    "signature": "Signature"
+    "no-tickets-scanned": "No tickets scanned on this device",
+    "signature": "Signature",
+    "toggle-flashlight": "Toggle flashlight"
   },
   "cancel-registration-confirmation-dialog": {
     "title": "Cancel your participation",
