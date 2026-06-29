@@ -9,6 +9,11 @@ export const eventOptions = (id: string) =>
   queryOptions({
     queryKey: ["event", id],
     queryFn: async () => {
+      // Validate ID is numeric before calling backend
+      if (!/^\d+$/.test(id)) {
+        throw new Error("event not found");
+      }
+
       return withSpan(`query:backend:event:${id}`, async () => {
         const res = await zenaoClient.getEvent({ eventId: id });
         if (res.event == null) {
