@@ -48,12 +48,12 @@ const nextConfig: NextConfig = {
       process.env.NEXT_PUBLIC_ZENAO_BACKEND_ENDPOINT || "";
     const backendCspOrigin = backendEndpoint
       ? (() => {
-        try {
-          return new URL(backendEndpoint).origin;
-        } catch {
-          return "";
-        }
-      })()
+          try {
+            return new URL(backendEndpoint).origin;
+          } catch {
+            return "";
+          }
+        })()
       : "";
 
     const cspDirectives = [
@@ -120,9 +120,9 @@ export default withSentryConfig(withNextIntl(nextConfig), {
   // For all available options, see:
   // https://www.npmjs.com/package/@sentry/webpack-plugin#options
 
-  org: "sentry",
-  project: "zenao",
-
+  org: process.env.SENTRY_ORG_SLUG ?? "sentry",
+  project: process.env.SENTRY_PROJECT_SLUG ?? "zenao",
+  sentryUrl: process.env.SENTRY_URL,
   // Only print logs for uploading source maps in CI
   silent: !process.env.CI,
 
@@ -137,8 +137,7 @@ export default withSentryConfig(withNextIntl(nextConfig), {
 
   sourcemaps: {
     deleteSourcemapsAfterUpload: true,
-    disable:
-      (process.env.NEXT_PUBLIC_ENV ?? "development") === "development",
+    disable: (process.env.NEXT_PUBLIC_ENV ?? "development") === "development",
   },
   bundleSizeOptimizations: {
     excludeReplayIframe: true,
@@ -151,4 +150,3 @@ export default withSentryConfig(withNextIntl(nextConfig), {
     automaticVercelMonitors: true,
   },
 });
-
