@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ## [Unreleased] — Production Incident Fix & Deploy Hardening (2026-02-28)
 
 ### Fixed
+- Remove direct GitHub secret interpolation from deployment shell bodies and disable credential trace output; update Stripe environment data without treating its value as a command. Runtime host and rollout verification remain required.
 - **Production outage**: Backend stuck in `--maintenance` mode after deploy #22523329085 failed at migration step — `git restore` never ran, leaving all RPC endpoints returning `CodeUnavailable`
 - **Deploy workflow safety net**: Added "Rollback maintenance on migration failure" step to `deploy-prod.yml` and `deploy-staging.yml` — `git restore` + container rebuild runs via `if: failure()`
 - **Emergency recovery workflow**: New `emergency-clear-maintenance.yml` — one-click workflow_dispatch to clear stuck maintenance mode
