@@ -76,9 +76,20 @@ func (g *gormZenaoDB) UpsertPaymentAccount(account *zeni.PaymentAccount) (*zeni.
 			"country":             account.Country,
 			"updated_at":          now,
 		}),
+		Where: clause.Where{Exprs: []clause.Expression{clause.Expr{SQL: "payment_accounts.platform_account_id = excluded.platform_account_id AND payment_accounts.deleted_at IS NULL"}}},
 	}).Create(&newAccount).Error
-
-	return dbPaymentAccountToZeniPaymentAccount(&newAccount), err
+	if err != nil {
+		return nil, err
+	}
+	// A generic status/profile write is never authority to replace seller identity.
+	current, err := g.GetPaymentAccountByCommunityPlatform(account.CommunityID, account.PlatformType)
+	if err != nil {
+		return nil, err
+	}
+	if current.PlatformAccountID != account.PlatformAccountID {
+		return nil, zeni.ErrOnboardingReconciliation
+	}
+	return current, nil
 }
 
 // CreatePriceGroup implements zeni.DB.

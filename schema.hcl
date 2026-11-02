@@ -386,6 +386,15 @@ table "payment_accounts" {
     null = true
     type = datetime
   }
+  column "verification_generation" {
+    null    = false
+    type    = integer
+    default = 0
+  }
+  column "verification_lease_until" {
+    null = true
+    type = datetime
+  }
   column "business_name" {
     null    = false
     type    = text
@@ -1065,6 +1074,73 @@ table "sold_tickets" {
   }
   index "idx_sold_tickets_deleted_at" {
     columns = [column.deleted_at]
+  }
+}
+table "stripe_onboarding_operations" {
+  schema = schema.main
+  column "community_id" {
+    null = false
+    type = integer
+  }
+  column "platform_type" {
+    null = false
+    type = text
+  }
+  column "operation_id" {
+    null    = false
+    type    = text
+    default = ""
+  }
+  column "platform_account_id" {
+    null    = false
+    type    = text
+    default = ""
+  }
+  column "live_mode" {
+    null    = false
+    type    = numeric
+    default = false
+  }
+  column "fingerprint" {
+    null    = false
+    type    = text
+    default = ""
+  }
+  column "idempotency_key" {
+    null    = false
+    type    = text
+    default = ""
+  }
+  column "state" {
+    null = false
+    type = text
+  }
+  column "first_attempt_at" {
+    null = true
+    type = datetime
+  }
+  column "fence" {
+    null    = false
+    type    = integer
+    default = 0
+  }
+  column "lease_until" {
+    null = false
+    type = datetime
+  }
+  column "account_id" {
+    null    = false
+    type    = text
+    default = ""
+  }
+  primary_key {
+    columns = [column.community_id, column.platform_type]
+  }
+  foreign_key "fk_stripe_onboarding_operations_community" {
+    columns     = [column.community_id]
+    ref_columns = [table.communities.column.id]
+    on_update   = NO_ACTION
+    on_delete   = NO_ACTION
   }
 }
 table "tags" {

@@ -444,6 +444,11 @@ type DB interface {
 
 	GetPaymentAccountByCommunityPlatform(communityID string, platformType string) (*PaymentAccount, error)
 	UpsertPaymentAccount(account *PaymentAccount) (*PaymentAccount, error)
+	ClaimStripeOnboarding(scope StripeOnboardingScope, verifiedExistingID string, now time.Time) (*StripeOnboardingOperation, error)
+	CompleteStripeOnboardingAccount(claim *StripeOnboardingOperation, accountID string, now time.Time) error
+	FinishStripeOnboarding(claim *StripeOnboardingOperation, state string, now time.Time) error
+	BeginPaymentAccountVerification(account *PaymentAccount, scope StripeOnboardingScope, now time.Time) (*PaymentAccountVerificationClaim, error)
+	CompletePaymentAccountVerification(account *PaymentAccount, claim *PaymentAccountVerificationClaim, now time.Time) (bool, error)
 
 	CreateTeam(ownerID string, displayName string) (*User, error)
 	EditTeam(teamID string, memberIDs []string, req *zenaov1.EditTeamRequest) error

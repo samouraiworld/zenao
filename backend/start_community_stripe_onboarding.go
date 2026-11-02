@@ -13,8 +13,6 @@ import (
 	zenaov1 "github.com/samouraiworld/zenao/backend/zenao/v1"
 	"github.com/samouraiworld/zenao/backend/zeni"
 	"github.com/stripe/stripe-go/v84"
-	"github.com/stripe/stripe-go/v84/account"
-	"github.com/stripe/stripe-go/v84/accountlink"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
 )
@@ -114,54 +112,57 @@ func (s *ZenaoServer) StartCommunityStripeOnboarding(
 		return nil, errors.New("stripe already connected")
 	}
 
-	accountID := ""
-	if existingAccount != nil {
-		// TODO: check if account is still active, return an error if not
-		accountID = existingAccount.PlatformAccountID
-	}
-	if accountID == "" {
-		params := &stripe.AccountParams{
-			Type: stripe.String(string(stripe.AccountTypeStandard)),
-			Capabilities: &stripe.AccountCapabilitiesParams{
-				CardPayments: &stripe.AccountCapabilitiesCardPaymentsParams{Requested: stripe.Bool(true)},
-				Transfers:    &stripe.AccountCapabilitiesTransfersParams{Requested: stripe.Bool(true)},
-			},
-		}
-
-		// NOTE: If DB persistence fails, retries will reuse this account while the idempotency window is active.
-		params.SetIdempotencyKey(fmt.Sprintf("account.New.Community:%s", req.Msg.CommunityId))
-
-		acct, err := account.New(params)
-		if err != nil {
-			return nil, fmt.Errorf("create stripe account: %w", err)
-		}
-		accountID = acct.ID
-	}
-
-	link, err := accountlink.New(&stripe.AccountLinkParams{
-		Account:    stripe.String(accountID),
-		RefreshURL: stripe.String(refreshURL),
-		ReturnURL:  stripe.String(returnURL),
-		Type:       stripe.String(string(stripe.AccountLinkTypeAccountOnboarding)),
-	})
+	gateway := s.onboardingGateway()
+	requestCtx, cancel := context.WithTimeout(ctx, 10*time.Second)
+	defer cancel()
+	identity, err := gateway.Identity(requestCtx)
 	if err != nil {
-		return nil, fmt.Errorf("create stripe account link: %w", err)
+		return nil, errors.New("Stripe platform identity could not be verified")
 	}
-
-	if err := s.DB.TxWithSpan(ctx, "db.UpsertPaymentAccount", func(tx zeni.DB) error {
-		_, err = tx.UpsertPaymentAccount(&zeni.PaymentAccount{
-			CommunityID:       req.Msg.CommunityId,
-			PlatformType:      zeni.PaymentPlatformStripeConnect,
-			PlatformAccountID: accountID,
-			OnboardingState:   zeni.PaymentOnboardingStateStarted,
-			StartedAt:         time.Now().UTC(),
-			VerificationState: zeni.PaymentVerificationStatePending,
-		})
-
-		return err
-	}); err != nil {
+	scope := zeni.StripeOnboardingScope{CommunityID: req.Msg.CommunityId, ActorID: actor.ID(), PlatformAccountID: identity.AccountID, LiveMode: identity.LiveMode}
+	verifiedExistingID := ""
+	if existingAccount != nil && existingAccount.PlatformAccountID != "" {
+		a, e := gateway.Get(requestCtx, existingAccount.PlatformAccountID)
+		if e != nil || a == nil || a.ID != existingAccount.PlatformAccountID || a.ID == identity.AccountID {
+			return nil, zeni.ErrOnboardingReconciliation
+		}
+		verifiedExistingID = a.ID
+	}
+	claim, err := s.DB.WithContext(ctx).ClaimStripeOnboarding(scope, verifiedExistingID, s.onboardingNow())
+	if err != nil {
 		return nil, err
 	}
-
-	return connect.NewResponse(&zenaov1.StartCommunityStripeOnboardingResponse{OnboardingUrl: link.URL}), nil
+	accountID := claim.AccountID
+	if accountID == "" {
+		a, e := gateway.Create(requestCtx, claim.IdempotencyKey, claim.OperationID)
+		if e != nil || a == nil || a.ID == "" {
+			// Even an HTTP 500/cancel can have created an account. Preserve the
+			// original key/clock; never generate a new operation on this error.
+			state := "unknown"
+			var se *stripe.Error
+			if errors.As(e, &se) && (se.HTTPStatusCode == 400 || se.HTTPStatusCode == 401 || se.HTTPStatusCode == 403) {
+				state = "blocked"
+			}
+			if finishErr := s.DB.WithContext(ctx).FinishStripeOnboarding(claim, state, s.onboardingNow()); finishErr != nil {
+				return nil, finishErr
+			}
+			return nil, errors.New("Stripe account creation needs retry or reconciliation")
+		}
+		accountID = a.ID
+		if e = s.DB.WithContext(ctx).CompleteStripeOnboardingAccount(claim, accountID, s.onboardingNow()); e != nil {
+			return nil, e
+		}
+	}
+	link, err := gateway.Link(requestCtx, accountID, returnURL, refreshURL)
+	if err != nil || link == "" {
+		if e := s.DB.WithContext(ctx).FinishStripeOnboarding(claim, "known", s.onboardingNow()); e != nil {
+			return nil, e
+		}
+		return nil, errors.New("Stripe onboarding link unavailable; retry resumes the same account")
+	}
+	// A late worker may not publish its URL after losing its claim.
+	if err = s.DB.WithContext(ctx).FinishStripeOnboarding(claim, "known", s.onboardingNow()); err != nil {
+		return nil, err
+	}
+	return connect.NewResponse(&zenaov1.StartCommunityStripeOnboardingResponse{OnboardingUrl: link}), nil
 }
