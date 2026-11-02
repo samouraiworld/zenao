@@ -16,13 +16,20 @@ jobs:
         uses: appleboy/ssh-action@v1
         env:
           PR_NUMBER: ${{ inputs.pr_number }}
+          STRIPE_SECRET_KEY: ${{ secrets.STRIPE_TEST_SECRET_KEY }}
         with:
           host: 51.159.98.163
           username: root
           key: ${{ secrets.STAGING_SSH_KEY }}
-          envs: PR_NUMBER
+          debug: false
+          allenvs: false
+          envs: PR_NUMBER,STRIPE_SECRET_KEY
+          envs_format: |
+            set +vx
+            export {NAME}={VALUE}
           script: |
-            set -xe
+            set +vx
+            set -e
 
             if ! [[ "$PR_NUMBER" =~ ^[0-9]+$ ]]; then
               echo "Invalid PR number: $PR_NUMBER"
@@ -39,9 +46,54 @@ jobs:
 
             # Add Stripe + app config to backend.env (idempotent)
             cd zenao
-            grep -q 'ZENAO_STRIPE_SECRET_KEY' backend.env 2>/dev/null && \
-              sed -i 's|^ZENAO_STRIPE_SECRET_KEY=.*|ZENAO_STRIPE_SECRET_KEY=${{ secrets.STRIPE_TEST_SECRET_KEY }}|' backend.env || \
-              echo 'ZENAO_STRIPE_SECRET_KEY=${{ secrets.STRIPE_TEST_SECRET_KEY }}' >> backend.env
+            # Standalone workflow: do not require a newer remote checkout.
+            (
+                set +vx
+                set -eu
+
+                if ! awk 'BEGIN {
+                    value = ENVIRON["STRIPE_SECRET_KEY"]
+                    if (value == "" || index(value, "\r") || index(value, "\n")) exit 1
+                }' </dev/null; then
+                    printf '%s\n' 'Stripe credential must be a nonempty single line' >&2
+                    exit 1
+                fi
+
+                if [ -L backend.env ] || { [ -e backend.env ] && [ ! -f backend.env ]; }; then
+                    printf '%s\n' 'Refusing a non-regular backend.env' >&2
+                    exit 1
+                fi
+
+                umask 077
+                stripe_env_tmp=$(mktemp backend.env.tmp.XXXXXX)
+                trap 'rm -f "$stripe_env_tmp"' 0
+                trap 'exit 1' HUP INT TERM
+
+                # Retain the existing file's mode; a new environment file starts private.
+                stripe_env_input=/dev/null
+                if [ -f backend.env ]; then
+                    cp -p backend.env "$stripe_env_tmp"
+                    stripe_env_input=backend.env
+                fi
+
+                # Credential bytes stay data in ENVIRON, not shell source, sed syntax or argv.
+                if ! awk '
+                    /^ZENAO_STRIPE_SECRET_KEY=/ {
+                        print "ZENAO_STRIPE_SECRET_KEY=" ENVIRON["STRIPE_SECRET_KEY"]
+                        found = 1
+                        next
+                    }
+                    { print }
+                    END {
+                        if (!found) print "ZENAO_STRIPE_SECRET_KEY=" ENVIRON["STRIPE_SECRET_KEY"]
+                    }
+                ' "$stripe_env_input" >"$stripe_env_tmp"; then
+                    printf '%s\n' 'Unable to prepare Stripe environment update' >&2
+                    exit 1
+                fi
+
+                mv "$stripe_env_tmp" backend.env
+            )
 
             grep -q 'ZENAO_PAID_EVENTS_ENABLED' backend.env 2>/dev/null && \
               sed -i 's|^ZENAO_PAID_EVENTS_ENABLED=.*|ZENAO_PAID_EVENTS_ENABLED=true|' backend.env || \

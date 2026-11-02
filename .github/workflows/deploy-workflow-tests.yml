@@ -1,0 +1,25 @@
+name: Deployment secret handling
+
+on:
+  pull_request:
+    paths:
+      - .github/workflows/deploy-prod.yml
+      - .github/workflows/deploy-staging.yml
+      - .github/workflows/configure-staging-stripe.yml
+      - .github/workflows/deploy-workflow-tests.yml
+      - scripts/update-stripe-env.sh
+      - scripts/tests/test_deploy_secrets.py
+  merge_group:
+
+permissions:
+  contents: read
+
+jobs:
+  dummy-credential-fixtures:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check shell syntax and exercise local dummy credentials
+        run: |
+          sh -n scripts/update-stripe-env.sh
+          python3 -B -m unittest discover -s scripts/tests -p 'test_deploy_secrets.py' -v
