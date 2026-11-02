@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ## [Unreleased] — Production Incident Fix & Deploy Hardening (2026-02-28)
 
 ### Fixed
+- **Stripe community onboarding**: Persist account-creation intent before calling Stripe, retain one idempotency key across bounded retries, save the connected account before requesting a link, and fence concurrent completion and verification writes. Existing unmapped communities require explicit reconciliation before rollout; see `docs/stripe-onboarding-rollout.md`.
 - **Production outage**: Backend stuck in `--maintenance` mode after deploy #22523329085 failed at migration step — `git restore` never ran, leaving all RPC endpoints returning `CodeUnavailable`
 - **Deploy workflow safety net**: Added "Rollback maintenance on migration failure" step to `deploy-prod.yml` and `deploy-staging.yml` — `git restore` + container rebuild runs via `if: failure()`
 - **Emergency recovery workflow**: New `emergency-clear-maintenance.yml` — one-click workflow_dispatch to clear stuck maintenance mode

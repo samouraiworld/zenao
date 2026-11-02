@@ -11,15 +11,12 @@ import (
 	zenaov1 "github.com/samouraiworld/zenao/backend/zenao/v1"
 	"github.com/samouraiworld/zenao/backend/zeni"
 	"github.com/stripe/stripe-go/v84"
-	"github.com/stripe/stripe-go/v84/account"
 	"gorm.io/gorm"
 )
 
 const (
 	stripeAccountVerificationTTL = 5 * time.Minute
 )
-
-var stripeAccountGetByID = account.GetByID
 
 func shouldRefreshStripeAccountVerification(lastVerifiedAt *time.Time, now time.Time, ttl time.Duration) bool {
 	if lastVerifiedAt == nil {
@@ -168,7 +165,7 @@ func (s *ZenaoServer) GetCommunityPayoutStatus(
 		response.LastVerifiedAt = accountData.LastVerifiedAt.Unix()
 	}
 
-	now := time.Now().UTC()
+	now := s.onboardingNow()
 	if !shouldRefreshStripeAccountVerification(accountData.LastVerifiedAt, now, stripeAccountVerificationTTL) {
 		return connect.NewResponse(response), nil
 	}
@@ -179,56 +176,61 @@ func (s *ZenaoServer) GetCommunityPayoutStatus(
 		return connect.NewResponse(response), nil
 	}
 
-	stripeAcct, err := stripeAccountGetByID(accountData.PlatformAccountID, nil)
+	gateway := s.onboardingGateway()
+	requestCtx, cancel := context.WithTimeout(ctx, 10*time.Second)
+	defer cancel()
+	identity, err := gateway.Identity(requestCtx)
 	if err != nil {
-		response.RefreshError = err.Error()
+		response.RefreshError = "Stripe platform identity unavailable"
 		response.IsStale = true
 		return connect.NewResponse(response), nil
 	}
-
-	verificationState := deriveStripeAccountVerificationState(stripeAcct)
-	onboardingState := accountData.OnboardingState
-	if stripeAcct.DetailsSubmitted && onboardingState != zeni.PaymentOnboardingStateCompleted {
-		onboardingState = zeni.PaymentOnboardingStateCompleted
-	}
-	lastVerifiedAt := now
-	profile := deriveStripeAccountBusinessProfile(stripeAcct)
-
-	if err := s.DB.TxWithSpan(ctx, "db.UpdatePaymentAccountVerification", func(tx zeni.DB) error {
-		_, err = tx.UpsertPaymentAccount(&zeni.PaymentAccount{
-			CommunityID:       accountData.CommunityID,
-			PlatformType:      accountData.PlatformType,
-			PlatformAccountID: accountData.PlatformAccountID,
-			OnboardingState:   onboardingState,
-			StartedAt:         accountData.StartedAt,
-			VerificationState: verificationState,
-			LastVerifiedAt:    &lastVerifiedAt,
-			BusinessName:      profile.businessName,
-			LegalName:         profile.legalName,
-			SupportEmail:      profile.supportEmail,
-			SupportPhone:      profile.supportPhone,
-			SupportURL:        profile.supportURL,
-			BusinessAddress:   profile.address,
-			Country:           profile.country,
-		})
-
-		return err
-	}); err != nil {
+	scope := zeni.StripeOnboardingScope{CommunityID: accountData.CommunityID, PlatformAccountID: identity.AccountID, LiveMode: identity.LiveMode}
+	generation, err := s.DB.WithContext(ctx).BeginPaymentAccountVerification(accountData, scope, s.onboardingNow())
+	if err != nil {
 		return nil, err
 	}
-
-	response.VerificationState = verificationState
-	response.LastVerifiedAt = lastVerifiedAt.Unix()
-	response.IsStale = false
-	response.OnboardingState = onboardingState
-	response.PlatformAccountId = accountData.PlatformAccountID
-	response.BusinessName = profile.businessName
-	response.LegalName = profile.legalName
-	response.SupportEmail = profile.supportEmail
-	response.SupportPhone = profile.supportPhone
-	response.SupportUrl = profile.supportURL
-	response.BusinessAddress = profile.address
-	response.Country = profile.country
-
+	stripeAcct, err := gateway.Get(requestCtx, accountData.PlatformAccountID)
+	if err != nil || stripeAcct == nil || stripeAcct.ID != accountData.PlatformAccountID || stripeAcct.ID == identity.AccountID {
+		response.RefreshError = "Stripe account verification unavailable"
+		response.IsStale = true
+		return connect.NewResponse(response), nil
+	}
+	updated := *accountData
+	updated.VerificationState = deriveStripeAccountVerificationState(stripeAcct)
+	if stripeAcct.DetailsSubmitted {
+		updated.OnboardingState = zeni.PaymentOnboardingStateCompleted
+	}
+	lastVerifiedAt := s.onboardingNow()
+	updated.LastVerifiedAt = &lastVerifiedAt
+	profile := deriveStripeAccountBusinessProfile(stripeAcct)
+	updated.BusinessName = profile.businessName
+	updated.LegalName = profile.legalName
+	updated.SupportEmail = profile.supportEmail
+	updated.SupportPhone = profile.supportPhone
+	updated.SupportURL = profile.supportURL
+	updated.BusinessAddress = profile.address
+	updated.Country = profile.country
+	applied, err := s.DB.WithContext(ctx).CompletePaymentAccountVerification(&updated, generation, s.onboardingNow())
+	if err != nil {
+		return nil, err
+	}
+	current, err := s.DB.WithContext(ctx).GetPaymentAccountByCommunityPlatform(accountData.CommunityID, accountData.PlatformType)
+	if err != nil {
+		return nil, err
+	}
+	response = payoutStatusResponse(current)
+	if !applied {
+		response.IsStale = true
+		response.RefreshError = "Newer verification won; current state reloaded"
+	}
 	return connect.NewResponse(response), nil
+}
+
+func payoutStatusResponse(p *zeni.PaymentAccount) *zenaov1.GetCommunityPayoutStatusResponse {
+	r := &zenaov1.GetCommunityPayoutStatusResponse{VerificationState: p.VerificationState, OnboardingState: p.OnboardingState, PlatformAccountId: p.PlatformAccountID, Currencies: zeni.ListSupportedStripeCurrencies(), BusinessName: p.BusinessName, LegalName: p.LegalName, SupportEmail: p.SupportEmail, SupportPhone: p.SupportPhone, SupportUrl: p.SupportURL, BusinessAddress: p.BusinessAddress, Country: p.Country}
+	if p.LastVerifiedAt != nil {
+		r.LastVerifiedAt = p.LastVerifiedAt.Unix()
+	}
+	return r
 }

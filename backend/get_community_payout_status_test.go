@@ -152,11 +152,9 @@ func TestGetCommunityPayoutStatusStripeErrorPreservesState(t *testing.T) {
 	})
 	require.NoError(t, err)
 
-	originalStripeGet := stripeAccountGetByID
-	stripeAccountGetByID = func(id string, params *stripe.AccountParams) (*stripe.Account, error) {
-		return nil, errors.New("stripe unavailable")
-	}
-	t.Cleanup(func() { stripeAccountGetByID = originalStripeGet })
+	server.StripeOnboardingGateway = &fakeStripeGateway{get: func(context.Context, string) (*stripe.Account, error) {
+		return nil, errors.New("verification unavailable")
+	}}
 
 	resp, err := server.GetCommunityPayoutStatus(
 		context.Background(),
@@ -168,7 +166,7 @@ func TestGetCommunityPayoutStatusStripeErrorPreservesState(t *testing.T) {
 	require.Equal(t, zeni.PaymentVerificationStatePending, resp.Msg.VerificationState)
 	require.Equal(t, lastVerifiedAt.Unix(), resp.Msg.LastVerifiedAt)
 	require.True(t, resp.Msg.IsStale)
-	require.Contains(t, resp.Msg.RefreshError, "stripe unavailable")
+	require.Contains(t, resp.Msg.RefreshError, "verification unavailable")
 	require.Equal(t, zeni.PaymentOnboardingStateStarted, resp.Msg.OnboardingState)
 	require.Equal(t, "acct_123", resp.Msg.PlatformAccountId)
 	require.ElementsMatch(t, zeni.ListSupportedStripeCurrencies(), resp.Msg.Currencies)
@@ -208,15 +206,9 @@ func TestGetCommunityPayoutStatusStripeSuccessUpdatesState(t *testing.T) {
 	})
 	require.NoError(t, err)
 
-	originalStripeGet := stripeAccountGetByID
-	stripeAccountGetByID = func(id string, params *stripe.AccountParams) (*stripe.Account, error) {
-		return &stripe.Account{
-			DetailsSubmitted: true,
-			ChargesEnabled:   true,
-			PayoutsEnabled:   true,
-		}, nil
-	}
-	t.Cleanup(func() { stripeAccountGetByID = originalStripeGet })
+	server.StripeOnboardingGateway = &fakeStripeGateway{get: func(_ context.Context, id string) (*stripe.Account, error) {
+		return &stripe.Account{ID: id, DetailsSubmitted: true, ChargesEnabled: true, PayoutsEnabled: true}, nil
+	}}
 
 	resp, err := server.GetCommunityPayoutStatus(
 		context.Background(),

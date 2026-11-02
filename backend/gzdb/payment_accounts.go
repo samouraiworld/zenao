@@ -10,21 +10,23 @@ import (
 
 type PaymentAccount struct {
 	gorm.Model
-	CommunityID       uint      `gorm:"not null;index:idx_payment_accounts_community_platform,unique"`
-	Community         Community `gorm:"foreignKey:CommunityID"`
-	PlatformType      string    `gorm:"not null;index:idx_payment_accounts_community_platform,unique"`
-	PlatformAccountID string    `gorm:"not null"`
-	OnboardingState   string    `gorm:"not null"`
-	StartedAt         time.Time `gorm:"not null"`
-	VerificationState string    `gorm:"not null;default:pending"`
-	LastVerifiedAt    *time.Time
-	BusinessName      string `gorm:"not null;default:''"`
-	LegalName         string `gorm:"not null;default:''"`
-	SupportEmail      string `gorm:"not null;default:''"`
-	SupportPhone      string `gorm:"not null;default:''"`
-	SupportURL        string `gorm:"not null;default:''"`
-	BusinessAddress   string `gorm:"not null;default:''"`
-	Country           string `gorm:"not null;default:''"`
+	CommunityID            uint      `gorm:"not null;index:idx_payment_accounts_community_platform,unique"`
+	Community              Community `gorm:"foreignKey:CommunityID"`
+	PlatformType           string    `gorm:"not null;index:idx_payment_accounts_community_platform,unique"`
+	PlatformAccountID      string    `gorm:"not null"`
+	OnboardingState        string    `gorm:"not null"`
+	StartedAt              time.Time `gorm:"not null"`
+	VerificationState      string    `gorm:"not null;default:pending"`
+	LastVerifiedAt         *time.Time
+	VerificationGeneration uint64 `gorm:"not null;default:0"`
+	VerificationLeaseUntil *time.Time
+	BusinessName           string `gorm:"not null;default:''"`
+	LegalName              string `gorm:"not null;default:''"`
+	SupportEmail           string `gorm:"not null;default:''"`
+	SupportPhone           string `gorm:"not null;default:''"`
+	SupportURL             string `gorm:"not null;default:''"`
+	BusinessAddress        string `gorm:"not null;default:''"`
+	Country                string `gorm:"not null;default:''"`
 }
 
 func dbPaymentAccountToZeniPaymentAccount(dbAccount *PaymentAccount) *zeni.PaymentAccount {
