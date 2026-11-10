@@ -13,8 +13,7 @@ interface PageProps {
   params: Promise<{ orgType: string; orgId: string; postId: string }>;
 }
 
-const COMMUNITY_BANNER_FALLBACK =
-  "ipfs://bafybeib2gyk2yagrcdrnhpgbaj6an6ghk2liwx2mshhoa6d54y2mheny24";
+const COMMUNITY_BANNER_FALLBACK = "/images/community-image-fallback.png";
 
 export default async function SocialFeedPostPage({ params }: PageProps) {
   const queryClient = getQueryClient();
