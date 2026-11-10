@@ -19,6 +19,7 @@ require (
 	github.com/golangci/golangci-lint v1.64.8
 	github.com/google/uuid v1.6.0
 	github.com/goware/prefixer v0.0.0-20160118172347-395022866408
+	github.com/ipfs/go-cid v0.0.7
 	github.com/mattn/go-sqlite3 v1.14.24
 	github.com/multiformats/go-multiaddr v0.15.0
 	github.com/resend/resend-go/v2 v2.27.0
@@ -223,7 +224,6 @@ require (
 	github.com/hashicorp/hcl/v2 v2.18.1 // indirect
 	github.com/hexops/gotextdiff v1.0.3 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
-	github.com/ipfs/go-cid v0.0.7 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20240606120523-5a60cdf6a761 // indirect
 	github.com/jackc/pgx/v5 v5.7.2 // indirect

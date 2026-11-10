@@ -284,10 +284,13 @@ Uploaded files (event images, avatars, audio) are stored on a self-hosted IPFS n
 How it works:
 
 - The browser posts the file (multipart field `file`) to the backend endpoint `POST /files` with
-  the Clerk session token. The backend rejects anonymous and banned users, files over 5 MiB and
-  HTML files, then adds the file to kubo through its RPC API and returns `{"uri": "ipfs://<cid>"}`.
-- The kubo RPC API (port 5001) gives full control of the node: it is never published, the backend
-  reaches it on the Docker network.
+  the Clerk session token. The backend rejects anonymous and banned users, files over 5 MiB, HTML
+  files and users over 100 MiB per day, then adds the file to kubo through its RPC API and returns
+  `{"uri": "ipfs://<cid>"}`.
+- Uploaded files are kept forever. The backend refuses uploads with HTTP 507 once the node reaches
+  its `Datastore.StorageMax` (`ZENAO_IPFS_STORAGE_MAX`, default `20GB`).
+- The kubo RPC API (port 5001) gives full control of the node: it is never published, and only the
+  backend shares the `ipfs` Docker network with it.
 - Files are shown through the kubo gateway (`/ipfs/<cid>`), served by the host nginx on
   `https://ipfs.zenao.io` (`https://ipfs.staging.zenao.io` on staging).
 - The node is isolated (`ipfs/zenao-config.sh`): it does not join the public IPFS network and its
@@ -338,6 +341,10 @@ server {
     # Read-only access to /ipfs/<cid> only. No /ipns/, no RPC API.
     location /ipfs/ {
         limit_except GET HEAD { deny all; }
+        # ?filename=x.html would make kubo serve any file as text/html.
+        if ($arg_filename) {
+            return 403;
+        }
         proxy_pass http://127.0.0.1:8080;
         proxy_set_header Host $host;
         proxy_set_header X-Forwarded-Proto $scheme;
@@ -361,12 +368,22 @@ nginx -t && systemctl reload nginx
 certbot --nginx -d ipfs.zenao.io -d pinata.zenao.io
 ```
 
-**3. Upload size on the backend site.** nginx refuses request bodies over 1 MB by default. In the
-`server` block of `api.prod.zenao.io`, add `client_max_body_size 6m;`, then
-`nginx -t && systemctl reload nginx`.
+**3. Upload size on the backend site.** nginx refuses request bodies over 1 MB by default. Raise the
+limit for the upload endpoint only: in the `server` block of `api.prod.zenao.io`, add a location
+that copies the `proxy_*` lines of the existing `location /`, then
+`nginx -t && systemctl reload nginx`:
 
-**4. First start.** Run the "Deploy Prod" (or "Deploy Staging") workflow. It starts the `ipfs`
-service before the backend. Check:
+```nginx
+    location = /files {
+        client_max_body_size 6m;
+        # same proxy_pass and proxy_set_header lines as in "location /"
+    }
+```
+
+**4. First start.** Optionally set the storage cap in `~/zenao/.env` (read by docker compose), for
+example `ZENAO_IPFS_STORAGE_MAX=50GB`; keep it well below the free disk space, since backups are
+also written to this disk. Run the "Deploy Prod" (or "Deploy Staging") workflow. It starts the
+`ipfs` service after the backend. Check:
 
 ```bash
 docker compose -f prod.backend.docker-compose.yml ps ipfs   # healthy
@@ -441,11 +458,13 @@ The backend can store files on Pinata instead of kubo, with configuration only. 
 
 1. In `backend.env`: `ZENAO_FILE_STORE=pinata`, `ZENAO_PINATA_JWT=<JWT with Files write>`,
    optionally `ZENAO_PINATA_GROUP=<group id>`, and `ZENAO_IPFS_GATEWAY_URL=https://pinata.zenao.io`.
-2. Copy the files of the kubo node to Pinata (the command checks that Pinata returns the same CID):
+2. Copy the files of the kubo node to Pinata. The command runs in a new container, so it reads the
+   updated `backend.env`; it checks that Pinata returns the same CID and lists the CIDs missing on
+   the node (files already lost):
 
    ```bash
-   docker compose -f prod.backend.docker-compose.yml exec backend \
-     /bin/zenao-backend copy-ipfs-files -ipfs-api-url http://ipfs:5001
+   docker compose -f prod.backend.docker-compose.yml run --rm --no-deps --entrypoint /bin/zenao-backend \
+     backend copy-ipfs-files -ipfs-api-url http://ipfs:5001
    ```
 
    Add `-dry-run` first to list the CIDs and check which ones are on the node.

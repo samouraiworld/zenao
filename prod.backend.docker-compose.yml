@@ -8,6 +8,9 @@ services:
     environment:
       OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4318
       ZENAO_IPFS_API_URL: http://ipfs:5001
+    networks:
+      - default
+      - ipfs
     ports:
       - 4242:4242
     container_name: backend
@@ -39,6 +42,11 @@ services:
     image: ipfs/kubo:v0.43.1@sha256:b293923d66e490e70ced64df42ea7a6cf7eac2740e3fb29101df18070fa7be48
     environment:
       IPFS_PROFILE: server
+      ZENAO_IPFS_STORAGE_MAX: ${ZENAO_IPFS_STORAGE_MAX:-20GB}
+    # Only the backend shares this network: other containers cannot reach the
+    # RPC API.
+    networks:
+      - ipfs
     volumes:
       - ipfs-data:/data/ipfs
       - ./ipfs/zenao-config.sh:/container-init.d/001-zenao-config.sh:ro
@@ -49,6 +57,9 @@ services:
       resources:
         limits:
           memory: 1G
+
+networks:
+  ipfs:
 
 volumes:
   ipfs-data:

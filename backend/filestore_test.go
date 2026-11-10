@@ -12,31 +12,55 @@ import (
 	"testing"
 
 	"github.com/samouraiworld/zenao/backend/zeni"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
 )
 
+// Valid CIDs used by the tests (default mail icons).
+const (
+	testCIDA = "bafkreiaknq3mxzx5ulryv5tnikjkntmckvz3h4mhjyjle4zbtqkwhyb5xa"
+	testCIDB = "bafkreidfskfo2ld3i75s3d2uf6asiena3jletbz5cy7ostihwoyjclceqa"
+	testCIDC = "bafkreifqabflxtsqvaggg2kw4lyju3pckq4osun4vdlltsn7lal7ak5hli"
+	testCIDD = "bafybeidrbpiyfvwsel6fxb7wl4p64tymnhgd7xnt3nowquqymtllrq67uy"
+)
+
+// readMultipartFile is called from httptest handlers: it uses assert, not
+// require, because require must not stop the test from another goroutine.
 func readMultipartFile(t *testing.T, r *http.Request) (string, []byte) {
 	t.Helper()
 	file, header, err := r.FormFile("file")
-	require.NoError(t, err)
+	if !assert.NoError(t, err) {
+		return "", nil
+	}
 	defer file.Close()
 	data, err := io.ReadAll(file)
-	require.NoError(t, err)
+	assert.NoError(t, err)
 	return header.Filename, data
+}
+
+func writeRepoStat(w http.ResponseWriter, repoSize, storageMax uint64) {
+	_ = json.NewEncoder(w).Encode(map[string]uint64{"RepoSize": repoSize, "StorageMax": storageMax})
 }
 
 func TestKuboFileStoreAdd(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		require.Equal(t, http.MethodPost, r.Method)
-		require.Equal(t, "/api/v0/add", r.URL.Path)
-		for key, values := range kuboAddParams {
-			require.Equal(t, values, r.URL.Query()[key], key)
+		assert.Equal(t, http.MethodPost, r.Method)
+		switch r.URL.Path {
+		case "/api/v0/repo/stat":
+			writeRepoStat(w, 1000, 1<<30)
+		case "/api/v0/add":
+			for key, values := range kuboAddParams {
+				assert.Equal(t, values, r.URL.Query()[key], key)
+			}
+			name, data := readMultipartFile(t, r)
+			assert.Equal(t, "cat.png", name)
+			assert.Equal(t, []byte("image bytes"), data)
+			_, _ = w.Write([]byte(`{"Name":"cat.png","Hash":"bafkreitest","Size":"11"}`))
+		default:
+			t.Errorf("unexpected path %s", r.URL.Path)
+			http.NotFound(w, r)
 		}
-		name, data := readMultipartFile(t, r)
-		require.Equal(t, "cat.png", name)
-		require.Equal(t, []byte("image bytes"), data)
-		_, _ = w.Write([]byte(`{"Name":"cat.png","Hash":"bafkreitest","Size":"11"}`))
 	}))
 	defer srv.Close()
 
@@ -48,32 +72,82 @@ func TestKuboFileStoreAdd(t *testing.T) {
 	require.Equal(t, "bafkreitest", cid)
 }
 
-func TestKuboFileStoreAddError(t *testing.T) {
-	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		http.Error(w, "boom", http.StatusInternalServerError)
-	}))
-	defer srv.Close()
+func TestKuboFileStoreAddErrors(t *testing.T) {
+	tests := []struct {
+		name    string
+		handler http.HandlerFunc
+		wantErr string
+		isFull  bool
+	}{
+		{
+			name: "add status 500",
+			handler: func(w http.ResponseWriter, r *http.Request) {
+				if r.URL.Path == "/api/v0/repo/stat" {
+					writeRepoStat(w, 0, 1<<30)
+					return
+				}
+				http.Error(w, "boom", http.StatusInternalServerError)
+			},
+			wantErr: "status 500",
+		},
+		{
+			name: "late error in trailer",
+			handler: func(w http.ResponseWriter, r *http.Request) {
+				if r.URL.Path == "/api/v0/repo/stat" {
+					writeRepoStat(w, 0, 1<<30)
+					return
+				}
+				w.Header().Set("Trailer", "X-Stream-Error")
+				_, _ = w.Write([]byte(`{"Name":"cat.png","Hash":"bafkreitest","Size":"11"}`))
+				w.Header().Set("X-Stream-Error", "pin failed")
+			},
+			wantErr: "pin failed",
+		},
+		{
+			name: "storage full",
+			handler: func(w http.ResponseWriter, r *http.Request) {
+				if r.URL.Path == "/api/v0/repo/stat" {
+					writeRepoStat(w, 1000, 1005)
+					return
+				}
+				t.Errorf("add must not be called when storage is full")
+			},
+			isFull: true,
+		},
+	}
 
-	store, err := newFileStore(fileStoreKubo, srv.URL, "", "")
-	require.NoError(t, err)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			srv := httptest.NewServer(tt.handler)
+			defer srv.Close()
 
-	_, err = store.Add(context.Background(), "cat.png", []byte("image bytes"))
-	require.ErrorContains(t, err, "status 500")
+			store, err := newFileStore(fileStoreKubo, srv.URL, "", "")
+			require.NoError(t, err)
+
+			_, err = store.Add(context.Background(), "cat.png", []byte("image bytes"))
+			require.Error(t, err)
+			if tt.isFull {
+				require.ErrorIs(t, err, ErrStorageFull)
+			} else {
+				require.ErrorContains(t, err, tt.wantErr)
+			}
+		})
+	}
 }
 
 func TestPinataFileStoreAdd(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		require.Equal(t, http.MethodPost, r.Method)
-		require.Equal(t, "/pinning/pinFileToIPFS", r.URL.Path)
-		require.Equal(t, "Bearer jwt-token", r.Header.Get("Authorization"))
+		assert.Equal(t, http.MethodPost, r.Method)
+		assert.Equal(t, "/pinning/pinFileToIPFS", r.URL.Path)
+		assert.Equal(t, "Bearer jwt-token", r.Header.Get("Authorization"))
 
 		name, data := readMultipartFile(t, r)
-		require.Equal(t, "cat.png", name)
-		require.Equal(t, []byte("image bytes"), data)
+		assert.Equal(t, "cat.png", name)
+		assert.Equal(t, []byte("image bytes"), data)
 
 		var options map[string]any
-		require.NoError(t, json.Unmarshal([]byte(r.FormValue("pinataOptions")), &options))
-		require.Equal(t, map[string]any{"cidVersion": float64(1), "groupId": "group-id"}, options)
+		assert.NoError(t, json.Unmarshal([]byte(r.FormValue("pinataOptions")), &options))
+		assert.Equal(t, map[string]any{"cidVersion": float64(1), "groupId": "group-id"}, options)
 
 		_, _ = w.Write([]byte(`{"IpfsHash":"bafkreitest","PinSize":11}`))
 	}))
@@ -115,12 +189,16 @@ func (f *fakeFileStore) Add(_ context.Context, name string, data []byte) (string
 
 func TestCopyFiles(t *testing.T) {
 	kubo := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		require.Equal(t, "/api/v0/cat", r.URL.Path)
+		assert.Equal(t, "/api/v0/cat", r.URL.Path)
+		assert.Equal(t, "true", r.URL.Query().Get("offline"), "cat must not wait for the network")
 		switch cid := r.URL.Query().Get("arg"); cid {
-		case "cid-ok", "cid-mismatch", "cid-error":
+		case testCIDA, testCIDB, testCIDC:
 			_, _ = w.Write([]byte("content of " + cid))
+		case testCIDD:
+			http.Error(w, `{"Message":"block was not found locally (offline): ipld: could not find `+cid+`"}`, http.StatusInternalServerError)
 		default:
-			http.Error(w, `{"Message":"block was not found locally (offline)"}`, http.StatusInternalServerError)
+			t.Errorf("unexpected cat arg %q", cid)
+			http.Error(w, "unexpected", http.StatusBadRequest)
 		}
 	}))
 	defer kubo.Close()
@@ -128,24 +206,25 @@ func TestCopyFiles(t *testing.T) {
 
 	dst := &fakeFileStore{result: func(name string, _ []byte) (string, error) {
 		switch name {
-		case "cid-mismatch":
+		case testCIDB:
 			return "other-cid", nil
-		case "cid-error":
+		case testCIDC:
 			return "", errors.New("pinata down")
 		default:
 			return name, nil
 		}
 	}}
 
-	cids := []string{"cid-ok", "cid-mismatch", "cid-error", "cid-lost"}
+	// testCIDD is lost, "/ipns/example.com" is not a CID and must never reach kubo.
+	cids := []string{testCIDA, testCIDB, testCIDC, testCIDD, "/ipns/example.com"}
 	res := copyFiles(context.Background(), zap.NewNop(), cids, src, dst)
-	require.Equal(t, copyFilesResult{copied: 1, missing: 1, failed: 2}, res)
-	require.Equal(t, []byte("content of cid-ok"), dst.added["cid-ok"])
-	require.NotContains(t, dst.added, "cid-lost")
+	require.Equal(t, copyFilesResult{copied: 1, missing: 1, failed: 3}, res)
+	require.Equal(t, []byte("content of "+testCIDA), dst.added[testCIDA])
+	require.NotContains(t, dst.added, testCIDD)
 
 	// Dry run: no destination, only checks presence on the kubo node.
 	res = copyFiles(context.Background(), zap.NewNop(), cids, src, nil)
-	require.Equal(t, copyFilesResult{missing: 1}, res)
+	require.Equal(t, copyFilesResult{missing: 1, failed: 1}, res)
 }
 
 // TestKuboFileStoreIntegration runs against a real kubo node, for example the
@@ -178,7 +257,9 @@ func TestKuboFileStoreIntegration(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, data, got)
 
-	// The copy command reads the same file back from the node.
-	res := copyFiles(context.Background(), zap.NewNop(), []string{cid}, store.(*kuboFileStore), nil)
-	require.Equal(t, copyFilesResult{}, res)
+	// The copy command reads the same file back from the node, and reports a
+	// CID the node does not hold as missing, without waiting for the network.
+	lost := "bafkreigh2akiscaildcqabsyg3dfr6chu3fgpregiymsck7e7aqa4s52zy"
+	res := copyFiles(context.Background(), zap.NewNop(), []string{cid, lost}, store.(*kuboFileStore), nil)
+	require.Equal(t, copyFilesResult{missing: 1}, res)
 }

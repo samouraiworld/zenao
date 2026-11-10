@@ -98,6 +98,10 @@ jobs:
               sed -i 's|^ZENAO_PAID_EVENTS_ENABLED=.*|ZENAO_PAID_EVENTS_ENABLED=true|' backend.env || \
               echo 'ZENAO_PAID_EVENTS_ENABLED=true' >> backend.env
 
-            docker compose -f staging.docker-compose.yml up -d --wait otel-collector jaeger ipfs
+            docker compose -f staging.docker-compose.yml up -d --wait otel-collector jaeger
             git restore staging.docker-compose.yml
             docker compose -f staging.docker-compose.yml up -d --build backend
+
+            # IPFS node for file uploads, started after the backend leaves
+            # maintenance mode: if it fails, only uploads are affected.
+            docker compose -f staging.docker-compose.yml up -d --wait ipfs

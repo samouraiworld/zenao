@@ -305,10 +305,32 @@ func embedImageURL(pdf *fpdf.Fpdf, imageURI string, x, y, width, height float64)
 		return fmt.Errorf("failed to copy image data: %w", err)
 	}
 
-	pdf.ImageOptions(imgFile.Name(), x, y, width, height, false, fpdf.ImageOptions{
-		ReadDpi:               true,
-		AllowNegativePosition: false,
-	}, 0, "")
+	opts := fpdf.ImageOptions{
+		ReadDpi: true,
+		// The cropped image may start left of the page edge; the clip hides it.
+		AllowNegativePosition: true,
+	}
+	info := pdf.RegisterImageOptions(imgFile.Name(), opts)
+	if pdf.Err() {
+		return fmt.Errorf("failed to register image: %w", pdf.Error())
+	}
+	if info == nil || info.Width() <= 0 || info.Height() <= 0 {
+		return fmt.Errorf("failed to register image: invalid size")
+	}
+
+	// Fill the box and crop the overflow ("cover"), so that images with
+	// another aspect ratio are not stretched. The gateway serves originals.
+	drawW, drawH := coverSize(info.Width(), info.Height(), width, height)
+	pdf.ClipRect(x, y, width, height, false)
+	pdf.ImageOptions(imgFile.Name(), x+(width-drawW)/2, y+(height-drawH)/2, drawW, drawH, false, opts, 0, "")
+	pdf.ClipEnd()
 
 	return nil
+}
+
+// coverSize returns the size of an imgW x imgH image scaled to cover a
+// boxW x boxH box while keeping its aspect ratio.
+func coverSize(imgW, imgH, boxW, boxH float64) (float64, float64) {
+	scale := max(boxW/imgW, boxH/imgH)
+	return imgW * scale, imgH * scale
 }

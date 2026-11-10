@@ -13,8 +13,12 @@ import (
 	"strings"
 	"time"
 
+	"github.com/ipfs/go-cid"
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 )
+
+// ErrStorageFull is returned by FileStore.Add when the store has no room left.
+var ErrStorageFull = errors.New("file storage is full")
 
 // FileStore adds a file to IPFS, pins it and returns its CID.
 //
@@ -28,6 +32,9 @@ type FileStore interface {
 const (
 	fileStoreKubo   = "kubo"
 	fileStorePinata = "pinata"
+
+	// defaultIPFSAPIURL is the kubo RPC API of dev.docker-compose.yml.
+	defaultIPFSAPIURL = "http://127.0.0.1:5001"
 
 	// defaultPinataAPIURL is the Pinata pinning API used by the former
 	// pinata-web3 SDK; it produces the same CIDs as kuboAddParams.
@@ -80,6 +87,10 @@ type kuboFileStore struct {
 var _ FileStore = (*kuboFileStore)(nil)
 
 func (k *kuboFileStore) Add(ctx context.Context, name string, data []byte) (string, error) {
+	if err := k.checkSpace(ctx, len(data)); err != nil {
+		return "", err
+	}
+
 	body, contentType, err := multipartFile(name, data, nil)
 	if err != nil {
 		return "", err
@@ -102,21 +113,77 @@ func (k *kuboFileStore) Add(ctx context.Context, name string, data []byte) (stri
 		return "", fmt.Errorf("kubo add: status %d: %s", resp.StatusCode, strings.TrimSpace(string(msg)))
 	}
 
-	var res struct {
-		Hash string `json:"Hash"`
+	// kubo streams the result and reports late errors (for example a failed
+	// pin) in the X-Stream-Error trailer, available once the body is read.
+	raw, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return "", fmt.Errorf("kubo add: read response: %w", err)
 	}
-	if err := json.NewDecoder(resp.Body).Decode(&res); err != nil {
-		return "", fmt.Errorf("kubo add: decode response: %w", err)
+	if streamErr := resp.Trailer.Get("X-Stream-Error"); streamErr != "" {
+		return "", fmt.Errorf("kubo add: %s", streamErr)
 	}
-	if res.Hash == "" {
+
+	// One JSON object per added entry; the last one is the root.
+	var hash string
+	dec := json.NewDecoder(bytes.NewReader(raw))
+	for dec.More() {
+		var res struct {
+			Hash string `json:"Hash"`
+		}
+		if err := dec.Decode(&res); err != nil {
+			return "", fmt.Errorf("kubo add: decode response: %w", err)
+		}
+		hash = res.Hash
+	}
+	if hash == "" {
 		return "", errors.New("kubo add: empty CID in response")
 	}
-	return res.Hash, nil
+	return hash, nil
 }
 
-// Cat returns the content of a file stored on the kubo node.
-func (k *kuboFileStore) Cat(ctx context.Context, cid string) ([]byte, error) {
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, k.apiURL+"/api/v0/cat?"+url.Values{"arg": {cid}}.Encode(), nil)
+// checkSpace returns ErrStorageFull when adding size bytes would exceed the
+// Datastore.StorageMax of the node.
+func (k *kuboFileStore) checkSpace(ctx context.Context, size int) error {
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, k.apiURL+"/api/v0/repo/stat?size-only=true", nil)
+	if err != nil {
+		return err
+	}
+	resp, err := k.client.Do(req)
+	if err != nil {
+		return fmt.Errorf("kubo repo stat: %w", err)
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		msg, _ := io.ReadAll(io.LimitReader(resp.Body, 1024))
+		return fmt.Errorf("kubo repo stat: status %d: %s", resp.StatusCode, strings.TrimSpace(string(msg)))
+	}
+
+	var stat struct {
+		RepoSize   uint64 `json:"RepoSize"`
+		StorageMax uint64 `json:"StorageMax"`
+	}
+	if err := json.NewDecoder(resp.Body).Decode(&stat); err != nil {
+		return fmt.Errorf("kubo repo stat: decode response: %w", err)
+	}
+	if stat.StorageMax > 0 && stat.RepoSize+uint64(size) > stat.StorageMax {
+		return ErrStorageFull
+	}
+	return nil
+}
+
+// errNotOnNode is returned by Cat when the node does not hold the file.
+var errNotOnNode = errors.New("not on the kubo node")
+
+// Cat returns the content of a file stored on the kubo node. It only reads
+// local blocks: it never waits for the network.
+func (k *kuboFileStore) Cat(ctx context.Context, c string) ([]byte, error) {
+	parsed, err := cid.Decode(c)
+	if err != nil {
+		return nil, fmt.Errorf("invalid CID %q: %w", c, err)
+	}
+
+	query := url.Values{"arg": {parsed.String()}, "offline": {"true"}}
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, k.apiURL+"/api/v0/cat?"+query.Encode(), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -129,9 +196,19 @@ func (k *kuboFileStore) Cat(ctx context.Context, cid string) ([]byte, error) {
 
 	if resp.StatusCode != http.StatusOK {
 		msg, _ := io.ReadAll(io.LimitReader(resp.Body, 1024))
+		if strings.Contains(string(msg), "not found locally") {
+			return nil, errNotOnNode
+		}
 		return nil, fmt.Errorf("kubo cat: status %d: %s", resp.StatusCode, strings.TrimSpace(string(msg)))
 	}
-	return io.ReadAll(resp.Body)
+	data, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, fmt.Errorf("kubo cat: read response: %w", err)
+	}
+	if streamErr := resp.Trailer.Get("X-Stream-Error"); streamErr != "" {
+		return nil, fmt.Errorf("kubo cat: %s", streamErr)
+	}
+	return data, nil
 }
 
 // pinataFileStore adds files to Pinata. It is kept so that Zenao can move

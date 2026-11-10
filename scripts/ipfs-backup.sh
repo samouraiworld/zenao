@@ -40,6 +40,17 @@ ipfs() {
 
 mkdir -p "$backup_dir/cars"
 
+# List the pins first: a failure inside a process substitution would go
+# unnoticed and the script would report an empty, successful backup.
+if ! pins="$(ipfs pin ls --type=recursive --quiet </dev/null)"; then
+  echo "$(date -u +%FT%TZ) ERROR: cannot list pins on the IPFS node" >&2
+  exit 1
+fi
+if [[ -z "$pins" ]]; then
+  echo "$(date -u +%FT%TZ) ERROR: the IPFS node has no pins; refusing to continue" >&2
+  exit 1
+fi
+
 exported=0
 total=0
 while read -r cid; do
@@ -53,7 +64,7 @@ while read -r cid; do
   ipfs dag export "$cid" </dev/null >"$car.tmp"
   mv "$car.tmp" "$car"
   exported=$((exported + 1))
-done < <(ipfs pin ls --type=recursive --quiet)
+done <<<"$pins"
 
 echo "$(date -u +%FT%TZ) pinned CIDs: $total, newly exported: $exported, backup dir: $backup_dir/cars"
 

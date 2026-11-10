@@ -26,6 +26,12 @@ ipfs config --json Provide.Enabled false
 # so it cannot be used as an open public gateway.
 ipfs config --json Gateway.NoFetch true
 ipfs config --json Gateway.ExposeRoutingAPI false
+# Serve /ipfs/<cid> paths only: never resolve the Host header as DNSLink.
+ipfs config --json Gateway.NoDNSLink true
+
+# Storage cap. The Zenao backend refuses uploads (HTTP 507) once the repo
+# reaches it. Set ZENAO_IPFS_STORAGE_MAX in the compose project .env file.
+ipfs config Datastore.StorageMax "${ZENAO_IPFS_STORAGE_MAX:-20GB}"
 
 # Listen on all container interfaces. The compose files publish only the
 # gateway, on the host loopback; the RPC API stays on the Docker network.

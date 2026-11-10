@@ -85,7 +85,7 @@ func (conf *config) RegisterFlags(flset *flag.FlagSet) {
 	flset.StringVar(&conf.stripeSecretKey, "stripe-secret-key", "", "Stripe secret key")
 	flset.BoolVar(&conf.paidEventsEnabled, "paid-events", false, "Enable paid events feature")
 	flset.StringVar(&conf.fileStore, "file-store", fileStoreKubo, "Where uploaded files are stored: kubo or pinata")
-	flset.StringVar(&conf.ipfsAPIURL, "ipfs-api-url", "http://127.0.0.1:5001", "kubo RPC API URL, never exposed publicly (file-store kubo)")
+	flset.StringVar(&conf.ipfsAPIURL, "ipfs-api-url", defaultIPFSAPIURL, "kubo RPC API URL, never exposed publicly (file-store kubo)")
 	flset.StringVar(&conf.ipfsGatewayURL, "ipfs-gateway-url", defaultIPFSGatewayURL, "Public IPFS gateway URL used to render ipfs:// URIs")
 	flset.StringVar(&conf.pinataJWT, "pinata-jwt", "", "Pinata API JWT (file-store pinata)")
 	flset.StringVar(&conf.pinataGroup, "pinata-group", "", "Optional Pinata group ID (file-store pinata)")

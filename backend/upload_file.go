@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/samouraiworld/zenao/backend/zeni"
@@ -22,6 +23,10 @@ const (
 
 	// maxUploadRequestSize leaves room for the multipart envelope.
 	maxUploadRequestSize = maxUploadFileSize + 64<<10
+
+	// dailyUploadQuota is the number of bytes one user can upload per day.
+	// Uploaded files are kept forever: this bounds what one account can store.
+	dailyUploadQuota = 100 << 20
 )
 
 // uploadFileHandler stores a file on IPFS for an authenticated, non-banned
@@ -33,6 +38,7 @@ type uploadFileHandler struct {
 	store       FileStore
 	maintenance bool
 	limiter     *RateLimiter
+	quota       *uploadQuota
 }
 
 var _ http.Handler = (*uploadFileHandler)(nil)
@@ -45,6 +51,7 @@ func newUploadFileHandler(logger *zap.Logger, auth zeni.Auth, store FileStore, m
 		maintenance: maintenance,
 		// Per-user limit: one upload every 2 seconds on average, bursts of 10.
 		limiter: NewRateLimiter(0.5, 10, 10*time.Minute),
+		quota:   newUploadQuota(dailyUploadQuota, 24*time.Hour),
 	}
 }
 
@@ -107,8 +114,19 @@ func (h *uploadFileHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if !h.quota.reserve(user.ID, int64(len(data))) {
+		writeUploadError(w, http.StatusTooManyRequests, "Daily Upload Quota Exceeded")
+		return
+	}
+
 	cid, err := h.store.Add(r.Context(), header.Filename, data)
 	if err != nil {
+		h.quota.release(user.ID, int64(len(data)))
+		if errors.Is(err, ErrStorageFull) {
+			h.logger.Error("upload-file: storage full", zap.String("user-id", user.ID))
+			writeUploadError(w, http.StatusInsufficientStorage, "Storage Full")
+			return
+		}
 		h.logger.Error("upload-file", zap.String("user-id", user.ID), zap.Error(err))
 		writeUploadError(w, http.StatusInternalServerError, "Internal Server Error")
 		return
@@ -126,4 +144,59 @@ func writeUploadJSON(w http.ResponseWriter, status int, body any) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
 	_ = json.NewEncoder(w).Encode(body)
+}
+
+// uploadQuota limits the bytes each user can upload in a fixed window that
+// starts at the user's first upload. It is kept in memory.
+type uploadQuota struct {
+	mu     sync.Mutex
+	limit  int64
+	window time.Duration
+	usage  map[string]*quotaUsage
+	now    func() time.Time
+}
+
+type quotaUsage struct {
+	start time.Time
+	bytes int64
+}
+
+func newUploadQuota(limit int64, window time.Duration) *uploadQuota {
+	return &uploadQuota{limit: limit, window: window, usage: map[string]*quotaUsage{}, now: time.Now}
+}
+
+// reserve records n bytes for userID and reports whether they fit in the quota.
+func (q *uploadQuota) reserve(userID string, n int64) bool {
+	q.mu.Lock()
+	defer q.mu.Unlock()
+
+	now := q.now()
+	if len(q.usage) > 10000 {
+		for id, u := range q.usage {
+			if now.Sub(u.start) >= q.window {
+				delete(q.usage, id)
+			}
+		}
+	}
+
+	u := q.usage[userID]
+	if u == nil || now.Sub(u.start) >= q.window {
+		u = &quotaUsage{start: now}
+		q.usage[userID] = u
+	}
+	if u.bytes+n > q.limit {
+		return false
+	}
+	u.bytes += n
+	return true
+}
+
+// release gives back n bytes reserved for userID, after a failed upload.
+func (q *uploadQuota) release(userID string, n int64) {
+	q.mu.Lock()
+	defer q.mu.Unlock()
+
+	if u := q.usage[userID]; u != nil {
+		u.bytes = max(0, u.bytes-n)
+	}
 }

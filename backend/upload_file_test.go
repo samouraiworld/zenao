@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 
 	"github.com/samouraiworld/zenao/backend/zeni"
 	"github.com/stretchr/testify/require"
@@ -106,12 +107,27 @@ func TestUploadFileRejections(t *testing.T) {
 			wantCode: http.StatusRequestEntityTooLarge,
 		},
 		{
+			name: "request body over the request limit",
+			user: user,
+			req: func(t *testing.T) *http.Request {
+				return uploadRequest(t, "file", append(pngHeader, make([]byte, maxUploadRequestSize)...))
+			},
+			wantCode: http.StatusRequestEntityTooLarge,
+		},
+		{
 			name: "html file",
 			user: user,
 			req: func(t *testing.T) *http.Request {
 				return uploadRequest(t, "file", []byte("<!DOCTYPE html><html><body>login</body></html>"))
 			},
 			wantCode: http.StatusUnsupportedMediaType,
+		},
+		{
+			name:     "storage full",
+			user:     user,
+			store:    &fakeFileStore{result: func(string, []byte) (string, error) { return "", ErrStorageFull }},
+			req:      func(t *testing.T) *http.Request { return uploadRequest(t, "file", pngHeader) },
+			wantCode: http.StatusInsufficientStorage,
 		},
 		{
 			name:     "store error",
@@ -148,4 +164,41 @@ func TestUploadFileRateLimit(t *testing.T) {
 	}
 	require.Equal(t, 10, codes[http.StatusOK])
 	require.Equal(t, 5, codes[http.StatusTooManyRequests])
+}
+
+func TestUploadFileDailyQuota(t *testing.T) {
+	failing := true
+	store := &fakeFileStore{result: func(string, []byte) (string, error) {
+		if failing {
+			return "", errors.New("kubo down")
+		}
+		return "bafkreitest", nil
+	}}
+	h := newUploadFileHandler(zap.NewNop(), &stubAuth{user: &zeni.AuthUser{ID: "user-1"}}, store, false)
+	now := time.Unix(0, 0)
+	h.quota = newUploadQuota(int64(2*len(pngHeader)), time.Hour)
+	h.quota.now = func() time.Time { return now }
+
+	// A failed upload does not use the quota.
+	code, _ := serveUpload(h, uploadRequest(t, "file", pngHeader))
+	require.Equal(t, http.StatusInternalServerError, code)
+
+	failing = false
+	for range 2 {
+		code, _ = serveUpload(h, uploadRequest(t, "file", pngHeader))
+		require.Equal(t, http.StatusOK, code)
+	}
+	code, body := serveUpload(h, uploadRequest(t, "file", pngHeader))
+	require.Equal(t, http.StatusTooManyRequests, code)
+	require.Equal(t, "Daily Upload Quota Exceeded", body["error"])
+
+	// Another user has its own quota; the window resets after its duration.
+	other := newUploadFileHandler(zap.NewNop(), &stubAuth{user: &zeni.AuthUser{ID: "user-2"}}, store, false)
+	other.quota = h.quota
+	code, _ = serveUpload(other, uploadRequest(t, "file", pngHeader))
+	require.Equal(t, http.StatusOK, code)
+
+	now = now.Add(time.Hour)
+	code, _ = serveUpload(h, uploadRequest(t, "file", pngHeader))
+	require.Equal(t, http.StatusOK, code)
 }

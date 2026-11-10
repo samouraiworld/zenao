@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"flag"
 	"fmt"
 	"os"
@@ -43,7 +44,7 @@ type copyIPFSFilesConfig struct {
 
 func (conf *copyIPFSFilesConfig) RegisterFlags(flset *flag.FlagSet) {
 	flset.StringVar(&conf.dbPath, "db", "dev.db", "path to the SQLite database or a libsql DSN (libsql://...?authToken=...)")
-	flset.StringVar(&conf.ipfsAPIURL, "ipfs-api-url", "http://127.0.0.1:5001", "kubo RPC API URL (or set ZENAO_IPFS_API_URL env var)")
+	flset.StringVar(&conf.ipfsAPIURL, "ipfs-api-url", defaultIPFSAPIURL, "kubo RPC API URL (or set ZENAO_IPFS_API_URL env var)")
 	flset.StringVar(&conf.pinataJWT, "pinata-jwt", "", "Pinata API JWT (or set ZENAO_PINATA_JWT env var)")
 	flset.StringVar(&conf.pinataGroup, "pinata-group", "", "optional Pinata group ID (or set ZENAO_PINATA_GROUP env var)")
 	flset.BoolVar(&conf.dryRun, "dry-run", false, "list CIDs and check they are on the kubo node, without uploading")
@@ -54,13 +55,14 @@ func copyIPFSFiles(ctx context.Context) error {
 	if val := os.Getenv("ZENAO_DB"); val != "" && conf.dbPath == "dev.db" {
 		conf.dbPath = val
 	}
-	if val := os.Getenv("ZENAO_IPFS_API_URL"); val != "" {
+	// Environment variables apply only when the flag is not set.
+	if val := os.Getenv("ZENAO_IPFS_API_URL"); val != "" && conf.ipfsAPIURL == defaultIPFSAPIURL {
 		conf.ipfsAPIURL = val
 	}
-	if val := os.Getenv("ZENAO_PINATA_JWT"); val != "" {
+	if val := os.Getenv("ZENAO_PINATA_JWT"); val != "" && conf.pinataJWT == "" {
 		conf.pinataJWT = val
 	}
-	if val := os.Getenv("ZENAO_PINATA_GROUP"); val != "" {
+	if val := os.Getenv("ZENAO_PINATA_GROUP"); val != "" && conf.pinataGroup == "" {
 		conf.pinataGroup = val
 	}
 	if !conf.dryRun && conf.pinataJWT == "" {
@@ -117,14 +119,20 @@ type copyFilesResult struct {
 
 // copyFiles reads each CID from the kubo node and adds it to dst. A nil dst
 // only checks that the CIDs are on the kubo node. CIDs that the kubo node does
-// not hold (files lost with the former Pinata account) are counted as missing.
+// not hold (files lost with the former Pinata account) are counted as missing
+// and do not fail the copy: they are missing on both sides.
 func copyFiles(ctx context.Context, logger *zap.Logger, cids []string, src *kuboFileStore, dst FileStore) copyFilesResult {
 	var res copyFilesResult
 	for _, cid := range cids {
 		data, err := src.Cat(ctx, cid)
-		if err != nil {
-			logger.Warn("not on the kubo node", zap.String("cid", cid), zap.Error(err))
+		if errors.Is(err, errNotOnNode) {
+			logger.Warn("not on the kubo node", zap.String("cid", cid))
 			res.missing++
+			continue
+		}
+		if err != nil {
+			logger.Error("failed to read from the kubo node", zap.String("cid", cid), zap.Error(err))
+			res.failed++
 			continue
 		}
 		if dst == nil {
