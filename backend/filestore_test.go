@@ -267,6 +267,6 @@ func TestKuboFileStoreIntegration(t *testing.T) {
 
 func TestExtractIPFSCIDs(t *testing.T) {
 	text := "Intro ![cover](ipfs://" + testCIDA + ") and [audio](ipfs://" + testCIDB + ")\n" +
-		`{"uri":"ipfs://` + testCIDC + `"}` + " ipfs://" + testCIDD + "\\n"
+		`{"uri":"ipfs://` + testCIDC + `"}` + " ipfs://hello ipfs://" + testCIDD + "\\n"
 	require.Equal(t, []string{testCIDA, testCIDB, testCIDC, testCIDD}, extractIPFSCIDs(text))
 }

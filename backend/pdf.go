@@ -264,6 +264,10 @@ func embedImageURL(pdf *fpdf.Fpdf, imageURI string, x, y, width, height float64)
 		return err
 	}
 
+	if pdf.Err() {
+		// An earlier error is not ours to clear.
+		return fmt.Errorf("pdf already failed: %w", pdf.Error())
+	}
 	opts := fpdf.ImageOptions{ImageType: "JPG"}
 	info := pdf.RegisterImageOptionsReader(imageURI, opts, bytes.NewReader(img))
 	if pdf.Err() || info == nil {

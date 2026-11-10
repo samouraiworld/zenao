@@ -51,6 +51,13 @@ manifest="$backup_dir/exported.txt"
 mkdir -p "$cars_dir"
 touch "$manifest"
 
+# One run at a time: a slow run must not race with the next cron run.
+exec 9>"$backup_dir/.lock"
+if ! flock -n 9; then
+  log "another backup run is in progress; skipping"
+  exit 0
+fi
+
 # List the pins first: a failure inside a process substitution would go
 # unnoticed and the script would report an empty, successful backup.
 if ! pins="$(ipfs pin ls --type=recursive --quiet </dev/null)"; then

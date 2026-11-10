@@ -12,6 +12,8 @@ import (
 	"net/http"
 	"sync"
 	"time"
+
+	"golang.org/x/sync/singleflight"
 )
 
 const (
@@ -25,6 +27,10 @@ const (
 	// maxTicketImageDownload bounds the download of the original image.
 	maxTicketImageDownload = 20 << 20
 
+	// maxTicketImagePixels bounds the decoded size: a small compressed file
+	// can declare huge dimensions (decompression bomb).
+	maxTicketImagePixels = 30_000_000
+
 	// maxTicketImageCacheEntries bounds the processed image cache (about
 	// 100 KiB per entry).
 	maxTicketImageCacheEntries = 64
@@ -37,6 +43,10 @@ var (
 	// tickets for the same event, and ipfs:// images never change.
 	ticketImageCacheMu sync.Mutex
 	ticketImageCache   = map[string][]byte{}
+
+	// ticketImageGroup makes concurrent requests for the same URL share one
+	// download and decode.
+	ticketImageGroup singleflight.Group
 )
 
 // ticketImage downloads the image at imageURL and returns it as a 1280x720
@@ -49,6 +59,16 @@ func ticketImage(imageURL string) ([]byte, error) {
 		return cached, nil
 	}
 
+	img, err, _ := ticketImageGroup.Do(imageURL, func() (any, error) {
+		return fetchTicketImage(imageURL)
+	})
+	if err != nil {
+		return nil, err
+	}
+	return img.([]byte), nil
+}
+
+func fetchTicketImage(imageURL string) ([]byte, error) {
 	resp, err := ticketImageClient.Get(imageURL)
 	if err != nil {
 		return nil, fmt.Errorf("failed to download image: %w", err)
@@ -82,6 +102,14 @@ func ticketImage(imageURL string) ([]byte, error) {
 // coverJPEG decodes a JPEG, PNG or GIF image, crops it around its center to
 // the w:h aspect ratio, scales it to w x h and encodes it as JPEG.
 func coverJPEG(data []byte, w, h, quality int) ([]byte, error) {
+	cfg, _, err := image.DecodeConfig(bytes.NewReader(data))
+	if err != nil {
+		return nil, fmt.Errorf("unsupported image: %w", err)
+	}
+	if cfg.Width <= 0 || cfg.Height <= 0 || int64(cfg.Width)*int64(cfg.Height) > maxTicketImagePixels {
+		return nil, fmt.Errorf("unsupported image size %dx%d", cfg.Width, cfg.Height)
+	}
+
 	src, _, err := image.Decode(bytes.NewReader(data))
 	if err != nil {
 		return nil, fmt.Errorf("unsupported image: %w", err)

@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/gnolang/gno/tm2/pkg/commands"
+	"github.com/ipfs/go-cid"
 	"go.uber.org/zap"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
@@ -161,11 +162,14 @@ func copyFiles(ctx context.Context, logger *zap.Logger, cids []string, src *kubo
 // strings do not leak into the CID.
 var ipfsURIRe = regexp.MustCompile(`ipfs://([A-Za-z0-9]+)`)
 
-// extractIPFSCIDs returns the CIDs of the ipfs:// URIs found in text.
+// extractIPFSCIDs returns the valid CIDs of the ipfs:// URIs found in text.
+// Free text can hold ipfs:// strings that are not CIDs: they are skipped.
 func extractIPFSCIDs(text string) []string {
 	var cids []string
 	for _, m := range ipfsURIRe.FindAllStringSubmatch(text, -1) {
-		cids = append(cids, m[1])
+		if _, err := cid.Decode(m[1]); err == nil {
+			cids = append(cids, m[1])
+		}
 	}
 	return cids
 }

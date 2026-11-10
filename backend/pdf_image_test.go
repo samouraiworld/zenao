@@ -2,6 +2,8 @@ package main
 
 import (
 	"bytes"
+	"encoding/binary"
+	"hash/crc32"
 	"image"
 	"image/color"
 	"image/jpeg"
@@ -59,4 +61,17 @@ func TestCoverJPEG(t *testing.T) {
 
 	_, err = coverJPEG([]byte("<svg></svg>"), 16, 9, 75)
 	require.ErrorContains(t, err, "unsupported image")
+
+	// A tiny PNG header that declares 100000x100000 pixels is refused before
+	// decoding.
+	bomb := image.NewGray(image.Rect(0, 0, 1, 1))
+	var bombPNG bytes.Buffer
+	require.NoError(t, png.Encode(&bombPNG, bomb))
+	raw := bombPNG.Bytes()
+	// IHDR width and height are bytes 16-23 of a PNG file; its CRC covers
+	// bytes 12-28 and is stored in bytes 29-32.
+	copy(raw[16:24], []byte{0, 1, 0x86, 0xa0, 0, 1, 0x86, 0xa0})
+	binary.BigEndian.PutUint32(raw[29:33], crc32.ChecksumIEEE(raw[12:29]))
+	_, err = coverJPEG(raw, 16, 9, 75)
+	require.ErrorContains(t, err, "unsupported image size 100000x100000")
 }
