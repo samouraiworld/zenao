@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/ipfs/go-cid"
@@ -82,11 +83,18 @@ func newFileStore(kind, kuboAPIURL, pinataJWT, pinataGroup string) (FileStore, e
 type kuboFileStore struct {
 	apiURL string
 	client *http.Client
+
+	// addMu makes the free-space check and the add one step, so that
+	// concurrent uploads cannot all pass the check and overshoot StorageMax.
+	addMu sync.Mutex
 }
 
 var _ FileStore = (*kuboFileStore)(nil)
 
 func (k *kuboFileStore) Add(ctx context.Context, name string, data []byte) (string, error) {
+	k.addMu.Lock()
+	defer k.addMu.Unlock()
+
 	if err := k.checkSpace(ctx, len(data)); err != nil {
 		return "", err
 	}
@@ -110,6 +118,9 @@ func (k *kuboFileStore) Add(ctx context.Context, name string, data []byte) (stri
 
 	if resp.StatusCode != http.StatusOK {
 		msg, _ := io.ReadAll(io.LimitReader(resp.Body, 1024))
+		if strings.Contains(string(msg), "no space left on device") {
+			return "", ErrStorageFull
+		}
 		return "", fmt.Errorf("kubo add: status %d: %s", resp.StatusCode, strings.TrimSpace(string(msg)))
 	}
 
@@ -120,6 +131,9 @@ func (k *kuboFileStore) Add(ctx context.Context, name string, data []byte) (stri
 		return "", fmt.Errorf("kubo add: read response: %w", err)
 	}
 	if streamErr := resp.Trailer.Get("X-Stream-Error"); streamErr != "" {
+		if strings.Contains(streamErr, "no space left on device") {
+			return "", ErrStorageFull
+		}
 		return "", fmt.Errorf("kubo add: %s", streamErr)
 	}
 

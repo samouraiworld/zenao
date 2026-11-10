@@ -146,7 +146,7 @@ func copyFiles(ctx context.Context, logger *zap.Logger, cids []string, src *kubo
 		case err != nil:
 			logger.Error("failed to copy", zap.String("cid", cid), zap.Error(err))
 			res.failed++
-		case got != cid:
+		case !sameCID(got, cid):
 			logger.Error("copied with a different CID", zap.String("cid", cid), zap.String("got", got))
 			res.failed++
 		default:
@@ -161,6 +161,17 @@ func copyFiles(ctx context.Context, logger *zap.Logger, cids []string, src *kubo
 // characters only, so that markdown such as ![x](ipfs://<cid>) or JSON
 // strings do not leak into the CID.
 var ipfsURIRe = regexp.MustCompile(`ipfs://([A-Za-z0-9]+)`)
+
+// sameCID reports whether a and b are the same content, whatever their CID
+// version or multibase encoding.
+func sameCID(a, b string) bool {
+	ca, errA := cid.Decode(a)
+	cb, errB := cid.Decode(b)
+	if errA != nil || errB != nil {
+		return a == b
+	}
+	return cid.NewCidV1(ca.Type(), ca.Hash()).Equals(cid.NewCidV1(cb.Type(), cb.Hash()))
+}
 
 // extractIPFSCIDs returns the valid CIDs of the ipfs:// URIs found in text.
 // Free text can hold ipfs:// strings that are not CIDs: they are skipped.
@@ -238,7 +249,12 @@ func collectAllIPFSCIDs(db *gorm.DB) ([]string, error) {
 		if err := rows.Scan(&uri); err != nil {
 			return nil, err
 		}
-		seen[strings.TrimPrefix(uri, "ipfs://")] = struct{}{}
+		// Keep the CID only: drop a "/path", "?query" or "#fragment" suffix.
+		c := strings.TrimPrefix(uri, "ipfs://")
+		if i := strings.IndexAny(c, "/?#"); i >= 0 {
+			c = c[:i]
+		}
+		seen[c] = struct{}{}
 	}
 	if err := rows.Err(); err != nil {
 		return nil, err

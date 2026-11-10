@@ -78,6 +78,11 @@ exported=0
 total=0
 while read -r cid; do
   [[ -n "$cid" ]] || continue
+  # The CID becomes a file name: accept CID characters only.
+  if [[ ! "$cid" =~ ^[A-Za-z0-9]+$ ]]; then
+    log "ERROR: unexpected pin name from the IPFS node: $cid" >&2
+    exit 1
+  fi
   total=$((total + 1))
   car="$cars_dir/$cid.car"
   if [[ -n "${backed_up[$cid]:-}" || -s "$car" ]]; then

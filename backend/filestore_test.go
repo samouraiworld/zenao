@@ -104,6 +104,17 @@ func TestKuboFileStoreAddErrors(t *testing.T) {
 			wantErr: "pin failed",
 		},
 		{
+			name: "disk full reported by kubo",
+			handler: func(w http.ResponseWriter, r *http.Request) {
+				if r.URL.Path == "/api/v0/repo/stat" {
+					writeRepoStat(w, 0, 1<<30)
+					return
+				}
+				http.Error(w, `{"Message":"write /data/ipfs/blocks/x: no space left on device"}`, http.StatusInternalServerError)
+			},
+			isFull: true,
+		},
+		{
 			name: "storage full",
 			handler: func(w http.ResponseWriter, r *http.Request) {
 				if r.URL.Path == "/api/v0/repo/stat" {
@@ -263,6 +274,16 @@ func TestKuboFileStoreIntegration(t *testing.T) {
 	lost := "bafkreigh2akiscaildcqabsyg3dfr6chu3fgpregiymsck7e7aqa4s52zy"
 	res := copyFiles(context.Background(), zap.NewNop(), []string{cid, lost}, store.(*kuboFileStore), nil)
 	require.Equal(t, copyFilesResult{missing: 1}, res)
+}
+
+func TestSameCID(t *testing.T) {
+	// Same content: CIDv0 and its CIDv1 (dag-pb) in base32 and base58.
+	v0 := "QmUNLLsPACCz1vLxQVkXqqLX5R1X345qqfHbsf67hvA3Nn"
+	v1 := "bafybeiczsscdsbs7ffqz55asqdf3smv6klcw3gofszvwlyarci47bgf354"
+	require.True(t, sameCID(v0, v1))
+	require.True(t, sameCID(testCIDA, testCIDA))
+	require.False(t, sameCID(testCIDA, testCIDB))
+	require.False(t, sameCID("not-a-cid", testCIDA))
 }
 
 func TestExtractIPFSCIDs(t *testing.T) {

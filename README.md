@@ -339,10 +339,12 @@ server {
     server_name ipfs.zenao.io pinata.zenao.io;
 
     # Read-only access to /ipfs/<cid> only. No /ipns/, no RPC API.
-    location /ipfs/ {
+    # The regex runs on the decoded path: it refuses "?", "/", "%", spaces
+    # and CR/LF, so only a CID reaches kubo. A query string (dropped here) or
+    # an encoded "%3F" could carry ?filename=x.html, which makes kubo serve
+    # any file as text/html.
+    location ~ "^/ipfs/[A-Za-z0-9]+$" {
         limit_except GET HEAD { deny all; }
-        # $uri drops the query string: kubo gateway parameters such as
-        # ?filename=x.html would let it serve any file as text/html.
         proxy_pass http://127.0.0.1:8080$uri;
         proxy_set_header Host $host;
         proxy_set_header X-Forwarded-Proto $scheme;
@@ -441,6 +443,9 @@ RCLONE_CONFIG_SCW_ACCESS_KEY_ID=<access key>
 RCLONE_CONFIG_SCW_SECRET_ACCESS_KEY=<secret key>
 ```
 
+The script only needs to write: give the Scaleway key access to this bucket only, without delete,
+and turn on bucket versioning, so that a compromised server cannot erase the backups.
+
 Run it once by hand, then add an hourly cron entry (`crontab -e`). The script exits with a non-zero
 status and an `ERROR` line in the log when the node or the bucket is unreachable:
 
@@ -454,10 +459,20 @@ import them:
 ```bash
 mkdir -p /root/ipfs-restore
 docker run --rm --env-file /root/ipfs-backup.env -v /root/ipfs-restore:/restore \
-  rclone/rclone:1.75.2 copy scw:<bucket>/prod /restore
+  rclone/rclone:1.75.2@sha256:2687085f718d3c628f7fdfb77c52a1d344332aed543110bb88088f2c70d43eb5 \
+  copy scw:<bucket>/prod /restore
 for car in /root/ipfs-restore/*.car; do
   docker compose -f prod.backend.docker-compose.yml exec -T ipfs ipfs dag import --pin-roots < "$car"
 done
+```
+
+**Upgrading kubo.** `ipfs/zenao-config.sh` runs `ipfs config` before the daemon starts, so a new
+kubo version that changes the repo format would fail to start until the repo is migrated. Before
+changing the image in the compose files, migrate the repo with the new image, then deploy:
+
+```bash
+docker compose -f prod.backend.docker-compose.yml stop ipfs
+docker compose -f prod.backend.docker-compose.yml run --rm --no-deps --entrypoint ipfs ipfs repo migrate
 ```
 
 **7. Environment variables.**

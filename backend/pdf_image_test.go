@@ -8,6 +8,8 @@ import (
 	"image/color"
 	"image/jpeg"
 	"image/png"
+	"net/http"
+	"net/http/httptest"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -46,6 +48,34 @@ func TestCoverResizeTransparentAndTiny(t *testing.T) {
 	one.SetRGBA(0, 0, color.RGBA{R: 10, G: 20, B: 30, A: 255})
 	dst = coverResize(one, 16, 9)
 	require.Equal(t, color.RGBA{R: 10, G: 20, B: 30, A: 255}, dst.RGBAAt(15, 8))
+}
+
+func TestTicketImageCachesGatewayFilesOnly(t *testing.T) {
+	var pngData bytes.Buffer
+	require.NoError(t, png.Encode(&pngData, image.NewRGBA(image.Rect(0, 0, 32, 18))))
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		_, _ = w.Write(pngData.Bytes())
+	}))
+	defer srv.Close()
+
+	oldGateway := ipfsGatewayURL
+	ipfsGatewayURL = srv.URL
+	defer func() { ipfsGatewayURL = oldGateway }()
+
+	gatewayURL := srv.URL + "/ipfs/" + testCIDA
+	otherURL := srv.URL + "/images/event.png"
+	for _, u := range []string{gatewayURL, otherURL} {
+		img, err := ticketImage(u)
+		require.NoError(t, err)
+		require.NotEmpty(t, img)
+	}
+
+	ticketImageCacheMu.Lock()
+	_, gatewayCached := ticketImageCache[gatewayURL]
+	_, otherCached := ticketImageCache[otherURL]
+	ticketImageCacheMu.Unlock()
+	require.True(t, gatewayCached, "IPFS gateway files never change")
+	require.False(t, otherCached, "other URLs can change")
 }
 
 func TestCoverJPEG(t *testing.T) {

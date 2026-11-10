@@ -10,6 +10,7 @@ import (
 	_ "image/png" // register the PNG decoder for image.Decode
 	"io"
 	"net/http"
+	"strings"
 	"sync"
 	"time"
 
@@ -29,7 +30,7 @@ const (
 
 	// maxTicketImagePixels bounds the decoded size: a small compressed file
 	// can declare huge dimensions (decompression bomb).
-	maxTicketImagePixels = 30_000_000
+	maxTicketImagePixels = 16_000_000
 
 	// maxTicketImageCacheEntries bounds the processed image cache (about
 	// 100 KiB per entry).
@@ -47,6 +48,10 @@ var (
 	// ticketImageGroup makes concurrent requests for the same URL share one
 	// download and decode.
 	ticketImageGroup singleflight.Group
+
+	// ticketImageDecodeSlot allows one decode at a time: a decode can use
+	// hundreds of MB, and many ticket emails can be built at once.
+	ticketImageDecodeSlot = make(chan struct{}, 1)
 )
 
 // ticketImage downloads the image at imageURL and returns it as a 1280x720
@@ -85,11 +90,18 @@ func fetchTicketImage(imageURL string) ([]byte, error) {
 		return nil, fmt.Errorf("image larger than %d bytes", maxTicketImageDownload)
 	}
 
+	ticketImageDecodeSlot <- struct{}{}
 	img, err := coverJPEG(data, ticketImageWidth, ticketImageHeight, ticketImageQuality)
+	<-ticketImageDecodeSlot
 	if err != nil {
 		return nil, err
 	}
 
+	// Only files served by the IPFS gateway never change; other URLs can
+	// point to new content later.
+	if !strings.HasPrefix(imageURL, ipfsGatewayURL+"/ipfs/") {
+		return img, nil
+	}
 	ticketImageCacheMu.Lock()
 	if len(ticketImageCache) >= maxTicketImageCacheEntries {
 		clear(ticketImageCache)

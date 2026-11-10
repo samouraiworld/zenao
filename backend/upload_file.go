@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"io"
@@ -108,8 +109,9 @@ func (h *uploadFileHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// The gateway serves files from a zenao.io subdomain: refuse HTML so that
-	// it cannot host phishing pages.
-	if strings.HasPrefix(http.DetectContentType(data), "text/html") {
+	// it cannot host phishing pages. Skip a UTF-8 byte order mark first: the
+	// gateway's type detection skips it too.
+	if strings.HasPrefix(http.DetectContentType(bytes.TrimPrefix(data, []byte("\xef\xbb\xbf"))), "text/html") {
 		writeUploadError(w, http.StatusUnsupportedMediaType, "Unsupported File Type")
 		return
 	}

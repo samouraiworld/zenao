@@ -123,6 +123,14 @@ func TestUploadFileRejections(t *testing.T) {
 			wantCode: http.StatusUnsupportedMediaType,
 		},
 		{
+			name: "html file behind a UTF-8 byte order mark",
+			user: user,
+			req: func(t *testing.T) *http.Request {
+				return uploadRequest(t, "file", []byte("\xef\xbb\xbf<!DOCTYPE html><html><body>login</body></html>"))
+			},
+			wantCode: http.StatusUnsupportedMediaType,
+		},
+		{
 			name:     "storage full",
 			user:     user,
 			store:    &fakeFileStore{result: func(string, []byte) (string, error) { return "", ErrStorageFull }},
