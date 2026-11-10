@@ -54,9 +54,9 @@ func TestKuboFileStoreAdd(t *testing.T) {
 				assert.Equal(t, values, r.URL.Query()[key], key)
 			}
 			name, data := readMultipartFile(t, r)
-			assert.Equal(t, "cat.png", name)
+			assert.Equal(t, "file", name, "user file names never reach kubo")
 			assert.Equal(t, []byte("image bytes"), data)
-			_, _ = w.Write([]byte(`{"Name":"cat.png","Hash":"bafkreitest","Size":"11"}`))
+			_, _ = w.Write([]byte(`{"Name":"file","Hash":"bafkreitest","Size":"11"}`))
 		default:
 			t.Errorf("unexpected path %s", r.URL.Path)
 			http.NotFound(w, r)
@@ -142,8 +142,9 @@ func TestPinataFileStoreAdd(t *testing.T) {
 		assert.Equal(t, "Bearer jwt-token", r.Header.Get("Authorization"))
 
 		name, data := readMultipartFile(t, r)
-		assert.Equal(t, "cat.png", name)
+		assert.Equal(t, "file", name)
 		assert.Equal(t, []byte("image bytes"), data)
+		assert.JSONEq(t, `{"name":"a/b.png"}`, r.FormValue("pinataMetadata"))
 
 		var options map[string]any
 		assert.NoError(t, json.Unmarshal([]byte(r.FormValue("pinataOptions")), &options))
@@ -154,7 +155,7 @@ func TestPinataFileStoreAdd(t *testing.T) {
 	defer srv.Close()
 
 	store := &pinataFileStore{apiURL: srv.URL, jwt: "jwt-token", group: "group-id", client: srv.Client()}
-	cid, err := store.Add(context.Background(), "cat.png", []byte("image bytes"))
+	cid, err := store.Add(context.Background(), "a/b.png", []byte("image bytes"))
 	require.NoError(t, err)
 	require.Equal(t, "bafkreitest", cid)
 }
@@ -262,4 +263,10 @@ func TestKuboFileStoreIntegration(t *testing.T) {
 	lost := "bafkreigh2akiscaildcqabsyg3dfr6chu3fgpregiymsck7e7aqa4s52zy"
 	res := copyFiles(context.Background(), zap.NewNop(), []string{cid, lost}, store.(*kuboFileStore), nil)
 	require.Equal(t, copyFilesResult{missing: 1}, res)
+}
+
+func TestExtractIPFSCIDs(t *testing.T) {
+	text := "Intro ![cover](ipfs://" + testCIDA + ") and [audio](ipfs://" + testCIDB + ")\n" +
+		`{"uri":"ipfs://` + testCIDC + `"}` + " ipfs://" + testCIDD + "\\n"
+	require.Equal(t, []string{testCIDA, testCIDB, testCIDC, testCIDD}, extractIPFSCIDs(text))
 }

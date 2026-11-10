@@ -91,7 +91,7 @@ func (k *kuboFileStore) Add(ctx context.Context, name string, data []byte) (stri
 		return "", err
 	}
 
-	body, contentType, err := multipartFile(name, data, nil)
+	body, contentType, err := multipartFile(data, nil)
 	if err != nil {
 		return "", err
 	}
@@ -236,7 +236,7 @@ func (p *pinataFileStore) Add(ctx context.Context, name string, data []byte) (st
 		return "", err
 	}
 
-	body, contentType, err := multipartFile(name, data, map[string]string{
+	body, contentType, err := multipartFile(data, map[string]string{
 		"pinataOptions":  string(optionsJSON),
 		"pinataMetadata": string(metadataJSON),
 	})
@@ -275,15 +275,14 @@ func (p *pinataFileStore) Add(ctx context.Context, name string, data []byte) (st
 }
 
 // multipartFile builds a multipart body with the file in the "file" field,
-// followed by the given extra fields.
-func multipartFile(name string, data []byte, fields map[string]string) (io.Reader, string, error) {
+// followed by the given extra fields. The multipart file name is fixed: the
+// stores read paths from it (a "/" would create a directory), and the name
+// does not change the CID of a single file.
+func multipartFile(data []byte, fields map[string]string) (io.Reader, string, error) {
 	var buf bytes.Buffer
 	w := multipart.NewWriter(&buf)
 
-	if name == "" {
-		name = "file"
-	}
-	part, err := w.CreateFormFile("file", name)
+	part, err := w.CreateFormFile("file", "file")
 	if err != nil {
 		return nil, "", err
 	}

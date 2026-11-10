@@ -6,8 +6,6 @@ import (
 	"embed"
 	"flag"
 	"fmt"
-	"io"
-	"net/http"
 	"os"
 	"time"
 
@@ -261,76 +259,20 @@ func drawImagePlaceholder(pdf *fpdf.Fpdf, x, y, width, height float64) {
 }
 
 func embedImageURL(pdf *fpdf.Fpdf, imageURI string, x, y, width, height float64) error {
-	optimizedURL := fmt.Sprintf("%s?img-width=1280&img-height=720&img-quality=75&img-fit=cover", imageURI)
-	resp, err := http.Get(optimizedURL)
+	img, err := ticketImage(imageURI)
 	if err != nil {
-		return fmt.Errorf("failed to download image: %w", err)
-	}
-	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("failed to download image: %d", resp.StatusCode)
-	}
-	defer resp.Body.Close()
-
-	bodyStart, err := io.ReadAll(io.LimitReader(resp.Body, 512))
-	if err != nil {
-		return fmt.Errorf("failed to read image data: %w", err)
+		return err
 	}
 
-	var fileExt string
-	contentType := http.DetectContentType(bodyStart)
-	switch contentType {
-	case "image/jpeg":
-		fileExt = ".jpg"
-	case "image/png":
-		fileExt = ".png"
-	case "image/gif":
-		fileExt = ".gif"
-	default:
-		return fmt.Errorf("unsupported image type: %s", contentType)
+	opts := fpdf.ImageOptions{ImageType: "JPG"}
+	info := pdf.RegisterImageOptionsReader(imageURI, opts, bytes.NewReader(img))
+	if pdf.Err() || info == nil {
+		err := pdf.Error()
+		// fpdf ignores every call after an error: clear it so that the caller
+		// can still draw the placeholder.
+		pdf.ClearError()
+		return fmt.Errorf("failed to register image: %v", err)
 	}
-
-	imgFile, err := os.CreateTemp("", "event-image-*"+fileExt)
-	if err != nil {
-		return fmt.Errorf("failed to create temporary file: %w", err)
-	}
-	defer os.Remove(imgFile.Name())
-	defer imgFile.Close()
-
-	_, err = imgFile.Write(bodyStart)
-	if err != nil {
-		return fmt.Errorf("failed to write image data: %w", err)
-	}
-	_, err = io.Copy(imgFile, resp.Body)
-	if err != nil {
-		return fmt.Errorf("failed to copy image data: %w", err)
-	}
-
-	opts := fpdf.ImageOptions{
-		ReadDpi: true,
-		// The cropped image may start left of the page edge; the clip hides it.
-		AllowNegativePosition: true,
-	}
-	info := pdf.RegisterImageOptions(imgFile.Name(), opts)
-	if pdf.Err() {
-		return fmt.Errorf("failed to register image: %w", pdf.Error())
-	}
-	if info == nil || info.Width() <= 0 || info.Height() <= 0 {
-		return fmt.Errorf("failed to register image: invalid size")
-	}
-
-	// Fill the box and crop the overflow ("cover"), so that images with
-	// another aspect ratio are not stretched. The gateway serves originals.
-	drawW, drawH := coverSize(info.Width(), info.Height(), width, height)
-	pdf.ClipRect(x, y, width, height, false)
-	pdf.ImageOptions(imgFile.Name(), x+(width-drawW)/2, y+(height-drawH)/2, drawW, drawH, false, opts, 0, "")
-	pdf.ClipEnd()
-
+	pdf.ImageOptions(imageURI, x, y, width, height, false, opts, 0, "")
 	return nil
-}
-
-// coverSize returns the size of an imgW x imgH image scaled to cover a
-// boxW x boxH box while keeping its aspect ratio.
-func coverSize(imgW, imgH, boxW, boxH float64) (float64, float64) {
-	scale := max(boxW/imgW, boxH/imgH)
-	return imgW * scale, imgH * scale
 }

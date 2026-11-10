@@ -156,9 +156,19 @@ func copyFiles(ctx context.Context, logger *zap.Logger, cids []string, src *kubo
 	return res
 }
 
-// ipfsURIRe matches an ipfs:// URI and captures the CID (everything after the scheme
-// up to a whitespace, double-quote, or backslash).
-var ipfsURIRe = regexp.MustCompile(`ipfs://([^\s"\\]+)`)
+// ipfsURIRe matches an ipfs:// URI and captures the CID: base32 or base58
+// characters only, so that markdown such as ![x](ipfs://<cid>) or JSON
+// strings do not leak into the CID.
+var ipfsURIRe = regexp.MustCompile(`ipfs://([A-Za-z0-9]+)`)
+
+// extractIPFSCIDs returns the CIDs of the ipfs:// URIs found in text.
+func extractIPFSCIDs(text string) []string {
+	var cids []string
+	for _, m := range ipfsURIRe.FindAllStringSubmatch(text, -1) {
+		cids = append(cids, m[1])
+	}
+	return cids
+}
 
 // staticCIDs lists hardcoded IPFS CIDs used as fallback images and email icons.
 // These are not stored in the database so they must be copied explicitly.
@@ -195,14 +205,19 @@ SELECT DISTINCT uri FROM (
 	SELECT thumbnail_image_uri         FROM posts        WHERE thumbnail_image_uri LIKE 'ipfs://%'
 )`
 
-// allFrontMatterIPFSCIDsQuery fetches text blobs that embed portfolio items as
-// front-matter JSON (communities.description and users.bio), so we can regex-scan
-// them for ipfs:// URIs that the column-level query above would miss.
+// allFrontMatterIPFSCIDsQuery fetches text blobs that embed ipfs:// URIs:
+// portfolio items as front-matter JSON (communities.description, users.bio)
+// and markdown uploads (events.description, posts.content), so we can
+// regex-scan them for URIs that the column-level query above would miss.
 const allFrontMatterIPFSCIDsQuery = `
 SELECT DISTINCT blob FROM (
 	SELECT description AS blob FROM communities WHERE description LIKE '%ipfs://%'
 	UNION ALL
 	SELECT bio         AS blob FROM users        WHERE bio         LIKE '%ipfs://%'
+	UNION ALL
+	SELECT description AS blob FROM events       WHERE description LIKE '%ipfs://%'
+	UNION ALL
+	SELECT content     AS blob FROM posts        WHERE content     LIKE '%ipfs://%'
 )`
 
 func collectAllIPFSCIDs(db *gorm.DB) ([]string, error) {
@@ -236,8 +251,8 @@ func collectAllIPFSCIDs(db *gorm.DB) ([]string, error) {
 		if err := fmRows.Scan(&blob); err != nil {
 			return nil, err
 		}
-		for _, m := range ipfsURIRe.FindAllStringSubmatch(blob, -1) {
-			seen[m[1]] = struct{}{}
+		for _, cid := range extractIPFSCIDs(blob) {
+			seen[cid] = struct{}{}
 		}
 	}
 	if err := fmRows.Err(); err != nil {

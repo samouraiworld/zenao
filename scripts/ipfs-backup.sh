@@ -1,13 +1,17 @@
 #!/usr/bin/env bash
 # ipfs-backup.sh — Incremental backup of the files pinned on the Zenao kubo
 # node. Each pinned CID is exported once as a CAR file (the standard IPFS
-# archive format) into <backup-dir>/cars, without stopping kubo. Optionally,
-# the CAR files are then copied to an S3-compatible bucket with rclone.
+# archive format), without stopping kubo, then copied to an S3-compatible
+# bucket with rclone. Once the copy succeeds, the local CAR files are deleted:
+# <backup-dir>/exported.txt lists the CIDs already backed up, so local disk
+# use stays small.
 #
 # Usage (from the zenao checkout on the server):
 #   scripts/ipfs-backup.sh <compose-file> <backup-dir> [<rclone-destination> <rclone-env-file>]
 #
-# Example (prod, nightly cron, Scaleway Object Storage):
+# Without a destination, the CAR files are kept in <backup-dir>/cars.
+#
+# Example (prod, hourly cron, Scaleway Object Storage):
 #   scripts/ipfs-backup.sh prod.backend.docker-compose.yml /root/ipfs-backup \
 #     scw:zenao-ipfs-backup/prod /root/ipfs-backup.env
 #
@@ -19,7 +23,7 @@
 #   RCLONE_CONFIG_SCW_ACCESS_KEY_ID=...
 #   RCLONE_CONFIG_SCW_SECRET_ACCESS_KEY=...
 #
-# Restore: see README "File uploads (IPFS)".
+# Restore: see README "File Uploads (IPFS)".
 set -euo pipefail
 
 RCLONE_IMAGE="rclone/rclone:1.75.2@sha256:2687085f718d3c628f7fdfb77c52a1d344332aed543110bb88088f2c70d43eb5"
@@ -34,30 +38,42 @@ backup_dir="$2"
 rclone_destination="${3:-}"
 rclone_env_file="${4:-}"
 
+log() {
+  echo "$(date -u +%FT%TZ) $*"
+}
+
 ipfs() {
   docker compose -f "$compose_file" exec -T ipfs ipfs "$@"
 }
 
-mkdir -p "$backup_dir/cars"
+cars_dir="$backup_dir/cars"
+manifest="$backup_dir/exported.txt"
+mkdir -p "$cars_dir"
+touch "$manifest"
 
 # List the pins first: a failure inside a process substitution would go
 # unnoticed and the script would report an empty, successful backup.
 if ! pins="$(ipfs pin ls --type=recursive --quiet </dev/null)"; then
-  echo "$(date -u +%FT%TZ) ERROR: cannot list pins on the IPFS node" >&2
+  log "ERROR: cannot list pins on the IPFS node" >&2
   exit 1
 fi
 if [[ -z "$pins" ]]; then
-  echo "$(date -u +%FT%TZ) ERROR: the IPFS node has no pins; refusing to continue" >&2
+  log "ERROR: the IPFS node has no pins; refusing to continue" >&2
   exit 1
 fi
+
+declare -A backed_up=()
+while read -r cid; do
+  [[ -n "$cid" ]] && backed_up["$cid"]=1
+done <"$manifest"
 
 exported=0
 total=0
 while read -r cid; do
   [[ -n "$cid" ]] || continue
   total=$((total + 1))
-  car="$backup_dir/cars/$cid.car"
-  if [[ -s "$car" ]]; then
+  car="$cars_dir/$cid.car"
+  if [[ -n "${backed_up[$cid]:-}" || -s "$car" ]]; then
     continue
   fi
   # </dev/null: docker compose exec would otherwise read the CID list.
@@ -65,13 +81,32 @@ while read -r cid; do
   mv "$car.tmp" "$car"
   exported=$((exported + 1))
 done <<<"$pins"
+log "pinned CIDs: $total, newly exported: $exported"
 
-echo "$(date -u +%FT%TZ) pinned CIDs: $total, newly exported: $exported, backup dir: $backup_dir/cars"
-
-if [[ -n "$rclone_destination" ]]; then
-  docker run --rm \
-    --env-file "$rclone_env_file" \
-    -v "$(realpath "$backup_dir/cars"):/cars:ro" \
-    "$RCLONE_IMAGE" copy /cars "$rclone_destination"
-  echo "$(date -u +%FT%TZ) copied to $rclone_destination"
+shopt -s nullglob
+pending=("$cars_dir"/*.car)
+if [[ ${#pending[@]} -eq 0 ]]; then
+  log "nothing to copy"
+  exit 0
 fi
+
+if [[ -z "$rclone_destination" ]]; then
+  for car in "${pending[@]}"; do
+    cid="$(basename "$car" .car)"
+    [[ -n "${backed_up[$cid]:-}" ]] || echo "$cid" >>"$manifest"
+  done
+  log "kept ${#pending[@]} CAR file(s) in $cars_dir"
+  exit 0
+fi
+
+# Copy, then delete the local CAR files only after rclone succeeded
+# (set -e stops the script on a failed copy; the next run retries).
+docker run --rm \
+  --env-file "$rclone_env_file" \
+  -v "$(realpath "$cars_dir"):/cars:ro" \
+  "$RCLONE_IMAGE" copy /cars "$rclone_destination"
+for car in "${pending[@]}"; do
+  echo "$(basename "$car" .car)" >>"$manifest"
+  rm -f "$car"
+done
+log "copied ${#pending[@]} CAR file(s) to $rclone_destination"

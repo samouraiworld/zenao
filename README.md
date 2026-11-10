@@ -341,15 +341,13 @@ server {
     # Read-only access to /ipfs/<cid> only. No /ipns/, no RPC API.
     location /ipfs/ {
         limit_except GET HEAD { deny all; }
-        # ?filename=x.html would make kubo serve any file as text/html.
-        if ($arg_filename) {
-            return 403;
-        }
-        proxy_pass http://127.0.0.1:8080;
+        # $uri drops the query string: kubo gateway parameters such as
+        # ?filename=x.html would let it serve any file as text/html.
+        proxy_pass http://127.0.0.1:8080$uri;
         proxy_set_header Host $host;
         proxy_set_header X-Forwarded-Proto $scheme;
-        # Uploaded files are untrusted: a browser must never run them as a page
-        # on a zenao.io origin.
+        # Required. Uploaded files are untrusted: a browser must never run them
+        # as a page on a zenao.io origin (SVG files can hold scripts).
         add_header Content-Security-Policy "sandbox" always;
         add_header X-Content-Type-Options "nosniff" always;
     }
@@ -383,7 +381,9 @@ that copies the `proxy_*` lines of the existing `location /`, then
 **4. First start.** Optionally set the storage cap in `~/zenao/.env` (read by docker compose), for
 example `ZENAO_IPFS_STORAGE_MAX=50GB`; keep it well below the free disk space, since backups are
 also written to this disk. Run the "Deploy Prod" (or "Deploy Staging") workflow. It starts the
-`ipfs` service after the backend. Check:
+`ipfs` service after the backend. Run it right after merging: Netlify deploys the frontend from
+`main`, and uploads fail until the backend serves `/files` (they already fail since Pinata
+stopped). Check:
 
 ```bash
 docker compose -f prod.backend.docker-compose.yml ps ipfs   # healthy
@@ -393,13 +393,15 @@ curl -sI https://ipfs.zenao.io/ipfs/bafkreidfskfo2ld3i75s3d2uf6asiena3jletbz5cy7
 The `curl` returns 404 until step 5 adds that file.
 
 **5. Restore the default images.** Database rows still reference the former default avatar,
-banners and mail icons by CID. Add the original files (commit `88b6eba3`) to the node; the script
+banners and mail icons by CID. Add the original files to the node. They are in `public/images/`
+once the local default images change is merged, and in commit `88b6eba3` before that. The script
 prints `ok` when the CID matches:
 
 ```bash
 git fetch origin
 while read -r cid file; do
-  got=$(git show "88b6eba3:public/images/$file" | docker compose -f prod.backend.docker-compose.yml exec -T ipfs \
+  if [ -f "public/images/$file" ]; then src="cat public/images/$file"; else src="git show 88b6eba3:public/images/$file"; fi
+  got=$($src | docker compose -f prod.backend.docker-compose.yml exec -T ipfs \
     ipfs add --cid-version=1 --raw-leaves --chunker=size-262144 --pin -Q)
   [ "$got" = "$cid" ] && echo "ok $file" || echo "MISMATCH $file: $got"
 done <<'EOF'
@@ -415,10 +417,11 @@ EOF
 
 Other files uploaded to Pinata before it stopped are lost unless someone has a copy.
 
-**6. Backups.** `scripts/ipfs-backup.sh` exports each pinned file once as a CAR file, without
-stopping kubo, then copies the new files to a Scaleway Object Storage bucket with rclone (run from a
-pinned Docker image). Create the bucket and an API key in the Scaleway console, then write
-`/root/ipfs-backup.env` (`chmod 600`):
+**6. Backups.** `scripts/ipfs-backup.sh` exports each new pinned file once as a CAR file, without
+stopping kubo, copies it to a Scaleway Object Storage bucket with rclone (run from a pinned Docker
+image), then deletes the local copy; `/root/ipfs-backup/exported.txt` lists the files already
+backed up. Until a run succeeds, a new upload exists only on the server disk. Create the bucket and
+an API key in the Scaleway console, then write `/root/ipfs-backup.env` (`chmod 600`):
 
 ```bash
 RCLONE_CONFIG_SCW_TYPE=s3
@@ -429,16 +432,21 @@ RCLONE_CONFIG_SCW_ACCESS_KEY_ID=<access key>
 RCLONE_CONFIG_SCW_SECRET_ACCESS_KEY=<secret key>
 ```
 
-Run it once by hand, then add a nightly cron entry (`crontab -e`):
+Run it once by hand, then add an hourly cron entry (`crontab -e`). The script exits with a non-zero
+status and an `ERROR` line in the log when the node or the bucket is unreachable:
 
 ```bash
-30 3 * * * cd /root/zenao && scripts/ipfs-backup.sh prod.backend.docker-compose.yml /root/ipfs-backup scw:<bucket>/prod /root/ipfs-backup.env >> /var/log/zenao-ipfs-backup.log 2>&1
+15 * * * * cd /root/zenao && scripts/ipfs-backup.sh prod.backend.docker-compose.yml /root/ipfs-backup scw:<bucket>/prod /root/ipfs-backup.env >> /var/log/zenao-ipfs-backup.log 2>&1
 ```
 
-Restore (new server or lost volume), after step 4, from a copy of the `cars` directory:
+Restore (new server or lost volume), after step 4: download the CAR files from the bucket, then
+import them:
 
 ```bash
-for car in /root/ipfs-backup/cars/*.car; do
+mkdir -p /root/ipfs-restore
+docker run --rm --env-file /root/ipfs-backup.env -v /root/ipfs-restore:/restore \
+  rclone/rclone:1.75.2 copy scw:<bucket>/prod /restore
+for car in /root/ipfs-restore/*.car; do
   docker compose -f prod.backend.docker-compose.yml exec -T ipfs ipfs dag import --pin-roots < "$car"
 done
 ```
