@@ -374,7 +374,16 @@ that copies the `proxy_*` lines of the existing `location /`, then
 ```nginx
     location = /files {
         client_max_body_size 6m;
+        # Over the limit, answer in JSON with CORS: the browser can then show
+        # "file too large" instead of a network error.
+        error_page 413 = @upload_too_large;
         # same proxy_pass and proxy_set_header lines as in "location /"
+    }
+
+    location @upload_too_large {
+        default_type application/json;
+        add_header Access-Control-Allow-Origin $http_origin always;
+        return 413 '{"error":"File Too Large"}';
     }
 ```
 
