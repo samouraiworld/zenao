@@ -20,6 +20,11 @@ import (
 
 const userDefaultAvatar = "https://zenao.io/zenao-profile.png"
 
+// legacyUserDefaultAvatar is the IPFS default avatar stored for users and teams
+// created before userDefaultAvatar moved to a static asset. Its gateway is gone,
+// so it is mapped to userDefaultAvatar when read.
+const legacyUserDefaultAvatar = "ipfs://bafybeidrbpiyfvwsel6fxb7wl4p64tymnhgd7xnt3nowquqymtllrq67uy"
+
 type User struct {
 	gorm.Model          // this ID should be used for any database related logic (like querying)
 	AuthID      *string `gorm:"uniqueIndex"` // this ID should be only used for user identification & creation (auth provider id: clerk, auth0, etc). nil for teams and guests.
@@ -175,7 +180,7 @@ func dbUserToZeniDBUser(dbuser *User) *zeni.User {
 	if u.Bio == "" {
 		u.Bio = "Zenao Managed User"
 	}
-	if u.AvatarURI == "" {
+	if u.AvatarURI == "" || u.AvatarURI == legacyUserDefaultAvatar {
 		u.AvatarURI = userDefaultAvatar
 	}
 	return u
