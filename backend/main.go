@@ -47,7 +47,7 @@ func main() {
 		newGenticketCmd(),
 		newGenPdfTicketCmd(),
 		newConvertEvtToComCmd(),
-		newPinIPFSCIDsCmd(),
+		newCopyIPFSFilesCmd(),
 	)
 
 	cmd.Execute(context.Background(), os.Args[1:])
@@ -65,6 +65,11 @@ type config struct {
 	maintenance       bool
 	stripeSecretKey   string
 	paidEventsEnabled bool
+	fileStore         string
+	ipfsAPIURL        string
+	ipfsGatewayURL    string
+	pinataJWT         string
+	pinataGroup       string
 }
 
 func (conf *config) RegisterFlags(flset *flag.FlagSet) {
@@ -79,6 +84,11 @@ func (conf *config) RegisterFlags(flset *flag.FlagSet) {
 	flset.BoolVar(&conf.maintenance, "maintenance", false, "Maintenance mode, disable all API calls except healthcheck")
 	flset.StringVar(&conf.stripeSecretKey, "stripe-secret-key", "", "Stripe secret key")
 	flset.BoolVar(&conf.paidEventsEnabled, "paid-events", false, "Enable paid events feature")
+	flset.StringVar(&conf.fileStore, "file-store", fileStoreKubo, "Where uploaded files are stored: kubo or pinata")
+	flset.StringVar(&conf.ipfsAPIURL, "ipfs-api-url", "http://127.0.0.1:5001", "kubo RPC API URL, never exposed publicly (file-store kubo)")
+	flset.StringVar(&conf.ipfsGatewayURL, "ipfs-gateway-url", defaultIPFSGatewayURL, "Public IPFS gateway URL used to render ipfs:// URIs")
+	flset.StringVar(&conf.pinataJWT, "pinata-jwt", "", "Pinata API JWT (file-store pinata)")
+	flset.StringVar(&conf.pinataGroup, "pinata-group", "", "Optional Pinata group ID (file-store pinata)")
 }
 
 var conf config
@@ -107,6 +117,11 @@ func injectStartEnv() {
 		"ZENAO_MAIL_SENDER":       &conf.mailSender,
 		"DISCORD_TOKEN":           &conf.discordtoken,
 		"ZENAO_STRIPE_SECRET_KEY": &conf.stripeSecretKey,
+		"ZENAO_FILE_STORE":        &conf.fileStore,
+		"ZENAO_IPFS_API_URL":      &conf.ipfsAPIURL,
+		"ZENAO_IPFS_GATEWAY_URL":  &conf.ipfsGatewayURL,
+		"ZENAO_PINATA_JWT":        &conf.pinataJWT,
+		"ZENAO_PINATA_GROUP":      &conf.pinataGroup,
 	}
 
 	for key, ps := range mappings {
@@ -197,6 +212,19 @@ func execStart(ctx context.Context) (retErr error) {
 		),
 	)
 	mux.Handle(path, middlewares(handler,
+		withTracing(),
+		withConnectCORS(allowedOrigins...),
+		auth.WithAuth(),
+	))
+
+	ipfsGatewayURL = strings.TrimSuffix(conf.ipfsGatewayURL, "/")
+
+	fileStore, err := newFileStore(conf.fileStore, conf.ipfsAPIURL, conf.pinataJWT, conf.pinataGroup)
+	if err != nil {
+		return err
+	}
+	logger.Info("file store initialized", zap.String("kind", conf.fileStore))
+	mux.Handle(uploadFilePath, middlewares(newUploadFileHandler(logger, auth, fileStore, conf.maintenance),
 		withTracing(),
 		withConnectCORS(allowedOrigins...),
 		auth.WithAuth(),

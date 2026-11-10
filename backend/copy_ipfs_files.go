@@ -1,17 +1,12 @@
 package main
 
 import (
-	"bytes"
 	"context"
-	"encoding/json"
 	"flag"
 	"fmt"
-	"io"
-	"net/http"
 	"os"
 	"regexp"
 	"strings"
-	"time"
 
 	"github.com/gnolang/gno/tm2/pkg/commands"
 	"go.uber.org/zap"
@@ -19,43 +14,57 @@ import (
 	"gorm.io/gorm"
 )
 
-func newPinIPFSCIDsCmd() *commands.Command {
+func newCopyIPFSFilesCmd() *commands.Command {
 	return commands.NewCommand(
 		commands.Metadata{
-			Name:       "pin-ipfs-cids",
-			ShortUsage: "pin-ipfs-cids [flags]",
-			ShortHelp:  "pin all IPFS CIDs stored in the database to the current Pinata account",
+			Name:       "copy-ipfs-files",
+			ShortUsage: "copy-ipfs-files [flags]",
+			ShortHelp:  "copy every IPFS file referenced in the database from the kubo node to Pinata",
+			LongHelp: "Reads each CID referenced in the database from the kubo node and uploads it to Pinata " +
+				"with the same parameters, then checks that Pinata returns the same CID. " +
+				"Use it to move back to Pinata (see README). Run it where the kubo RPC API is reachable.",
 		},
-		&pinIPFSCIDsConf,
+		&copyIPFSFilesConf,
 		func(ctx context.Context, args []string) error {
-			return pinIPFSCIDs()
+			return copyIPFSFiles(ctx)
 		},
 	)
 }
 
-var pinIPFSCIDsConf = pinIPFSCIDsConfig{}
+var copyIPFSFilesConf = copyIPFSFilesConfig{}
 
-type pinIPFSCIDsConfig struct {
-	dbPath    string
-	pinataJWT string
-	dryRun    bool
+type copyIPFSFilesConfig struct {
+	dbPath      string
+	ipfsAPIURL  string
+	pinataJWT   string
+	pinataGroup string
+	dryRun      bool
 }
 
-func (conf *pinIPFSCIDsConfig) RegisterFlags(flset *flag.FlagSet) {
+func (conf *copyIPFSFilesConfig) RegisterFlags(flset *flag.FlagSet) {
 	flset.StringVar(&conf.dbPath, "db", "dev.db", "path to the SQLite database or a libsql DSN (libsql://...?authToken=...)")
-	flset.StringVar(&conf.pinataJWT, "pinata-jwt", "", "Pinata API JWT token (or set PINATA_JWT env var)")
-	flset.BoolVar(&conf.dryRun, "dry-run", false, "list CIDs without actually pinning them")
+	flset.StringVar(&conf.ipfsAPIURL, "ipfs-api-url", "http://127.0.0.1:5001", "kubo RPC API URL (or set ZENAO_IPFS_API_URL env var)")
+	flset.StringVar(&conf.pinataJWT, "pinata-jwt", "", "Pinata API JWT (or set ZENAO_PINATA_JWT env var)")
+	flset.StringVar(&conf.pinataGroup, "pinata-group", "", "optional Pinata group ID (or set ZENAO_PINATA_GROUP env var)")
+	flset.BoolVar(&conf.dryRun, "dry-run", false, "list CIDs and check they are on the kubo node, without uploading")
 }
 
-func pinIPFSCIDs() error {
-	if val := os.Getenv("ZENAO_DB"); val != "" && pinIPFSCIDsConf.dbPath == "dev.db" {
-		pinIPFSCIDsConf.dbPath = val
+func copyIPFSFiles(ctx context.Context) error {
+	conf := &copyIPFSFilesConf
+	if val := os.Getenv("ZENAO_DB"); val != "" && conf.dbPath == "dev.db" {
+		conf.dbPath = val
 	}
-	if val := os.Getenv("PINATA_JWT"); val != "" {
-		pinIPFSCIDsConf.pinataJWT = val
+	if val := os.Getenv("ZENAO_IPFS_API_URL"); val != "" {
+		conf.ipfsAPIURL = val
 	}
-	if !pinIPFSCIDsConf.dryRun && pinIPFSCIDsConf.pinataJWT == "" {
-		return fmt.Errorf("-pinata-jwt or PINATA_JWT env var is required")
+	if val := os.Getenv("ZENAO_PINATA_JWT"); val != "" {
+		conf.pinataJWT = val
+	}
+	if val := os.Getenv("ZENAO_PINATA_GROUP"); val != "" {
+		conf.pinataGroup = val
+	}
+	if !conf.dryRun && conf.pinataJWT == "" {
+		return fmt.Errorf("-pinata-jwt or ZENAO_PINATA_JWT env var is required")
 	}
 
 	logger, err := zap.NewDevelopment()
@@ -64,13 +73,13 @@ func pinIPFSCIDs() error {
 	}
 
 	var db *gorm.DB
-	if strings.HasPrefix(pinIPFSCIDsConf.dbPath, "libsql") {
+	if strings.HasPrefix(conf.dbPath, "libsql") {
 		db, err = gorm.Open(sqlite.New(sqlite.Config{
 			DriverName: "libsql",
-			DSN:        pinIPFSCIDsConf.dbPath,
+			DSN:        conf.dbPath,
 		}), &gorm.Config{})
 	} else {
-		db, err = gorm.Open(sqlite.Open(pinIPFSCIDsConf.dbPath), &gorm.Config{})
+		db, err = gorm.Open(sqlite.Open(conf.dbPath), &gorm.Config{})
 	}
 	if err != nil {
 		return fmt.Errorf("open database: %w", err)
@@ -82,30 +91,61 @@ func pinIPFSCIDs() error {
 	}
 	logger.Info("collected unique IPFS CIDs", zap.Int("count", len(cids)))
 
-	if pinIPFSCIDsConf.dryRun {
-		for _, cid := range cids {
-			fmt.Println(cid)
-		}
-		return nil
+	kubo := &kuboFileStore{apiURL: strings.TrimSuffix(conf.ipfsAPIURL, "/"), client: newFileStoreHTTPClient()}
+	var pinata FileStore
+	if !conf.dryRun {
+		pinata = &pinataFileStore{apiURL: defaultPinataAPIURL, jwt: conf.pinataJWT, group: conf.pinataGroup, client: newFileStoreHTTPClient()}
 	}
 
-	client := &http.Client{Timeout: 30 * time.Second}
-	pinned, failed := 0, 0
-	for _, cid := range cids {
-		logger.Info("pinning", zap.String("cid", cid))
-		if err := callPinByHash(client, pinIPFSCIDsConf.pinataJWT, cid); err != nil {
-			logger.Error("failed to pin", zap.String("cid", cid), zap.Error(err))
-			failed++
-		} else {
-			pinned++
-		}
-	}
-
-	logger.Info("done", zap.Int("pinned", pinned), zap.Int("failed", failed))
-	if failed > 0 {
-		return fmt.Errorf("%d CID(s) failed to pin", failed)
+	res := copyFiles(ctx, logger, cids, kubo, pinata)
+	logger.Info("done",
+		zap.Int("copied", res.copied),
+		zap.Int("missing-on-kubo", res.missing),
+		zap.Int("failed", res.failed),
+	)
+	if res.failed > 0 {
+		return fmt.Errorf("%d file(s) failed to copy", res.failed)
 	}
 	return nil
+}
+
+type copyFilesResult struct {
+	copied  int
+	missing int
+	failed  int
+}
+
+// copyFiles reads each CID from the kubo node and adds it to dst. A nil dst
+// only checks that the CIDs are on the kubo node. CIDs that the kubo node does
+// not hold (files lost with the former Pinata account) are counted as missing.
+func copyFiles(ctx context.Context, logger *zap.Logger, cids []string, src *kuboFileStore, dst FileStore) copyFilesResult {
+	var res copyFilesResult
+	for _, cid := range cids {
+		data, err := src.Cat(ctx, cid)
+		if err != nil {
+			logger.Warn("not on the kubo node", zap.String("cid", cid), zap.Error(err))
+			res.missing++
+			continue
+		}
+		if dst == nil {
+			logger.Info("on the kubo node", zap.String("cid", cid), zap.Int("size", len(data)))
+			continue
+		}
+
+		got, err := dst.Add(ctx, cid, data)
+		switch {
+		case err != nil:
+			logger.Error("failed to copy", zap.String("cid", cid), zap.Error(err))
+			res.failed++
+		case got != cid:
+			logger.Error("copied with a different CID", zap.String("cid", cid), zap.String("got", got))
+			res.failed++
+		default:
+			logger.Info("copied", zap.String("cid", cid))
+			res.copied++
+		}
+	}
+	return res
 }
 
 // ipfsURIRe matches an ipfs:// URI and captures the CID (everything after the scheme
@@ -113,7 +153,7 @@ func pinIPFSCIDs() error {
 var ipfsURIRe = regexp.MustCompile(`ipfs://([^\s"\\]+)`)
 
 // staticCIDs lists hardcoded IPFS CIDs used as fallback images and email icons.
-// These are not stored in the database so they must be pinned explicitly.
+// These are not stored in the database so they must be copied explicitly.
 var staticCIDs = []string{
 	"bafybeidp4z4cywvdzoyqgdolcqmmxeug62qukpl3nfumjquqragxwr7bny", // profile banner fallback
 	"bafybeib2gyk2yagrcdrnhpgbaj6an6ghk2liwx2mshhoa6d54y2mheny24", // community banner fallback
@@ -125,7 +165,7 @@ var staticCIDs = []string{
 }
 
 // allIPFSCIDsQuery collects every distinct ipfs:// URI across all tables that store
-// user-uploaded media, so we can pin them all to the current Pinata account.
+// user-uploaded media.
 const allIPFSCIDsQuery = `
 SELECT DISTINCT uri FROM (
 	SELECT avatar_uri          AS uri FROM users        WHERE avatar_uri          LIKE 'ipfs://%'
@@ -205,45 +245,4 @@ func collectAllIPFSCIDs(db *gorm.DB) ([]string, error) {
 		cids = append(cids, cid)
 	}
 	return cids, nil
-}
-
-type pinByHashBody struct {
-	HashToPin     string     `json:"hashToPin"`
-	PinataOptions pinataOpts `json:"pinataOptions"`
-}
-
-type pinataOpts struct {
-	CIDVersion int `json:"cidVersion"`
-}
-
-// callPinByHash queues a CID to be pinned to the Pinata account associated with
-// jwt. The operation is asynchronous: Pinata fetches the content from the IPFS
-// network in the background after this call returns.
-func callPinByHash(client *http.Client, jwt, cid string) error {
-	body, err := json.Marshal(pinByHashBody{
-		HashToPin:     cid,
-		PinataOptions: pinataOpts{CIDVersion: 1},
-	})
-	if err != nil {
-		return err
-	}
-
-	req, err := http.NewRequest(http.MethodPost, "https://api.pinata.cloud/pinning/pinByHash", bytes.NewReader(body))
-	if err != nil {
-		return err
-	}
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", "Bearer "+jwt)
-
-	resp, err := client.Do(req)
-	if err != nil {
-		return err
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode >= 400 {
-		respBody, _ := io.ReadAll(resp.Body)
-		return fmt.Errorf("pinata returned status %d: %s", resp.StatusCode, string(respBody))
-	}
-	return nil
 }

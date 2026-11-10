@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { uploadFile } from "@/lib/files";
+import { useUploadFile } from "@/lib/files";
 
 function useMarkdownUpload(
   textareaRef: React.RefObject<HTMLTextAreaElement | null>,
@@ -7,6 +7,7 @@ function useMarkdownUpload(
   // Textarea last cursor before upload
   const [cursor, setCursor] = useState(0);
   const [uploading, setUploading] = useState(false);
+  const uploadFile = useUploadFile();
 
   const uploadMdFile = async (
     file: File,

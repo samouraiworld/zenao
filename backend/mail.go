@@ -110,8 +110,12 @@ func web2URL(uri string) string {
 		return uri
 	}
 	withoutScheme := strings.TrimPrefix(uri, "ipfs://")
-	res := fmt.Sprintf(`https://%s/ipfs/%s`, gatewayDomain, withoutScheme)
+	res := fmt.Sprintf(`%s/ipfs/%s`, ipfsGatewayURL, withoutScheme)
 	return res
 }
 
-const gatewayDomain = `pinata.zenao.io`
+const defaultIPFSGatewayURL = "https://ipfs.zenao.io"
+
+// ipfsGatewayURL is the public IPFS gateway used to render ipfs:// URIs in
+// mails and PDFs. The start command sets it from its configuration.
+var ipfsGatewayURL = defaultIPFSGatewayURL

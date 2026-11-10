@@ -7,6 +7,7 @@ services:
       - ./backend.env
     environment:
       OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4318
+      ZENAO_IPFS_API_URL: http://ipfs:5001
     ports:
       - 4242:4242
     container_name: backend
@@ -30,3 +31,25 @@ services:
       - 127.0.0.1:16686:16686 # need to tunnel for now
     healthcheck:
       test: [CMD, wget, -q, -S, -O, "-", "localhost:14269"]
+
+  # Self-hosted IPFS node (kubo) that stores uploaded files. Isolated node,
+  # settings in ipfs/zenao-config.sh. The RPC API (5001) stays on the Docker
+  # network for the backend; only the gateway is published, on the host
+  # loopback, for the host nginx. See README "File uploads (IPFS)".
+  ipfs:
+    image: ipfs/kubo:v0.43.1@sha256:b293923d66e490e70ced64df42ea7a6cf7eac2740e3fb29101df18070fa7be48
+    environment:
+      IPFS_PROFILE: server
+    volumes:
+      - ipfs-data:/data/ipfs
+      - ./ipfs/zenao-config.sh:/container-init.d/001-zenao-config.sh:ro
+    ports:
+      - 127.0.0.1:8080:8080
+    restart: always
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+
+volumes:
+  ipfs-data:

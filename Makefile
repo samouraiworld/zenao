@@ -52,6 +52,8 @@ dev: check-node
 	@echo "Make sure you have run 'make migrate-local' first!"
 	@echo ""
 	@trap 'kill 0' EXIT; \
+	echo "Starting local IPFS node (file uploads) ..."; \
+	docker compose -f dev.docker-compose.yml up -d ipfs || echo "WARNING: could not start the IPFS node with Docker, file uploads will fail"; \
 	echo "Starting backend on http://localhost:4242 ..."; \
 	go run ./backend start & \
 	sleep 2; \

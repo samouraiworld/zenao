@@ -98,6 +98,6 @@ jobs:
               sed -i 's|^ZENAO_PAID_EVENTS_ENABLED=.*|ZENAO_PAID_EVENTS_ENABLED=true|' backend.env || \
               echo 'ZENAO_PAID_EVENTS_ENABLED=true' >> backend.env
 
-            docker compose -f prod.backend.docker-compose.yml up -d --wait otel-collector jaeger
+            docker compose -f prod.backend.docker-compose.yml up -d --wait otel-collector jaeger ipfs
             git restore prod.backend.docker-compose.yml
             docker compose -f prod.backend.docker-compose.yml up -d --build backend
