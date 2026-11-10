@@ -214,7 +214,7 @@ func TestCopyFiles(t *testing.T) {
 		}
 	}))
 	defer kubo.Close()
-	src := &kuboFileStore{apiURL: kubo.URL, client: kubo.Client()}
+	src := newKuboFileStore(kubo.URL, kubo.Client())
 
 	dst := &fakeFileStore{result: func(name string, _ []byte) (string, error) {
 		switch name {
@@ -290,4 +290,14 @@ func TestExtractIPFSCIDs(t *testing.T) {
 	text := "Intro ![cover](ipfs://" + testCIDA + ") and [audio](ipfs://" + testCIDB + ")\n" +
 		`{"uri":"ipfs://` + testCIDC + `"}` + " ipfs://hello ipfs://" + testCIDD + "\\n"
 	require.Equal(t, []string{testCIDA, testCIDB, testCIDC, testCIDD}, extractIPFSCIDs(text))
+}
+
+func TestKuboFileStoreAddStopsWaitingOnCancel(t *testing.T) {
+	store := newKuboFileStore("http://127.0.0.1:0", http.DefaultClient)
+	store.addSlot <- struct{}{} // another upload holds the slot
+
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+	_, err := store.Add(ctx, "file", []byte("data"))
+	require.ErrorIs(t, err, context.Canceled)
 }

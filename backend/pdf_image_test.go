@@ -50,7 +50,7 @@ func TestCoverResizeTransparentAndTiny(t *testing.T) {
 	require.Equal(t, color.RGBA{R: 10, G: 20, B: 30, A: 255}, dst.RGBAAt(15, 8))
 }
 
-func TestTicketImageCachesGatewayFilesOnly(t *testing.T) {
+func TestTicketImageCacheExpiry(t *testing.T) {
 	var pngData bytes.Buffer
 	require.NoError(t, png.Encode(&pngData, image.NewRGBA(image.Rect(0, 0, 32, 18))))
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -71,11 +71,13 @@ func TestTicketImageCachesGatewayFilesOnly(t *testing.T) {
 	}
 
 	ticketImageCacheMu.Lock()
-	_, gatewayCached := ticketImageCache[gatewayURL]
-	_, otherCached := ticketImageCache[otherURL]
+	gatewayEntry, gatewayCached := ticketImageCache[gatewayURL]
+	otherEntry, otherCached := ticketImageCache[otherURL]
 	ticketImageCacheMu.Unlock()
-	require.True(t, gatewayCached, "IPFS gateway files never change")
-	require.False(t, otherCached, "other URLs can change")
+	require.True(t, gatewayCached)
+	require.True(t, gatewayEntry.expires.IsZero(), "IPFS gateway files never change")
+	require.True(t, otherCached)
+	require.False(t, otherEntry.expires.IsZero(), "other URLs can change: they expire")
 }
 
 func TestCoverJPEG(t *testing.T) {

@@ -6,6 +6,10 @@
 # through the Zenao backend. It does not join the public IPFS network.
 set -eu
 
+# A new kubo image may need a newer repo format; "ipfs config" below would
+# fail on an old one. No-op when the repo is current.
+ipfs repo migrate
+
 # No peer discovery, no content routing, no swarm listener.
 ipfs config Routing.Type none
 ipfs config --json Bootstrap '[]'

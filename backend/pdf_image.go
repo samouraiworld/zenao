@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"image"
 	"image/color"
@@ -35,7 +36,19 @@ const (
 	// maxTicketImageCacheEntries bounds the processed image cache (about
 	// 100 KiB per entry).
 	maxTicketImageCacheEntries = 64
+
+	// externalTicketImageTTL is how long an image from another URL than the
+	// IPFS gateway stays cached: that content can change.
+	externalTicketImageTTL = 10 * time.Minute
+
+	// ticketImageSlotWait bounds the wait for the decode slot.
+	ticketImageSlotWait = 30 * time.Second
 )
+
+type ticketImageCacheEntry struct {
+	data    []byte
+	expires time.Time // zero: never
+}
 
 var (
 	ticketImageClient = &http.Client{Timeout: 30 * time.Second}
@@ -43,7 +56,7 @@ var (
 	// ticketImageCache keeps processed images by URL: one email can hold many
 	// tickets for the same event, and ipfs:// images never change.
 	ticketImageCacheMu sync.Mutex
-	ticketImageCache   = map[string][]byte{}
+	ticketImageCache   = map[string]ticketImageCacheEntry{}
 
 	// ticketImageGroup makes concurrent requests for the same URL share one
 	// download and decode.
@@ -60,8 +73,8 @@ func ticketImage(imageURL string) ([]byte, error) {
 	ticketImageCacheMu.Lock()
 	cached, ok := ticketImageCache[imageURL]
 	ticketImageCacheMu.Unlock()
-	if ok {
-		return cached, nil
+	if ok && (cached.expires.IsZero() || time.Now().Before(cached.expires)) {
+		return cached.data, nil
 	}
 
 	img, err, _ := ticketImageGroup.Do(imageURL, func() (any, error) {
@@ -90,25 +103,36 @@ func fetchTicketImage(imageURL string) ([]byte, error) {
 		return nil, fmt.Errorf("image larger than %d bytes", maxTicketImageDownload)
 	}
 
-	ticketImageDecodeSlot <- struct{}{}
-	img, err := coverJPEG(data, ticketImageWidth, ticketImageHeight, ticketImageQuality)
-	<-ticketImageDecodeSlot
+	img, err := decodeTicketImage(data)
 	if err != nil {
 		return nil, err
 	}
 
-	// Only files served by the IPFS gateway never change; other URLs can
-	// point to new content later.
+	// Files served by the IPFS gateway never change; other URLs can point to
+	// new content later, so they expire.
+	entry := ticketImageCacheEntry{data: img}
 	if !strings.HasPrefix(imageURL, ipfsGatewayURL+"/ipfs/") {
-		return img, nil
+		entry.expires = time.Now().Add(externalTicketImageTTL)
 	}
 	ticketImageCacheMu.Lock()
 	if len(ticketImageCache) >= maxTicketImageCacheEntries {
 		clear(ticketImageCache)
 	}
-	ticketImageCache[imageURL] = img
+	ticketImageCache[imageURL] = entry
 	ticketImageCacheMu.Unlock()
 	return img, nil
+}
+
+// decodeTicketImage runs coverJPEG in the single decode slot.
+func decodeTicketImage(data []byte) ([]byte, error) {
+	select {
+	case ticketImageDecodeSlot <- struct{}{}:
+	case <-time.After(ticketImageSlotWait):
+		return nil, errors.New("image processing is busy")
+	}
+	defer func() { <-ticketImageDecodeSlot }()
+
+	return coverJPEG(data, ticketImageWidth, ticketImageHeight, ticketImageQuality)
 }
 
 // coverJPEG decodes a JPEG, PNG or GIF image, crops it around its center to

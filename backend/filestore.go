@@ -11,7 +11,6 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/ipfs/go-cid"
@@ -67,7 +66,7 @@ func newFileStore(kind, kuboAPIURL, pinataJWT, pinataGroup string) (FileStore, e
 		if kuboAPIURL == "" {
 			return nil, errors.New("kubo file store needs an IPFS API URL")
 		}
-		return &kuboFileStore{apiURL: strings.TrimSuffix(kuboAPIURL, "/"), client: newFileStoreHTTPClient()}, nil
+		return newKuboFileStore(kuboAPIURL, newFileStoreHTTPClient()), nil
 	case fileStorePinata:
 		if pinataJWT == "" {
 			return nil, errors.New("pinata file store needs a Pinata JWT")
@@ -84,16 +83,25 @@ type kuboFileStore struct {
 	apiURL string
 	client *http.Client
 
-	// addMu makes the free-space check and the add one step, so that
+	// addSlot makes the free-space check and the add one step, so that
 	// concurrent uploads cannot all pass the check and overshoot StorageMax.
-	addMu sync.Mutex
+	// A channel, unlike a mutex, lets a cancelled request stop waiting.
+	addSlot chan struct{}
+}
+
+func newKuboFileStore(apiURL string, client *http.Client) *kuboFileStore {
+	return &kuboFileStore{apiURL: strings.TrimSuffix(apiURL, "/"), client: client, addSlot: make(chan struct{}, 1)}
 }
 
 var _ FileStore = (*kuboFileStore)(nil)
 
 func (k *kuboFileStore) Add(ctx context.Context, name string, data []byte) (string, error) {
-	k.addMu.Lock()
-	defer k.addMu.Unlock()
+	select {
+	case k.addSlot <- struct{}{}:
+	case <-ctx.Done():
+		return "", ctx.Err()
+	}
+	defer func() { <-k.addSlot }()
 
 	if err := k.checkSpace(ctx, len(data)); err != nil {
 		return "", err

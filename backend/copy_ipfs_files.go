@@ -94,7 +94,7 @@ func copyIPFSFiles(ctx context.Context) error {
 	}
 	logger.Info("collected unique IPFS CIDs", zap.Int("count", len(cids)))
 
-	kubo := &kuboFileStore{apiURL: strings.TrimSuffix(conf.ipfsAPIURL, "/"), client: newFileStoreHTTPClient()}
+	kubo := newKuboFileStore(conf.ipfsAPIURL, newFileStoreHTTPClient())
 	var pinata FileStore
 	if !conf.dryRun {
 		pinata = &pinataFileStore{apiURL: defaultPinataAPIURL, jwt: conf.pinataJWT, group: conf.pinataGroup, client: newFileStoreHTTPClient()}
