@@ -18,7 +18,7 @@ import (
 	"gorm.io/plugin/opentelemetry/tracing"
 )
 
-const userDefaultAvatar = "https://zenao.io/images/user-default-avatar.png"
+const userDefaultAvatar = "https://zenao.io/zenao-profile.png"
 
 type User struct {
 	gorm.Model          // this ID should be used for any database related logic (like querying)
