@@ -117,8 +117,8 @@ func ticketsConfirmationMailContent(event *zeni.Event, welcomeText string, ticke
 	}
 	data := ticketsConfirmation{
 		ImageURL:        web2URL(event.ImageURI) + "?img-width=960&img-height=540&img-fit=cover&dpr=2",
-		CalendarIconURL: web2URL("ipfs://bafkreiaknq3mxzx5ulryv5tnikjkntmckvz3h4mhjyjle4zbtqkwhyb5xa"),
-		PinIconURL:      web2URL("ipfs://bafkreidfskfo2ld3i75s3d2uf6asiena3jletbz5cy7ostihwoyjclceqa"),
+		CalendarIconURL: "https://zenao.io/images/mail-calendar-icon.png",
+		PinIconURL:      "https://zenao.io/images/mail-pin-icon.png",
 		EventName:       event.Title,
 		TimeText:        event.StartDate.In(tz).Format(time.ANSIC) + " - " + event.EndDate.In(tz).Format(time.ANSIC),
 		LocationText:    locStr,
@@ -188,8 +188,8 @@ func purchaseConfirmationMailContent(event *zeni.Event, order *zeni.Order, selle
 
 	data := purchaseConfirmation{
 		ImageURL:        web2URL(event.ImageURI) + "?img-width=960&img-height=540&img-fit=cover&dpr=2",
-		CalendarIconURL: web2URL("ipfs://bafkreiaknq3mxzx5ulryv5tnikjkntmckvz3h4mhjyjle4zbtqkwhyb5xa"),
-		PinIconURL:      web2URL("ipfs://bafkreidfskfo2ld3i75s3d2uf6asiena3jletbz5cy7ostihwoyjclceqa"),
+		CalendarIconURL: "https://zenao.io/images/mail-calendar-icon.png",
+		PinIconURL:      "https://zenao.io/images/mail-pin-icon.png",
 		EventName:       event.Title,
 		TimeText:        event.StartDate.In(tz).Format(time.ANSIC) + " - " + event.EndDate.In(tz).Format(time.ANSIC),
 		LocationText:    locStr,
@@ -280,7 +280,7 @@ func communityNewEventMailContent(event *zeni.Event, community *zeni.Community) 
 		EventURL:        eventPublicURL(event.ID),
 		CommunityName:   community.DisplayName,
 		CommunityImage:  web2URL(community.AvatarURI) + "?img-width=960&img-height=540&img-fit=cover&dpr=2",
-		CalendarIconURL: web2URL("ipfs://bafkreiaknq3mxzx5ulryv5tnikjkntmckvz3h4mhjyjle4zbtqkwhyb5xa"),
+		CalendarIconURL: "https://zenao.io/images/mail-calendar-icon.png",
 	}
 
 	buf := &strings.Builder{}
@@ -325,8 +325,8 @@ func eventCancelledMailContent(event *zeni.Event) (string, string, error) {
 		EventStartDate:  event.StartDate.In(tz).Format(time.ANSIC),
 		EventEndDate:    event.EndDate.In(tz).Format(time.ANSIC),
 		LocationText:    locStr,
-		CalendarIconURL: web2URL("ipfs://bafkreiaknq3mxzx5ulryv5tnikjkntmckvz3h4mhjyjle4zbtqkwhyb5xa"),
-		PinIconURL:      web2URL("ipfs://bafkreidfskfo2ld3i75s3d2uf6asiena3jletbz5cy7ostihwoyjclceqa"),
+		CalendarIconURL: "https://zenao.io/images/mail-calendar-icon.png",
+		PinIconURL:      "https://zenao.io/images/mail-pin-icon.png",
 	}
 
 	buf := &strings.Builder{}
