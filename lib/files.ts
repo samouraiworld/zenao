@@ -6,6 +6,10 @@ export const filesPostResponseSchema = z.object({
   uri: z.string(),
 });
 
+const filesErrorResponseSchema = z.object({
+  error: z.string(),
+});
+
 export type FilesPostResponse = z.infer<typeof filesPostResponseSchema>;
 
 const uploadEndpoint = `${
@@ -31,9 +35,29 @@ export const uploadFile = async (
     headers: { Authorization: `Bearer ${token}` },
     body: data,
   });
-  const resRaw = await uploadRequest.json();
-  const res = filesPostResponseSchema.parse(resRaw);
 
+  // A proxy in front of the backend (for example nginx refusing a large
+  // body) can answer with an HTML page: only parse JSON responses.
+  const isJSON = (uploadRequest.headers.get("content-type") ?? "").includes(
+    "application/json",
+  );
+  const resRaw: unknown = isJSON
+    ? await uploadRequest.json().catch(() => null)
+    : null;
+
+  if (uploadRequest.status === 413) {
+    throw new Error("File size exceeds limit: the server refused the file");
+  }
+  if (!uploadRequest.ok) {
+    const error = filesErrorResponseSchema.safeParse(resRaw);
+    throw new Error(
+      `Upload failed (${uploadRequest.status}): ${
+        error.success ? error.data.error : uploadRequest.statusText
+      }`,
+    );
+  }
+
+  const res = filesPostResponseSchema.parse(resRaw);
   return res.uri;
 };
 
