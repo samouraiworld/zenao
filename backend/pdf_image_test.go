@@ -83,30 +83,48 @@ func TestTicketImageCacheExpiry(t *testing.T) {
 }
 
 func TestTicketImageFetchSlotsBoundDownloads(t *testing.T) {
+	var pngData bytes.Buffer
+	require.NoError(t, png.Encode(&pngData, image.NewRGBA(image.Rect(0, 0, 32, 18))))
 	var hits atomic.Int32
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		hits.Add(1)
+		_, _ = w.Write(pngData.Bytes())
 	}))
 	defer srv.Close()
 
-	oldWait := ticketImageSlotWait
-	ticketImageSlotWait = 10 * time.Millisecond
-	defer func() { ticketImageSlotWait = oldWait }()
+	oldGateway, oldWait := ipfsGatewayURL, ticketImageSlotWait
+	ipfsGatewayURL, ticketImageSlotWait = srv.URL, 10*time.Millisecond
+	defer func() { ipfsGatewayURL, ticketImageSlotWait = oldGateway, oldWait }()
 
-	// Every fetch slot is taken: a new image is not downloaded at all, so its
-	// bytes are not held in memory while it waits.
-	for range maxTicketImageFetches {
-		ticketImageFetchSlots <- struct{}{}
-	}
-	defer func() {
-		for range maxTicketImageFetches {
-			<-ticketImageFetchSlots
+	fill := func(slots chan struct{}) func() {
+		for range cap(slots) {
+			slots <- struct{}{}
 		}
-	}()
+		return func() {
+			for range cap(slots) {
+				<-slots
+			}
+		}
+	}
 
+	// Every external slot is taken: a new external image is not downloaded at
+	// all, so its bytes are not held in memory while it waits.
+	releaseExternal := fill(externalTicketImageFetchSlots)
 	_, err := ticketImage(srv.URL + "/images/busy.png")
 	require.ErrorIs(t, err, errTicketImageBusy)
 	require.Zero(t, hits.Load())
+
+	// Gateway images have their own slots: slow external URLs cannot block them.
+	img, err := ticketImage(srv.URL + "/ipfs/" + testCIDA + "?slots")
+	require.NoError(t, err)
+	require.NotEmpty(t, img)
+	releaseExternal()
+
+	releaseGateway := fill(ticketImageFetchSlots)
+	defer releaseGateway()
+	_, err = ticketImage(srv.URL + "/ipfs/" + testCIDA + "?busy")
+	require.ErrorIs(t, err, errTicketImageBusy)
+	require.EqualValues(t, 1, hits.Load())
 }
 
 func TestCoverJPEG(t *testing.T) {

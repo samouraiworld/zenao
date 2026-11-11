@@ -287,8 +287,10 @@ How it works:
   the Clerk session token. The backend rejects anonymous and banned users, files over 5 MiB, HTML
   files and users over 20 MiB per day, then adds the file to kubo through its RPC API and returns
   `{"uri": "ipfs://<cid>"}`. Once all users together reach 1 GiB in a day, uploads answer HTTP 503
-  and the backend logs `daily upload capacity reached`. Quotas are kept in memory (a restart resets
-  them) and count failed uploads too: kubo can keep the blocks of an add whose client went away.
+  and the backend logs `daily upload capacity reached`. Quotas are kept in memory: restarting the
+  backend (`docker compose -f prod.backend.docker-compose.yml restart backend`) resets them. A failed
+  upload counts too once its bytes reached kubo, which can keep the blocks of an add whose client
+  went away.
 - Uploaded files are kept forever. The backend refuses uploads with HTTP 507 once the node reaches
   its `Datastore.StorageMax` (`ZENAO_IPFS_STORAGE_MAX`, default `20GB`).
 - The kubo RPC API (port 5001) gives full control of the node: it is never published, and only the
@@ -488,8 +490,9 @@ applied. Back up first (step 6), then check `docker compose -f prod.backend.dock
 ### Moving back to Pinata
 
 The backend can store files on Pinata instead of kubo, with configuration only. CIDs stay the same.
-The backend reads `backend.env` only when its container starts: editing the file changes nothing
-until step 4.
+Docker compose reads `backend.env` only when it creates the backend container (`docker compose up`,
+as the deploy workflows do); `docker compose restart` keeps the old values. Run no other workflow
+between steps 1 and 4: any `docker compose up` of the backend would apply step 1 early.
 
 1. In `backend.env`: `ZENAO_FILE_STORE=pinata`, `ZENAO_PINATA_JWT=<JWT with Files write>`,
    optionally `ZENAO_PINATA_GROUP=<group id>`, and `ZENAO_IPFS_GATEWAY_URL=https://pinata.zenao.io`.
@@ -503,14 +506,15 @@ until step 4.
    ```
 
    Add `-dry-run` first to list the CIDs and check which ones are on the node.
-3. DNS: point `pinata` back to the Pinata dedicated gateway (CNAME). Netlify:
-   `NEXT_PUBLIC_IPFS_GATEWAY_URL=https://pinata.zenao.io`, then redeploy the frontend. Wait for the
-   old DNS record to expire (its TTL): until then, some browsers still reach the kubo node, which
-   does not hold the files uploaded to Pinata.
-4. Redeploy the backend (the "Deploy Prod" workflow) to apply `backend.env`. New uploads now go to
-   Pinata.
-5. Run the copy of step 2 again. Files uploaded to kubo between steps 2 and 4 do not render until
-   this second copy adds them to Pinata. The other files get the same CIDs again.
+3. DNS: point `pinata` back to the Pinata dedicated gateway (CNAME), then wait for the old record to
+   expire (its TTL). Until step 4, only links in mails sent before the move to kubo use
+   `pinata.zenao.io`, and step 2 copied their files to Pinata.
+4. In one go: on Netlify, set `NEXT_PUBLIC_IPFS_GATEWAY_URL=https://pinata.zenao.io` and redeploy the
+   frontend; then redeploy the backend (the "Deploy Prod" workflow) to apply `backend.env`. New
+   uploads now go to Pinata, and the frontend reads them there.
+5. Run the copy of step 2 again right away. Files uploaded to kubo between steps 2 and 4 do not
+   render until this second copy adds them to Pinata. The kubo node gets no upload after step 4, so
+   this copy is complete; the other files get the same CIDs again.
 
 ## Paid Events & Stripe
 

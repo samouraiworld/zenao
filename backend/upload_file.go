@@ -139,10 +139,15 @@ func (h *uploadFileHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// The quotas keep the bytes even when the add fails: kubo can keep the
-	// blocks, and sometimes the pin, of an add whose client went away.
+	// A failed add keeps its bytes in the quotas once the file was sent: kubo
+	// can keep the blocks, and sometimes the pin, of an add whose client went
+	// away. Only a failure before sending gives them back.
 	cid, err := h.store.Add(r.Context(), header.Filename, data)
 	if err != nil {
+		if errors.Is(err, errNothingStored) {
+			h.quota.release(user.ID, size)
+			h.totalQuota.release(totalQuotaKey, size)
+		}
 		if errors.Is(err, ErrStorageFull) {
 			h.logger.Error("upload-file: storage full", zap.String("user-id", user.ID))
 			writeUploadError(w, http.StatusInsufficientStorage, "Storage Full")

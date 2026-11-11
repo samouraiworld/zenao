@@ -175,10 +175,10 @@ func TestUploadFileRateLimit(t *testing.T) {
 }
 
 func TestUploadFileDailyQuota(t *testing.T) {
-	failing := true
+	var addErr error
 	store := &fakeFileStore{result: func(string, []byte) (string, error) {
-		if failing {
-			return "", errors.New("kubo down")
+		if addErr != nil {
+			return "", addErr
 		}
 		return "bafkreitest", nil
 	}}
@@ -187,11 +187,19 @@ func TestUploadFileDailyQuota(t *testing.T) {
 	h.quota = newUploadQuota(int64(3*len(pngHeader)), time.Hour)
 	h.quota.now = func() time.Time { return now }
 
-	// A failed upload still uses the quota: kubo can keep what it received.
+	// A failure before the file reached the store gives the quotas back.
+	addErr = nothingStored(errors.New("kubo down"))
 	code, _ := serveUpload(h, uploadRequest(t, "file", pngHeader))
 	require.Equal(t, http.StatusInternalServerError, code)
+	require.Zero(t, h.quota.usage["user-1"].bytes)
+	require.Zero(t, h.totalQuota.usage[totalQuotaKey].bytes)
 
-	failing = false
+	// A failure after sending keeps them: kubo can keep what it received.
+	addErr = errors.New("kubo add: unexpected EOF")
+	code, _ = serveUpload(h, uploadRequest(t, "file", pngHeader))
+	require.Equal(t, http.StatusInternalServerError, code)
+
+	addErr = nil
 	for range 2 {
 		code, _ = serveUpload(h, uploadRequest(t, "file", pngHeader))
 		require.Equal(t, http.StatusOK, code)

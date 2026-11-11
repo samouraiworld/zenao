@@ -78,6 +78,8 @@ func TestKuboFileStoreAddErrors(t *testing.T) {
 		handler http.HandlerFunc
 		wantErr string
 		isFull  bool
+		// nothingStored: the error happens before the file is sent.
+		nothingStored bool
 	}{
 		{
 			name: "add status 500",
@@ -104,6 +106,18 @@ func TestKuboFileStoreAddErrors(t *testing.T) {
 			wantErr: "pin failed",
 		},
 		{
+			name: "repo stat fails",
+			handler: func(w http.ResponseWriter, r *http.Request) {
+				if r.URL.Path == "/api/v0/repo/stat" {
+					http.Error(w, "starting", http.StatusServiceUnavailable)
+					return
+				}
+				t.Errorf("add must not be called when repo stat fails")
+			},
+			wantErr:       "status 503",
+			nothingStored: true,
+		},
+		{
 			name: "disk full reported by kubo",
 			handler: func(w http.ResponseWriter, r *http.Request) {
 				if r.URL.Path == "/api/v0/repo/stat" {
@@ -123,7 +137,8 @@ func TestKuboFileStoreAddErrors(t *testing.T) {
 				}
 				t.Errorf("add must not be called when storage is full")
 			},
-			isFull: true,
+			isFull:        true,
+			nothingStored: true,
 		},
 	}
 
@@ -142,8 +157,19 @@ func TestKuboFileStoreAddErrors(t *testing.T) {
 			} else {
 				require.ErrorContains(t, err, tt.wantErr)
 			}
+			require.Equal(t, tt.nothingStored, errors.Is(err, errNothingStored))
 		})
 	}
+}
+
+func TestKuboFileStoreAddNodeDown(t *testing.T) {
+	// Nothing listens on the port: the connection fails before any byte is sent.
+	srv := httptest.NewServer(http.NotFoundHandler())
+	srv.Close()
+
+	store := newKuboFileStore(srv.URL, http.DefaultClient)
+	_, err := store.Add(context.Background(), "file", []byte("data"))
+	require.ErrorIs(t, err, errNothingStored)
 }
 
 func TestPinataFileStoreAdd(t *testing.T) {
@@ -300,4 +326,5 @@ func TestKuboFileStoreAddStopsWaitingOnCancel(t *testing.T) {
 	cancel()
 	_, err := store.Add(ctx, "file", []byte("data"))
 	require.ErrorIs(t, err, context.Canceled)
+	require.ErrorIs(t, err, errNothingStored)
 }

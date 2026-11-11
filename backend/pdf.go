@@ -44,6 +44,7 @@ func newGenPdfTicketCmd() *commands.Command {
 		},
 		&genPdfTicketConf,
 		func(ctx context.Context, args []string) error {
+			useIPFSGatewayURLFromEnv()
 			return execGenPdfTicket(&genPdfTicketConf)
 		},
 	)

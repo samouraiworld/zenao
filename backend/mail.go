@@ -30,6 +30,7 @@ func newMailCmd() *commands.Command {
 		},
 		commands.NewEmptyConfig(),
 		func(ctx context.Context, args []string) error {
+			useIPFSGatewayURLFromEnv()
 			return execMail()
 		},
 	)
@@ -125,17 +126,25 @@ const defaultIPFSGatewayURL = "http://127.0.0.1:8080"
 // mails and PDFs. The start command sets it from its configuration.
 var ipfsGatewayURL = defaultIPFSGatewayURL
 
-// isLoopbackURL reports whether rawURL points to the local machine
-// (localhost or a loopback address).
-func isLoopbackURL(rawURL string) bool {
+// useIPFSGatewayURLFromEnv applies ZENAO_IPFS_GATEWAY_URL in the commands that
+// render ipfs:// URIs without the configuration of the start command.
+func useIPFSGatewayURLFromEnv() {
+	if val := os.Getenv("ZENAO_IPFS_GATEWAY_URL"); val != "" {
+		ipfsGatewayURL = strings.TrimSuffix(val, "/")
+	}
+}
+
+// isPublicHTTPSURL reports whether rawURL is an https URL that mail
+// recipients can reach: a dotted host name or a public IP address, not
+// localhost, a Docker service name or a private address.
+func isPublicHTTPSURL(rawURL string) bool {
 	u, err := url.Parse(rawURL)
-	if err != nil {
+	if err != nil || u.Scheme != "https" {
 		return false
 	}
 	host := u.Hostname()
-	if host == "localhost" {
-		return true
+	if ip := net.ParseIP(host); ip != nil {
+		return ip.IsGlobalUnicast() && !ip.IsPrivate()
 	}
-	ip := net.ParseIP(host)
-	return ip != nil && ip.IsLoopback()
+	return strings.Contains(host, ".") && !strings.HasSuffix(host, ".localhost")
 }

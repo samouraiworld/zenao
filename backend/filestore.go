@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"io"
 	"mime/multipart"
+	"net"
 	"net/http"
 	"net/url"
 	"strings"
@@ -19,6 +20,26 @@ import (
 
 // ErrStorageFull is returned by FileStore.Add when the store has no room left.
 var ErrStorageFull = errors.New("file storage is full")
+
+// errNothingStored wraps FileStore.Add errors that happen before any byte of
+// the file reaches the store: the caller can give back the upload quotas.
+var errNothingStored = errors.New("nothing stored")
+
+// nothingStored marks err as happening before the file was sent.
+func nothingStored(err error) error {
+	return fmt.Errorf("%w: %w", errNothingStored, err)
+}
+
+// sendError wraps an error of http.Client.Do: a failed connection means the
+// store received nothing; any other error can come after some bytes were sent.
+func sendError(prefix string, err error) error {
+	err = fmt.Errorf("%s: %w", prefix, err)
+	var opErr *net.OpError
+	if errors.As(err, &opErr) && opErr.Op == "dial" {
+		return nothingStored(err)
+	}
+	return err
+}
 
 // FileStore adds a file to IPFS, pins it and returns its CID.
 //
@@ -99,28 +120,28 @@ func (k *kuboFileStore) Add(ctx context.Context, name string, data []byte) (stri
 	select {
 	case k.addSlot <- struct{}{}:
 	case <-ctx.Done():
-		return "", ctx.Err()
+		return "", nothingStored(ctx.Err())
 	}
 	defer func() { <-k.addSlot }()
 
 	if err := k.checkSpace(ctx, len(data)); err != nil {
-		return "", err
+		return "", nothingStored(err)
 	}
 
 	body, contentType, err := multipartFile(data, nil)
 	if err != nil {
-		return "", err
+		return "", nothingStored(err)
 	}
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, k.apiURL+"/api/v0/add?"+kuboAddParams.Encode(), body)
 	if err != nil {
-		return "", err
+		return "", nothingStored(err)
 	}
 	req.Header.Set("Content-Type", contentType)
 
 	resp, err := k.client.Do(req)
 	if err != nil {
-		return "", fmt.Errorf("kubo add: %w", err)
+		return "", sendError("kubo add", err)
 	}
 	defer resp.Body.Close()
 
@@ -275,7 +296,7 @@ func (p *pinataFileStore) Add(ctx context.Context, name string, data []byte) (st
 
 	resp, err := p.client.Do(req)
 	if err != nil {
-		return "", fmt.Errorf("pinata upload: %w", err)
+		return "", sendError("pinata upload", err)
 	}
 	defer resp.Body.Close()
 

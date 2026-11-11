@@ -41,9 +41,13 @@ const (
 	// IPFS gateway stays cached: that content can change.
 	externalTicketImageTTL = 10 * time.Minute
 
-	// maxTicketImageFetches bounds the images downloaded or decoded at once:
-	// each one holds up to maxTicketImageDownload bytes until its decode ends.
-	maxTicketImageFetches = 4
+	// maxTicketImageFetches bounds the images downloaded or decoded at once
+	// from the IPFS gateway, and maxExternalTicketImageFetches from other
+	// URLs: each one holds up to maxTicketImageDownload bytes until its decode
+	// ends. Separate slots keep slow URLs set by organizers from holding the
+	// slots of gateway images.
+	maxTicketImageFetches         = 4
+	maxExternalTicketImageFetches = 2
 )
 
 type ticketImageCacheEntry struct {
@@ -63,9 +67,11 @@ var (
 	// download and decode.
 	ticketImageGroup singleflight.Group
 
-	// ticketImageFetchSlots bounds the downloaded images held in memory: a
-	// fetch keeps its slot from the download to the end of the decode.
-	ticketImageFetchSlots = make(chan struct{}, maxTicketImageFetches)
+	// ticketImageFetchSlots and externalTicketImageFetchSlots bound the
+	// downloaded images held in memory: a fetch keeps its slot from the
+	// download to the end of the decode.
+	ticketImageFetchSlots         = make(chan struct{}, maxTicketImageFetches)
+	externalTicketImageFetchSlots = make(chan struct{}, maxExternalTicketImageFetches)
 
 	// ticketImageDecodeSlot allows one decode at a time: a decode can use
 	// hundreds of MB, and many ticket emails can be built at once.
@@ -108,10 +114,17 @@ func ticketImage(imageURL string) ([]byte, error) {
 }
 
 func fetchTicketImage(imageURL string) ([]byte, error) {
-	if err := acquireTicketImageSlot(ticketImageFetchSlots); err != nil {
+	// Files served by the IPFS gateway never change; other URLs can point to
+	// new content later, so they expire.
+	fromGateway := strings.HasPrefix(imageURL, ipfsGatewayURL+"/ipfs/")
+	slots := externalTicketImageFetchSlots
+	if fromGateway {
+		slots = ticketImageFetchSlots
+	}
+	if err := acquireTicketImageSlot(slots); err != nil {
 		return nil, err
 	}
-	defer func() { <-ticketImageFetchSlots }()
+	defer func() { <-slots }()
 
 	resp, err := ticketImageClient.Get(imageURL)
 	if err != nil {
@@ -134,10 +147,8 @@ func fetchTicketImage(imageURL string) ([]byte, error) {
 		return nil, err
 	}
 
-	// Files served by the IPFS gateway never change; other URLs can point to
-	// new content later, so they expire.
 	entry := ticketImageCacheEntry{data: img}
-	if !strings.HasPrefix(imageURL, ipfsGatewayURL+"/ipfs/") {
+	if !fromGateway {
 		entry.expires = time.Now().Add(externalTicketImageTTL)
 	}
 	ticketImageCacheMu.Lock()
