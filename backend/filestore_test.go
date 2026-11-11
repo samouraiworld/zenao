@@ -4,11 +4,14 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
+	"net"
 	"net/http"
 	"net/http/httptest"
 	"os"
 	"strings"
+	"syscall"
 	"testing"
 
 	"github.com/samouraiworld/zenao/backend/zeni"
@@ -160,6 +163,25 @@ func TestKuboFileStoreAddErrors(t *testing.T) {
 			require.Equal(t, tt.nothingStored, errors.Is(err, errNothingStored))
 		})
 	}
+}
+
+func TestSendError(t *testing.T) {
+	dialErr := &net.OpError{Op: "dial", Net: "tcp", Err: syscall.ECONNREFUSED}
+	require.ErrorIs(t, sendError("kubo add", fmt.Errorf("post: %w", dialErr)), errNothingStored)
+
+	// A connection that fails while writing can follow sent bytes.
+	writeErr := &net.OpError{Op: "write", Net: "tcp", Err: syscall.EPIPE}
+	require.NotErrorIs(t, sendError("kubo add", writeErr), errNothingStored)
+	require.NotErrorIs(t, sendError("kubo add", io.ErrUnexpectedEOF), errNothingStored)
+}
+
+func TestPinataFileStoreAddServerDown(t *testing.T) {
+	srv := httptest.NewServer(http.NotFoundHandler())
+	srv.Close()
+
+	store := &pinataFileStore{apiURL: srv.URL, jwt: "jwt", client: http.DefaultClient}
+	_, err := store.Add(context.Background(), "file", []byte("data"))
+	require.ErrorIs(t, err, errNothingStored)
 }
 
 func TestKuboFileStoreAddNodeDown(t *testing.T) {

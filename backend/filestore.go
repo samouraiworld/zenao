@@ -272,11 +272,11 @@ func (p *pinataFileStore) Add(ctx context.Context, name string, data []byte) (st
 	}
 	optionsJSON, err := json.Marshal(options)
 	if err != nil {
-		return "", err
+		return "", nothingStored(err)
 	}
 	metadataJSON, err := json.Marshal(map[string]string{"name": name})
 	if err != nil {
-		return "", err
+		return "", nothingStored(err)
 	}
 
 	body, contentType, err := multipartFile(data, map[string]string{
@@ -284,12 +284,12 @@ func (p *pinataFileStore) Add(ctx context.Context, name string, data []byte) (st
 		"pinataMetadata": string(metadataJSON),
 	})
 	if err != nil {
-		return "", err
+		return "", nothingStored(err)
 	}
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, p.apiURL+"/pinning/pinFileToIPFS", body)
 	if err != nil {
-		return "", err
+		return "", nothingStored(err)
 	}
 	req.Header.Set("Content-Type", contentType)
 	req.Header.Set("Authorization", "Bearer "+p.jwt)

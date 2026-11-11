@@ -127,13 +127,15 @@ func (h *uploadFileHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	size := int64(len(data))
-	if !h.quota.reserve(user.ID, size) {
+	userWindow, ok := h.quota.reserve(user.ID, size)
+	if !ok {
 		writeUploadError(w, http.StatusTooManyRequests, "Daily Upload Quota Exceeded")
 		return
 	}
-	if !h.totalQuota.reserve(totalQuotaKey, size) {
+	totalWindow, ok := h.totalQuota.reserve(totalQuotaKey, size)
+	if !ok {
 		// Nothing reached the store yet: give the user's bytes back.
-		h.quota.release(user.ID, size)
+		h.quota.release(user.ID, size, userWindow)
 		h.logger.Error("upload-file: daily upload capacity reached", zap.String("user-id", user.ID))
 		writeUploadError(w, http.StatusServiceUnavailable, "Daily Upload Capacity Reached")
 		return
@@ -145,8 +147,8 @@ func (h *uploadFileHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	cid, err := h.store.Add(r.Context(), header.Filename, data)
 	if err != nil {
 		if errors.Is(err, errNothingStored) {
-			h.quota.release(user.ID, size)
-			h.totalQuota.release(totalQuotaKey, size)
+			h.quota.release(user.ID, size, userWindow)
+			h.totalQuota.release(totalQuotaKey, size, totalWindow)
 		}
 		if errors.Is(err, ErrStorageFull) {
 			h.logger.Error("upload-file: storage full", zap.String("user-id", user.ID))
@@ -191,8 +193,9 @@ func newUploadQuota(limit int64, window time.Duration) *uploadQuota {
 	return &uploadQuota{limit: limit, window: window, usage: map[string]*quotaUsage{}, now: time.Now}
 }
 
-// reserve records n bytes for userID and reports whether they fit in the quota.
-func (q *uploadQuota) reserve(userID string, n int64) bool {
+// reserve records n bytes for userID and reports whether they fit in the
+// quota. It returns the start of the window that holds them, for release.
+func (q *uploadQuota) reserve(userID string, n int64) (time.Time, bool) {
 	q.mu.Lock()
 	defer q.mu.Unlock()
 
@@ -211,18 +214,19 @@ func (q *uploadQuota) reserve(userID string, n int64) bool {
 		q.usage[userID] = u
 	}
 	if u.bytes+n > q.limit {
-		return false
+		return u.start, false
 	}
 	u.bytes += n
-	return true
+	return u.start, true
 }
 
-// release gives back n bytes reserved for userID, when nothing was stored.
-func (q *uploadQuota) release(userID string, n int64) {
+// release gives back n bytes reserved for userID in the window that started
+// at window, when nothing was stored. A newer window keeps its bytes.
+func (q *uploadQuota) release(userID string, n int64, window time.Time) {
 	q.mu.Lock()
 	defer q.mu.Unlock()
 
-	if u := q.usage[userID]; u != nil {
+	if u := q.usage[userID]; u != nil && u.start.Equal(window) {
 		u.bytes = max(0, u.bytes-n)
 	}
 }

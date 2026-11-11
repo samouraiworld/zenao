@@ -288,7 +288,8 @@ How it works:
   files and users over 20 MiB per day, then adds the file to kubo through its RPC API and returns
   `{"uri": "ipfs://<cid>"}`. Once all users together reach 1 GiB in a day, uploads answer HTTP 503
   and the backend logs `daily upload capacity reached`. Quotas are kept in memory: restarting the
-  backend (`docker compose -f prod.backend.docker-compose.yml restart backend`) resets them. A failed
+  backend (`docker compose -f prod.backend.docker-compose.yml restart backend`, or
+  `staging.docker-compose.yml` on staging) resets them. A failed
   upload counts too once its bytes reached kubo, which can keep the blocks of an add whose client
   went away.
 - Uploaded files are kept forever. The backend refuses uploads with HTTP 507 once the node reaches
@@ -395,8 +396,7 @@ that copies the `proxy_*` lines of the existing `location /`, then
 
 **4. First start.** Optionally set the storage cap in `~/zenao/.env` (read by docker compose), for
 example `ZENAO_IPFS_STORAGE_MAX=50GB`; keep it well below the free disk space, since backups are
-also written to this disk. Add the `backend.env` line of step 7 first: the backend reads it at
-start. Run the "Deploy Prod" (or "Deploy Staging") workflow. It starts the
+also written to this disk. Run the "Deploy Prod" (or "Deploy Staging") workflow. It starts the
 `ipfs` service after the backend. Run it right after merging: Netlify deploys the frontend from
 `main`, and uploads fail until the backend serves `/files` (they already fail since Pinata
 stopped). Check:
@@ -481,10 +481,10 @@ applied. Back up first (step 6), then check `docker compose -f prod.backend.dock
 - Netlify: set `NEXT_PUBLIC_IPFS_GATEWAY_URL` (`https://ipfs.zenao.io` in production, which is also
   the default; `https://ipfs.staging.zenao.io` for staging). Remove `PINATA_JWT`, `PINATA_GROUP`
   and `NEXT_PUBLIC_GATEWAY_URL`.
-- Production `backend.env`: add `ZENAO_IPFS_GATEWAY_URL=https://ipfs.zenao.io`. Staging
-  `backend.env`: add `ZENAO_IPFS_GATEWAY_URL=https://ipfs.staging.zenao.io`. The default is the
-  local gateway; without this line, mails and ticket PDFs link `127.0.0.1` and the backend logs a
-  warning at start when mails are enabled.
+- `backend.env`: the deploy workflows add `ZENAO_IPFS_GATEWAY_URL=https://ipfs.zenao.io`
+  (staging: `https://ipfs.staging.zenao.io`) when the line is missing, and never change an existing
+  value. The backend default is the local gateway; without this line, mails and ticket PDFs link
+  `127.0.0.1` and the backend logs a warning at start when mails are enabled.
 - GitHub: the `TEST_PINATA_JWT` secret is no longer used.
 
 ### Moving back to Pinata

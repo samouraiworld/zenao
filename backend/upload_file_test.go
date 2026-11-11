@@ -241,3 +241,19 @@ func TestUploadFileDailyTotalQuota(t *testing.T) {
 	require.Equal(t, "Daily Upload Capacity Reached", body["error"])
 	require.Zero(t, quota.usage["user-3"].bytes)
 }
+
+func TestUploadQuotaReleaseKeepsNewerWindow(t *testing.T) {
+	now := time.Unix(0, 0)
+	q := newUploadQuota(100, time.Hour)
+	q.now = func() time.Time { return now }
+
+	oldWindow, ok := q.reserve("user-1", 60)
+	require.True(t, ok)
+
+	// The window resets before the refund of the first reservation lands.
+	now = now.Add(time.Hour)
+	_, ok = q.reserve("user-1", 60)
+	require.True(t, ok)
+	q.release("user-1", 60, oldWindow)
+	require.EqualValues(t, 60, q.usage["user-1"].bytes)
+}
