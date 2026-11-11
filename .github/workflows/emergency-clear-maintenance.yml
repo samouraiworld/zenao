@@ -32,6 +32,9 @@ jobs:
             echo "=== After restore ==="
             grep -n "maintenance\|command" prod.backend.docker-compose.yml || true
             docker compose -f prod.backend.docker-compose.yml up -d --build backend
+            # IPFS node for file uploads, started after the backend leaves
+            # maintenance mode, as in the deploy workflow.
+            docker compose -f prod.backend.docker-compose.yml up -d --wait ipfs
             sleep 10
             docker logs backend --tail 10
 
@@ -51,5 +54,8 @@ jobs:
             echo "=== After restore ==="
             grep -n "maintenance\|command" staging.docker-compose.yml || true
             docker compose -f staging.docker-compose.yml up -d --build backend
+            # IPFS node for file uploads, started after the backend leaves
+            # maintenance mode, as in the deploy workflow.
+            docker compose -f staging.docker-compose.yml up -d --wait ipfs
             sleep 10
             docker logs backend --tail 10
