@@ -482,8 +482,8 @@ applied. Back up first (step 6), then check `docker compose -f prod.backend.dock
   the default; `https://ipfs.staging.zenao.io` for staging). Remove `PINATA_JWT`, `PINATA_GROUP`
   and `NEXT_PUBLIC_GATEWAY_URL`.
 - `backend.env`: the deploy workflows add `ZENAO_IPFS_GATEWAY_URL=https://ipfs.zenao.io`
-  (staging: `https://ipfs.staging.zenao.io`) when the line is missing, and never change an existing
-  value. The backend default is the local gateway; without this line, mails and ticket PDFs link
+  (staging: `https://ipfs.staging.zenao.io`) when the line is missing or empty, and never change a
+  set value. The backend default is the local gateway; without this line, mails and ticket PDFs link
   `127.0.0.1` and the backend logs a warning at start when mails are enabled.
 - GitHub: the `TEST_PINATA_JWT` secret is no longer used.
 

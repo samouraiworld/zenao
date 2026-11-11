@@ -4,14 +4,12 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io"
-	"net"
+	"log"
 	"net/http"
 	"net/http/httptest"
 	"os"
 	"strings"
-	"syscall"
 	"testing"
 
 	"github.com/samouraiworld/zenao/backend/zeni"
@@ -165,14 +163,42 @@ func TestKuboFileStoreAddErrors(t *testing.T) {
 	}
 }
 
-func TestSendError(t *testing.T) {
-	dialErr := &net.OpError{Op: "dial", Net: "tcp", Err: syscall.ECONNREFUSED}
-	require.ErrorIs(t, sendError("kubo add", fmt.Errorf("post: %w", dialErr)), errNothingStored)
+func TestSendRequestNothingStored(t *testing.T) {
+	post := func(t *testing.T, url string) error {
+		req, err := http.NewRequest(http.MethodPost, url, strings.NewReader("file bytes"))
+		require.NoError(t, err)
+		resp, err := sendRequest(newFileStoreHTTPClient(), req, "add")
+		if resp != nil {
+			resp.Body.Close()
+		}
+		return err
+	}
 
-	// A connection that fails while writing can follow sent bytes.
-	writeErr := &net.OpError{Op: "write", Net: "tcp", Err: syscall.EPIPE}
-	require.NotErrorIs(t, sendError("kubo add", writeErr), errNothingStored)
-	require.NotErrorIs(t, sendError("kubo add", io.ErrUnexpectedEOF), errNothingStored)
+	t.Run("connection refused", func(t *testing.T) {
+		srv := httptest.NewServer(http.NotFoundHandler())
+		srv.Close()
+		require.ErrorIs(t, post(t, srv.URL), errNothingStored)
+	})
+
+	t.Run("TLS handshake failure", func(t *testing.T) {
+		// The client does not trust the test certificate.
+		srv := httptest.NewTLSServer(http.NotFoundHandler())
+		defer srv.Close()
+		srv.Config.ErrorLog = log.New(io.Discard, "", 0)
+		require.ErrorIs(t, post(t, srv.URL), errNothingStored)
+	})
+
+	t.Run("connection lost after the headers", func(t *testing.T) {
+		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			conn, _, err := w.(http.Hijacker).Hijack()
+			require.NoError(t, err)
+			conn.Close()
+		}))
+		defer srv.Close()
+		err := post(t, srv.URL)
+		require.Error(t, err)
+		require.NotErrorIs(t, err, errNothingStored)
+	})
 }
 
 func TestPinataFileStoreAddServerDown(t *testing.T) {

@@ -8,10 +8,11 @@ import (
 	"fmt"
 	"io"
 	"mime/multipart"
-	"net"
 	"net/http"
+	"net/http/httptrace"
 	"net/url"
 	"strings"
+	"sync/atomic"
 	"time"
 
 	"github.com/ipfs/go-cid"
@@ -30,15 +31,22 @@ func nothingStored(err error) error {
 	return fmt.Errorf("%w: %w", errNothingStored, err)
 }
 
-// sendError wraps an error of http.Client.Do: a failed connection means the
-// store received nothing; any other error can come after some bytes were sent.
-func sendError(prefix string, err error) error {
-	err = fmt.Errorf("%s: %w", prefix, err)
-	var opErr *net.OpError
-	if errors.As(err, &opErr) && opErr.Op == "dial" {
-		return nothingStored(err)
+// sendRequest sends req with client. When it fails before the request headers
+// were written (connection refused, TLS handshake failure, cancelled context),
+// the store received nothing and the error is marked so. After that point the
+// store may have received part of the file.
+func sendRequest(client *http.Client, req *http.Request, prefix string) (*http.Response, error) {
+	var wrote atomic.Bool
+	trace := &httptrace.ClientTrace{WroteHeaders: func() { wrote.Store(true) }}
+	resp, err := client.Do(req.WithContext(httptrace.WithClientTrace(req.Context(), trace)))
+	if err != nil {
+		err = fmt.Errorf("%s: %w", prefix, err)
+		if !wrote.Load() {
+			return nil, nothingStored(err)
+		}
+		return nil, err
 	}
-	return err
+	return resp, nil
 }
 
 // FileStore adds a file to IPFS, pins it and returns its CID.
@@ -139,9 +147,9 @@ func (k *kuboFileStore) Add(ctx context.Context, name string, data []byte) (stri
 	}
 	req.Header.Set("Content-Type", contentType)
 
-	resp, err := k.client.Do(req)
+	resp, err := sendRequest(k.client, req, "kubo add")
 	if err != nil {
-		return "", sendError("kubo add", err)
+		return "", err
 	}
 	defer resp.Body.Close()
 
@@ -294,9 +302,9 @@ func (p *pinataFileStore) Add(ctx context.Context, name string, data []byte) (st
 	req.Header.Set("Content-Type", contentType)
 	req.Header.Set("Authorization", "Bearer "+p.jwt)
 
-	resp, err := p.client.Do(req)
+	resp, err := sendRequest(p.client, req, "pinata upload")
 	if err != nil {
-		return "", sendError("pinata upload", err)
+		return "", err
 	}
 	defer resp.Body.Close()
 
