@@ -104,6 +104,10 @@ func (p imageFetchPolicy) checkURL(u *url.URL) error {
 	if !isASCII(u.Hostname()) {
 		return fmt.Errorf("%w: non-ASCII host", errImageURLBlocked)
 	}
+	// A trailing dot names the same host but would not match the gateway.
+	if strings.HasSuffix(u.Hostname(), ".") {
+		return fmt.Errorf("%w: host ends with a dot", errImageURLBlocked)
+	}
 
 	hostPort := canonicalHostPort(u)
 	if hostPort == p.gatewayHost {

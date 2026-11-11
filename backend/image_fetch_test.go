@@ -82,6 +82,8 @@ func TestImageFetchBlockedURLs(t *testing.T) {
 		"https://gateway。example/api/v0/id",
 		"https://gate\u00adway.example/api/v0/id",
 		"http://ｌｏｃａｌｈｏｓｔ/a.png",
+		// trailing dot, which would not match the gateway
+		"https://gateway.example./api/v0/id",
 	} {
 		_, err := f.fetch(context.Background(), rawURL)
 		require.ErrorIs(t, err, errImageURLBlocked, rawURL)
