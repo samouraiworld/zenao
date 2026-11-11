@@ -19,3 +19,21 @@ services:
       - 127.0.0.1:16686:16686
     healthcheck:
       test: [CMD, wget, -q, -S, -O, "-", "localhost:14269"]
+
+  # Local IPFS node for file uploads. The backend reaches the RPC API on
+  # 127.0.0.1:5001 and the frontend shows files through the gateway on
+  # 127.0.0.1:8080. Same settings as production (ipfs/zenao-config.sh).
+  ipfs:
+    container_name: zenao-ipfs
+    image: ipfs/kubo:v0.43.1@sha256:b293923d66e490e70ced64df42ea7a6cf7eac2740e3fb29101df18070fa7be48
+    environment:
+      IPFS_PROFILE: server
+    volumes:
+      - ipfs-data:/data/ipfs
+      - ./ipfs/zenao-config.sh:/container-init.d/001-zenao-config.sh:ro
+    ports:
+      - 127.0.0.1:5001:5001
+      - 127.0.0.1:8080:8080
+
+volumes:
+  ipfs-data:

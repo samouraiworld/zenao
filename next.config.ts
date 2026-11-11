@@ -7,6 +7,11 @@ import packageJson from "./package.json";
 
 const withNextIntl = createNextIntlPlugin("./app/i18n/request.ts");
 
+// Public IPFS gateway that serves ipfs:// URIs (see lib/uris.ts).
+const ipfsGateway = new URL(
+  process.env.NEXT_PUBLIC_IPFS_GATEWAY_URL || "https://ipfs.zenao.io",
+);
+
 const nextConfig: NextConfig = {
   env: {
     NEXT_APP_VERSION: packageJson.version,
@@ -18,6 +23,12 @@ const nextConfig: NextConfig = {
       {
         protocol: "https",
         hostname: "**",
+      },
+      // Local kubo gateway in development (http).
+      {
+        protocol: ipfsGateway.protocol === "http:" ? "http" : "https",
+        hostname: ipfsGateway.hostname,
+        port: ipfsGateway.port,
       },
     ],
   },
@@ -42,7 +53,7 @@ const nextConfig: NextConfig = {
   },
   async headers() {
     // Build CSP directives — permissive enough for all integrations
-    // (Clerk, Sentry, Pinata, Stripe, Plausible, Leaflet) while blocking XSS vectors
+    // (Clerk, Sentry, IPFS gateway, Stripe, Plausible, Leaflet) while blocking XSS vectors
     // Dynamically include backend endpoint so CSP works across all environments
     const backendEndpoint =
       process.env.NEXT_PUBLIC_ZENAO_BACKEND_ENDPOINT || "";
@@ -62,10 +73,10 @@ const nextConfig: NextConfig = {
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://unpkg.com",
       "img-src 'self' data: blob: https: http:",
       "font-src 'self' https://fonts.gstatic.com",
-      `connect-src 'self'${backendCspOrigin ? ` ${backendCspOrigin}` : ""} https://*.clerk.accounts.dev https://clerk.zenao.io https://*.clerk.com https://*.sentry.io https://*.ingest.sentry.io https://sentry.samourai.pro https://*.pinata.cloud https://pinata.zenao.io https://api.stripe.com https://plausible.io wss://*.clerk.accounts.dev wss://clerk.zenao.io https://tile.openstreetmap.org https://nominatim.openstreetmap.org`,
+      `connect-src 'self'${backendCspOrigin ? ` ${backendCspOrigin}` : ""} https://*.clerk.accounts.dev https://clerk.zenao.io https://*.clerk.com https://*.sentry.io https://*.ingest.sentry.io https://sentry.samourai.pro ${ipfsGateway.origin} https://api.stripe.com https://plausible.io wss://*.clerk.accounts.dev wss://clerk.zenao.io https://tile.openstreetmap.org https://nominatim.openstreetmap.org`,
       "frame-src 'self' https://js.stripe.com https://*.clerk.accounts.dev https://challenges.cloudflare.com",
       "worker-src 'self' blob:",
-      "media-src 'self' blob:",
+      `media-src 'self' blob: ${ipfsGateway.origin}`,
       "object-src 'none'",
       "base-uri 'self'",
       "form-action 'self'",

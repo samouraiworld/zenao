@@ -6,7 +6,7 @@ import { Image as ImageIcon, Loader2 } from "lucide-react";
 import { cva } from "class-variance-authority";
 import { useTranslations } from "next-intl";
 import { useToast } from "@/hooks/use-toast";
-import { uploadFile } from "@/lib/files";
+import { useUploadFile } from "@/lib/files";
 import { isValidURL, web2URL } from "@/lib/uris";
 import { FormField, FormItem, FormMessage } from "@/components/shadcn/form";
 import { AspectRatio } from "@/components/shadcn/aspect-ratio";
@@ -44,6 +44,7 @@ export const FormFieldImage = <T extends FieldValues>({
   fit?: "cover" | "pad";
 }) => {
   const { toast } = useToast();
+  const uploadFile = useUploadFile();
   const tImages = useTranslations("images");
   const tForms = useTranslations("forms");
   const { field, fieldState } = useController(props);

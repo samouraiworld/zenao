@@ -17,7 +17,7 @@
 import "./commands";
 
 beforeEach(() => {
-  cy.intercept("POST", "/api/files", {
+  cy.intercept("POST", "**/files", {
     statusCode: 200,
     body: { uri: "ipfs://test" },
   });

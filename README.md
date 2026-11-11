@@ -10,7 +10,7 @@ An event management and community platform featuring event creation, community m
 - [Environment Variables Reference](#environment-variables-reference)
 - [Testing](#testing)
 - [Clerk Authentication Setup](#clerk-authentication-setup)
-- [File Uploads with Pinata](#file-uploads-with-pinata)
+- [File Uploads (IPFS)](#file-uploads-ipfs)
 - [Paid Events & Stripe](#paid-events--stripe)
 - [Development Workflows](#development-workflows)
 - [Observability (Optional)](#observability-optional)
@@ -46,7 +46,7 @@ Follow these steps to run the complete stack locally (frontend + backend + datab
 
 **Before you start:** You may need to configure these services:
 - [Clerk Authentication Setup](#clerk-authentication-setup) - If the default test keys have expired
-- [File Uploads with Pinata](#file-uploads-with-pinata) - Required to upload images (e.g., create events)
+- [File Uploads (IPFS)](#file-uploads-ipfs) - Docker runs the local IPFS node needed to upload images (e.g., create events)
 
 ### Option 1: Automated Setup (Recommended)
 
@@ -153,10 +153,8 @@ NEXT_PUBLIC_ZENAO_NAMESPACE=zenao
 # Stripe configuration
 NEXT_PUBLIC_STRIPE_DASHBOARD_URL=https://dashboard.stripe.com/test
 
-# File uploads - See README "File Uploads with Pinata" section
-NEXT_PUBLIC_GATEWAY_URL=pinata.zenao.io
-PINATA_GROUP=f2ecce4d-b615-48ee-8ae8-744145b40dcb  # Optional: for organizing files in Pinata dashboard
-PINATA_JWT="" # Required for uploading images (e.g., to create events)
+# File uploads - See README "File Uploads (IPFS)" section
+NEXT_PUBLIC_IPFS_GATEWAY_URL=http://127.0.0.1:8080  # IPFS gateway, scheme included (default: https://ipfs.zenao.io)
 
 # Observability (optional)
 OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318
@@ -184,6 +182,11 @@ ZENAO_STRIPE_SECRET_KEY=sk_test_...                   # Default: empty (stripe d
 ZENAO_PAID_EVENTS_ENABLED=false                       # Default: false (paid events disabled)
 ZENAO_APP_BASE_URL=                                   # Default: https://zenao.io/
 DISCORD_TOKEN=                                        # Default: empty (Discord disabled)
+ZENAO_FILE_STORE=kubo                                 # Default: kubo (or pinata), see "File Uploads (IPFS)"
+ZENAO_IPFS_API_URL=http://127.0.0.1:5001              # Default: http://127.0.0.1:5001 (kubo RPC API, never public)
+ZENAO_IPFS_GATEWAY_URL=http://127.0.0.1:8080          # Default: http://127.0.0.1:8080 (local gateway for links in mails and PDFs; set in production and staging)
+ZENAO_PINATA_JWT=                                     # Default: empty (only with ZENAO_FILE_STORE=pinata)
+ZENAO_PINATA_GROUP=                                   # Default: empty (optional, with ZENAO_FILE_STORE=pinata)
 ```
 
 ## Testing
@@ -273,42 +276,245 @@ CLERK_SECRET_KEY=sk_test_your_key_here
 export ZENAO_CLERK_SECRET_KEY=sk_test_your_key_here
 ```
 
-## File Uploads with Pinata
+## File Uploads (IPFS)
 
-> **⚠️ Note:** File uploads are required to create events. Without Pinata configured, you cannot upload event images.
+Uploaded files (event images, avatars, audio) are stored on a self-hosted IPFS node
+([kubo](https://github.com/ipfs/kubo)) and referenced in the database as `ipfs://<CIDv1>`.
 
-### Setup
+How it works:
 
-**1. Create a free Pinata account:** [app.pinata.cloud/register](https://app.pinata.cloud/register)
+- The browser posts the file (multipart field `file`) to the backend endpoint `POST /files` with
+  the Clerk session token. The backend rejects anonymous and banned users, files over 5 MiB, HTML
+  files and users over 20 MiB per day, then adds the file to kubo through its RPC API and returns
+  `{"uri": "ipfs://<cid>"}`. Once all users together reach 1 GiB in a day, uploads answer HTTP 503
+  and the backend logs `daily upload capacity reached`. Quotas are kept in memory: restarting the
+  backend (`docker compose -f prod.backend.docker-compose.yml restart backend`, or
+  `staging.docker-compose.yml` on staging) resets them. A failed
+  upload counts too once its bytes reached kubo, which can keep the blocks of an add whose client
+  went away.
+- Uploaded files are kept forever. The backend refuses uploads with HTTP 507 once the node reaches
+  its `Datastore.StorageMax` (`ZENAO_IPFS_STORAGE_MAX`, default `20GB`).
+- The kubo RPC API (port 5001) gives full control of the node: it is never published, and only the
+  backend shares the `ipfs` Docker network with it.
+- Files are shown through the kubo gateway (`/ipfs/<cid>`), served by the host nginx on
+  `https://ipfs.zenao.io` (`https://ipfs.staging.zenao.io` on staging).
+- The node is isolated (`ipfs/zenao-config.sh`): it does not join the public IPFS network and its
+  gateway serves only local files (`Gateway.NoFetch`), so it cannot be used as an open gateway.
+- Files are added with `cid-version=1`, `raw-leaves`, 256 KiB chunks and sha2-256, the same
+  parameters as the former Pinata uploads: the same file gives the same CID on kubo and on Pinata.
 
-**2. Create an API Key:**
-- Dashboard → **API Keys** → **+ New Key**
-- Grant **Files** write permission and **Group** read permission
-- Copy the JWT (shown only once!)
+### Local development
 
-**3. Create a Gateway:**
-- Dashboard → **Gateways** → **+ New Gateway**
-- Copy your gateway domain (e.g., `your-name.mypinata.cloud`)
-
-**4. (Optional) Create a Group:**
-- Dashboard → **Groups** → **+ Create Group**
-- Copy the Group ID (used to organize uploaded files)
-
-**5. Update `.env.local`:**
+`make dev` and `make dev-otel` start the local node from `dev.docker-compose.yml` (Docker
+required). To start it alone:
 
 ```bash
-PINATA_JWT=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-NEXT_PUBLIC_GATEWAY_URL=your-name.mypinata.cloud  # Domain only, no https://
-PINATA_GROUP=your-group-id  # Optional
+docker compose -f dev.docker-compose.yml up -d ipfs
 ```
 
-**6. Restart:** `npm run dev`
+The backend defaults to the RPC API on `http://127.0.0.1:5001`; set
+`NEXT_PUBLIC_IPFS_GATEWAY_URL=http://127.0.0.1:8080` in `.env.local` (already in `.env.example`).
+Use `127.0.0.1`, not `localhost`: kubo redirects `localhost` to subdomain URLs.
 
-### Common Issues
+Integration test against the local node:
 
-**Upload fails:**
-- Check you haven't exceeded 1GB free tier limit
-- Restart dev server after changing `.env.local`
+```bash
+ZENAO_TEST_KUBO_API_URL=http://127.0.0.1:5001 ZENAO_TEST_KUBO_GATEWAY_URL=http://127.0.0.1:8080 \
+  go test ./backend -run TestKuboFileStoreIntegration
+```
+
+### Server runbook
+
+Production is `62.210.92.144` (`prod.backend.docker-compose.yml`), staging is `51.159.98.163`
+(`staging.docker-compose.yml`, domain `ipfs.staging.zenao.io`). Run the steps below on each server,
+as root, in the `zenao` checkout; replace the compose file and domains for staging.
+
+**1. DNS (Gandi, zone `zenao.io`).**
+
+- `ipfs` → `A 62.210.92.144`; `ipfs.staging` → `A 51.159.98.163`.
+- `pinata` → replace the CNAME to Pinata with `A 62.210.92.144`, so that image links in mails
+  already sent keep working for the files present on the node.
+
+**2. nginx site for the gateway.** Create `/etc/nginx/sites-available/ipfs.zenao.io`:
+
+```nginx
+server {
+    listen 80;
+    listen [::]:80;
+    server_name ipfs.zenao.io pinata.zenao.io;
+
+    # Read-only access to /ipfs/<cid> only. No /ipns/, no RPC API.
+    # The regex runs on the decoded path: it refuses "?", "/", "%", spaces
+    # and CR/LF, so only a CID reaches kubo. A query string (dropped here) or
+    # an encoded "%3F" could carry ?filename=x.html, which makes kubo serve
+    # any file as text/html.
+    location ~ "^/ipfs/[A-Za-z0-9]+\z" {
+        limit_except GET HEAD { deny all; }
+        proxy_pass http://127.0.0.1:8080$uri;
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        # Required. Uploaded files are untrusted: a browser must never run them
+        # as a page on a zenao.io origin (SVG files can hold scripts).
+        add_header Content-Security-Policy "sandbox" always;
+        add_header X-Content-Type-Options "nosniff" always;
+    }
+
+    location / {
+        return 404;
+    }
+}
+```
+
+Then enable it and get the certificate (the DNS records of step 1 must resolve first):
+
+```bash
+ln -s /etc/nginx/sites-available/ipfs.zenao.io /etc/nginx/sites-enabled/
+nginx -t && systemctl reload nginx
+certbot --nginx -d ipfs.zenao.io -d pinata.zenao.io
+```
+
+**3. Upload size on the backend site.** nginx refuses request bodies over 1 MB by default. Raise the
+limit for the upload endpoint only: in the `server` block of `api.prod.zenao.io`, add a location
+that copies the `proxy_*` lines of the existing `location /`, then
+`nginx -t && systemctl reload nginx`:
+
+```nginx
+    location = /files {
+        client_max_body_size 6m;
+        # Over the limit, answer in JSON with CORS: the browser can then show
+        # "file too large" instead of a network error.
+        error_page 413 = @upload_too_large;
+        # same proxy_pass and proxy_set_header lines as in "location /"
+    }
+
+    location @upload_too_large {
+        default_type application/json;
+        add_header Access-Control-Allow-Origin $http_origin always;
+        return 413 '{"error":"File Too Large"}';
+    }
+```
+
+**4. First start.** Optionally set the storage cap in `~/zenao/.env` (read by docker compose), for
+example `ZENAO_IPFS_STORAGE_MAX=50GB`; keep it well below the free disk space, since backups are
+also written to this disk. Run the "Deploy Prod" (or "Deploy Staging") workflow. It starts the
+`ipfs` service after the backend. Run it right after merging: Netlify deploys the frontend from
+`main`, and uploads fail until the backend serves `/files` (they already fail since Pinata
+stopped). Check:
+
+```bash
+docker compose -f prod.backend.docker-compose.yml ps ipfs   # healthy
+curl -sI https://ipfs.zenao.io/ipfs/bafkreidfskfo2ld3i75s3d2uf6asiena3jletbz5cy7ostihwoyjclceqa
+```
+
+The `curl` returns 404 until step 5 adds that file.
+
+**5. Restore the default images.** Database rows still reference the former default avatar,
+banners and mail icons by CID. Add the original files to the node. They are in `public/images/`
+once the local default images change is merged, and in commit `88b6eba3` before that. The script
+prints `ok` when the CID matches:
+
+```bash
+git fetch origin
+while read -r cid file; do
+  if [ -f "public/images/$file" ]; then src="cat public/images/$file"; else src="git show 88b6eba3:public/images/$file"; fi
+  got=$($src | docker compose -f prod.backend.docker-compose.yml exec -T ipfs \
+    ipfs add --cid-version=1 --raw-leaves --chunker=size-262144 --pin -Q)
+  [ "$got" = "$cid" ] && echo "ok $file" || echo "MISMATCH $file: $got"
+done <<'EOF'
+bafybeib2gyk2yagrcdrnhpgbaj6an6ghk2liwx2mshhoa6d54y2mheny24 community-image-fallback.png
+bafkreiaknq3mxzx5ulryv5tnikjkntmckvz3h4mhjyjle4zbtqkwhyb5xa mail-calendar-icon.png
+bafkreifqabflxtsqvaggg2kw4lyju3pckq4osun4vdlltsn7lal7ak5hli mail-logo.jpg
+bafkreidfskfo2ld3i75s3d2uf6asiena3jletbz5cy7ostihwoyjclceqa mail-pin-icon.png
+bafybeigirez6x4hn5ghchng5eoxoi2bkcglaybuz4np6joub6zja5om6l4 manifesto-image.png
+bafybeidp4z4cywvdzoyqgdolcqmmxeug62qukpl3nfumjquqragxwr7bny profile-avatar-fallback.png
+bafybeidrbpiyfvwsel6fxb7wl4p64tymnhgd7xnt3nowquqymtllrq67uy user-default-avatar.png
+EOF
+```
+
+Other files uploaded to Pinata before it stopped are lost unless someone has a copy.
+
+**6. Backups.** `scripts/ipfs-backup.sh` exports each new pinned file once as a CAR file, without
+stopping kubo, copies it to a Scaleway Object Storage bucket with rclone (run from a pinned Docker
+image), then deletes the local copy; `/root/ipfs-backup/exported.txt` lists the files already
+backed up. Until a run succeeds, a new upload exists only on the server disk. Create the bucket and
+an API key in the Scaleway console, then write `/root/ipfs-backup.env` (`chmod 600`):
+
+```bash
+RCLONE_CONFIG_SCW_TYPE=s3
+RCLONE_CONFIG_SCW_PROVIDER=Scaleway
+RCLONE_CONFIG_SCW_REGION=fr-par
+RCLONE_CONFIG_SCW_ENDPOINT=s3.fr-par.scw.cloud
+RCLONE_CONFIG_SCW_ACCESS_KEY_ID=<access key>
+RCLONE_CONFIG_SCW_SECRET_ACCESS_KEY=<secret key>
+```
+
+Give the Scaleway key access to this bucket only, with list, read and write but no delete (rclone
+checks each object after upload), and turn on bucket versioning, so that a compromised server
+cannot erase the backups.
+
+Run it once by hand, then add an hourly cron entry (`crontab -e`). The script exits with a non-zero
+status and an `ERROR` line in the log when the node or the bucket is unreachable:
+
+```bash
+15 * * * * cd /root/zenao && scripts/ipfs-backup.sh prod.backend.docker-compose.yml /root/ipfs-backup scw:<bucket>/prod /root/ipfs-backup.env >> /var/log/zenao-ipfs-backup.log 2>&1
+```
+
+Restore (new server or lost volume), after step 4: download the CAR files from the bucket, then
+import them:
+
+```bash
+mkdir -p /root/ipfs-restore
+docker run --rm --env-file /root/ipfs-backup.env -v /root/ipfs-restore:/restore \
+  rclone/rclone:1.75.2@sha256:2687085f718d3c628f7fdfb77c52a1d344332aed543110bb88088f2c70d43eb5 \
+  copy scw:<bucket>/prod /restore
+for car in /root/ipfs-restore/*.car; do
+  docker compose -f prod.backend.docker-compose.yml exec -T ipfs ipfs dag import --pin-roots < "$car"
+done
+```
+
+**Upgrading kubo.** Change the image in the compose files and deploy. `ipfs/zenao-config.sh` runs
+`ipfs repo migrate` at each start, so a new repo format is migrated before the settings are
+applied. Back up first (step 6), then check `docker compose -f prod.backend.docker-compose.yml logs ipfs`.
+
+**7. Environment variables.**
+
+- Netlify: set `NEXT_PUBLIC_IPFS_GATEWAY_URL` (`https://ipfs.zenao.io` in production, which is also
+  the default; `https://ipfs.staging.zenao.io` for staging). Remove `PINATA_JWT`, `PINATA_GROUP`
+  and `NEXT_PUBLIC_GATEWAY_URL`.
+- `backend.env`: the deploy workflows add `ZENAO_IPFS_GATEWAY_URL=https://ipfs.zenao.io`
+  (staging: `https://ipfs.staging.zenao.io`) when the line is missing or empty, and never change a
+  set value. The backend default is the local gateway; without this line, mails and ticket PDFs link
+  `127.0.0.1` and the backend logs a warning at start when mails are enabled.
+- GitHub: the `TEST_PINATA_JWT` secret is no longer used.
+
+### Moving back to Pinata
+
+The backend can store files on Pinata instead of kubo, with configuration only. CIDs stay the same.
+Docker compose reads `backend.env` only when it creates the backend container (`docker compose up`,
+as the deploy workflows do); `docker compose restart` keeps the old values. Run no other workflow
+between steps 1 and 4: any `docker compose up` of the backend would apply step 1 early.
+
+1. In `backend.env`: `ZENAO_FILE_STORE=pinata`, `ZENAO_PINATA_JWT=<JWT with Files write>`,
+   optionally `ZENAO_PINATA_GROUP=<group id>`, and `ZENAO_IPFS_GATEWAY_URL=https://pinata.zenao.io`.
+2. Copy the files of the kubo node to Pinata. The command runs in a new container, so it reads the
+   updated `backend.env`; it checks that Pinata returns the same CID and lists the CIDs missing on
+   the node (files already lost):
+
+   ```bash
+   docker compose -f prod.backend.docker-compose.yml run --rm --no-deps --entrypoint /bin/zenao-backend \
+     backend copy-ipfs-files -ipfs-api-url http://ipfs:5001
+   ```
+
+   Add `-dry-run` first to list the CIDs and check which ones are on the node.
+3. DNS: point `pinata` back to the Pinata dedicated gateway (CNAME), then wait for the old record to
+   expire (its TTL). Until step 4, only links in mails sent before the move to kubo use
+   `pinata.zenao.io`, and step 2 copied their files to Pinata.
+4. In one go: on Netlify, set `NEXT_PUBLIC_IPFS_GATEWAY_URL=https://pinata.zenao.io` and redeploy the
+   frontend; then redeploy the backend (the "Deploy Prod" workflow) to apply `backend.env`. New
+   uploads now go to Pinata, and the frontend reads them there.
+5. Run the copy of step 2 again right away. Files uploaded to kubo between steps 2 and 4 do not
+   render until this second copy adds them to Pinata. The kubo node gets no upload after step 4, so
+   this copy is complete; the other files get the same CIDs again.
 
 ## Paid Events & Stripe
 

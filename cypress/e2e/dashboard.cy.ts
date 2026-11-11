@@ -7,7 +7,7 @@ import {
 } from "../support/helpers";
 
 describe("dashboard", () => {
-  // NOTE: this test requires a valid pinata upload setup in the nextjs server
+  // NOTE: file uploads are mocked in cypress/support/e2e.ts
 
   it("prepare state", () => {
     reset();

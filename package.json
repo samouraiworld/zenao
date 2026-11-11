@@ -77,7 +77,6 @@
     "nextjs-toploader": "^3.7.15",
     "nuqs": "^2.4.1",
     "patch-package": "^8.0.0",
-    "pinata-web3": "^0.5.4",
     "react": "19.1.1",
     "react-day-picker": "^9.5.0",
     "react-dom": "19.1.1",

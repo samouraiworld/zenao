@@ -19,7 +19,7 @@ import Heading from "@/components/widgets/texts/heading";
 import { cn } from "@/lib/tailwind";
 import { PortfolioItem, PortfolioUploadVideoSchemaType } from "@/types/schemas";
 import { useToast } from "@/hooks/use-toast";
-import { uploadFile } from "@/lib/files";
+import { useUploadFile } from "@/lib/files";
 import { captureException } from "@/lib/report";
 
 const MemoizedVideoPreview = memo(({ uri }: { uri: string }) => (
@@ -43,6 +43,7 @@ export function PortfolioTab({
   ) => Promise<void>;
 }) {
   const { toast } = useToast();
+  const uploadFile = useUploadFile();
 
   const [localPortfolio, setLocalPortfolio] =
     useState<PortfolioItem[]>(portfolioItems);

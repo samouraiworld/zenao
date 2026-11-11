@@ -6,8 +6,6 @@ import (
 	"embed"
 	"flag"
 	"fmt"
-	"io"
-	"net/http"
 	"os"
 	"time"
 
@@ -46,6 +44,7 @@ func newGenPdfTicketCmd() *commands.Command {
 		},
 		&genPdfTicketConf,
 		func(ctx context.Context, args []string) error {
+			useIPFSGatewayURLFromEnv()
 			return execGenPdfTicket(&genPdfTicketConf)
 		},
 	)
@@ -261,54 +260,24 @@ func drawImagePlaceholder(pdf *fpdf.Fpdf, x, y, width, height float64) {
 }
 
 func embedImageURL(pdf *fpdf.Fpdf, imageURI string, x, y, width, height float64) error {
-	optimizedURL := fmt.Sprintf("%s?img-width=1280&img-height=720&img-quality=75&img-fit=cover", imageURI)
-	resp, err := http.Get(optimizedURL)
+	img, err := ticketImage(imageURI)
 	if err != nil {
-		return fmt.Errorf("failed to download image: %w", err)
-	}
-	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("failed to download image: %d", resp.StatusCode)
-	}
-	defer resp.Body.Close()
-
-	bodyStart, err := io.ReadAll(io.LimitReader(resp.Body, 512))
-	if err != nil {
-		return fmt.Errorf("failed to read image data: %w", err)
+		return err
 	}
 
-	var fileExt string
-	contentType := http.DetectContentType(bodyStart)
-	switch contentType {
-	case "image/jpeg":
-		fileExt = ".jpg"
-	case "image/png":
-		fileExt = ".png"
-	case "image/gif":
-		fileExt = ".gif"
-	default:
-		return fmt.Errorf("unsupported image type: %s", contentType)
+	if pdf.Err() {
+		// An earlier error is not ours to clear.
+		return fmt.Errorf("pdf already failed: %w", pdf.Error())
 	}
-
-	imgFile, err := os.CreateTemp("", "event-image-*"+fileExt)
-	if err != nil {
-		return fmt.Errorf("failed to create temporary file: %w", err)
+	opts := fpdf.ImageOptions{ImageType: "JPG"}
+	info := pdf.RegisterImageOptionsReader(imageURI, opts, bytes.NewReader(img))
+	if pdf.Err() || info == nil {
+		err := pdf.Error()
+		// fpdf ignores every call after an error: clear it so that the caller
+		// can still draw the placeholder.
+		pdf.ClearError()
+		return fmt.Errorf("failed to register image: %v", err)
 	}
-	defer os.Remove(imgFile.Name())
-	defer imgFile.Close()
-
-	_, err = imgFile.Write(bodyStart)
-	if err != nil {
-		return fmt.Errorf("failed to write image data: %w", err)
-	}
-	_, err = io.Copy(imgFile, resp.Body)
-	if err != nil {
-		return fmt.Errorf("failed to copy image data: %w", err)
-	}
-
-	pdf.ImageOptions(imgFile.Name(), x, y, width, height, false, fpdf.ImageOptions{
-		ReadDpi:               true,
-		AllowNegativePosition: false,
-	}, 0, "")
-
+	pdf.ImageOptions(imageURI, x, y, width, height, false, opts, 0, "")
 	return nil
 }

@@ -15,7 +15,7 @@ import { login, logout, reset, toastShouldContain } from "../support/helpers";
 // XXX: find a way to check for images
 
 describe("main", () => {
-  // NOTE: this test requires a valid pinata upload setup in the nextjs server
+  // NOTE: file uploads are mocked in cypress/support/e2e.ts
 
   beforeEach(() => {
     // Set viewport large enough to show header labels

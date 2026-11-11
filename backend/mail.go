@@ -6,6 +6,8 @@ import (
 	"encoding/base64"
 	"fmt"
 	"html/template"
+	"net"
+	"net/url"
 	"os"
 	"strings"
 	"time"
@@ -28,6 +30,7 @@ func newMailCmd() *commands.Command {
 		},
 		commands.NewEmptyConfig(),
 		func(ctx context.Context, args []string) error {
+			useIPFSGatewayURLFromEnv()
 			return execMail()
 		},
 	)
@@ -110,8 +113,38 @@ func web2URL(uri string) string {
 		return uri
 	}
 	withoutScheme := strings.TrimPrefix(uri, "ipfs://")
-	res := fmt.Sprintf(`https://%s/ipfs/%s`, gatewayDomain, withoutScheme)
+	res := fmt.Sprintf(`%s/ipfs/%s`, ipfsGatewayURL, withoutScheme)
 	return res
 }
 
-const gatewayDomain = `pinata.zenao.io`
+// defaultIPFSGatewayURL is the gateway of the local kubo node started by
+// dev.docker-compose.yml. Production and staging set ZENAO_IPFS_GATEWAY_URL in
+// backend.env.
+const defaultIPFSGatewayURL = "http://127.0.0.1:8080"
+
+// ipfsGatewayURL is the public IPFS gateway used to render ipfs:// URIs in
+// mails and PDFs. The start command sets it from its configuration.
+var ipfsGatewayURL = defaultIPFSGatewayURL
+
+// useIPFSGatewayURLFromEnv applies ZENAO_IPFS_GATEWAY_URL in the commands that
+// render ipfs:// URIs without the configuration of the start command.
+func useIPFSGatewayURLFromEnv() {
+	if val := os.Getenv("ZENAO_IPFS_GATEWAY_URL"); val != "" {
+		ipfsGatewayURL = strings.TrimSuffix(val, "/")
+	}
+}
+
+// isPublicHTTPSURL reports whether rawURL is an https URL that mail
+// recipients can reach: a dotted host name or a public IP address, not
+// localhost, a Docker service name or a private address.
+func isPublicHTTPSURL(rawURL string) bool {
+	u, err := url.Parse(rawURL)
+	if err != nil || u.Scheme != "https" {
+		return false
+	}
+	host := u.Hostname()
+	if ip := net.ParseIP(host); ip != nil {
+		return ip.IsGlobalUnicast() && !ip.IsPrivate()
+	}
+	return strings.Contains(host, ".") && !strings.HasSuffix(host, ".localhost")
+}
