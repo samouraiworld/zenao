@@ -12,6 +12,7 @@ import (
 	"strings"
 	"syscall"
 	"time"
+	"unicode/utf8"
 )
 
 // Event images are set by event organizers, so the server must not fetch
@@ -58,8 +59,8 @@ func newImageFetchPolicy(gatewayURL string) (imageFetchPolicy, error) {
 	if u.Scheme != "http" && u.Scheme != "https" {
 		return imageFetchPolicy{}, fmt.Errorf("gateway URL scheme must be http or https: %q", gatewayURL)
 	}
-	if u.Hostname() == "" {
-		return imageFetchPolicy{}, fmt.Errorf("gateway URL has no host: %q", gatewayURL)
+	if u.Hostname() == "" || !isASCII(u.Hostname()) {
+		return imageFetchPolicy{}, fmt.Errorf("gateway URL host must be non-empty ASCII: %q", gatewayURL)
 	}
 	return imageFetchPolicy{
 		gatewayScheme: u.Scheme,
@@ -98,6 +99,11 @@ func (p imageFetchPolicy) checkURL(u *url.URL) error {
 	if u.Hostname() == "" {
 		return fmt.Errorf("%w: no host", errImageURLBlocked)
 	}
+	// net/http dials the IDNA form of a non-ASCII host, which could differ
+	// from the host compared here and match the gateway at dial time only.
+	if !isASCII(u.Hostname()) {
+		return fmt.Errorf("%w: non-ASCII host", errImageURLBlocked)
+	}
 
 	hostPort := canonicalHostPort(u)
 	if hostPort == p.gatewayHost {
@@ -116,13 +122,31 @@ func (p imageFetchPolicy) checkURL(u *url.URL) error {
 }
 
 // isGatewayContentPath reports whether a decoded URL path stays under
-// /ipfs/, with no dot segment a server could resolve elsewhere.
+// /ipfs/. Only unreserved characters and slashes are accepted, so the path
+// sent is the path checked, and no dot segment, escape or backslash can be
+// resolved elsewhere by the gateway or a proxy in front of it.
 func isGatewayContentPath(p string) bool {
 	if !strings.HasPrefix(p, imageFetchGatewayPathRoot) {
 		return false
 	}
+	for i := 0; i < len(p); i++ {
+		c := p[i]
+		if !(c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z' || c >= '0' && c <= '9' ||
+			c == '-' || c == '.' || c == '_' || c == '~' || c == '/') {
+			return false
+		}
+	}
 	for _, segment := range strings.Split(p, "/") {
 		if segment == "." || segment == ".." {
+			return false
+		}
+	}
+	return true
+}
+
+func isASCII(s string) bool {
+	for i := 0; i < len(s); i++ {
+		if s[i] >= utf8.RuneSelf {
 			return false
 		}
 	}
@@ -134,20 +158,19 @@ var nonPublicImagePrefixes = []netip.Prefix{
 	netip.MustParsePrefix("100.64.0.0/10"),   // shared address space (CGNAT)
 	netip.MustParsePrefix("192.0.0.0/24"),    // IETF protocol assignments
 	netip.MustParsePrefix("192.0.2.0/24"),    // documentation
+	netip.MustParsePrefix("192.88.99.0/24"),  // deprecated 6to4 relay anycast
 	netip.MustParsePrefix("198.18.0.0/15"),   // benchmarking
 	netip.MustParsePrefix("198.51.100.0/24"), // documentation
 	netip.MustParsePrefix("203.0.113.0/24"),  // documentation
 	netip.MustParsePrefix("240.0.0.0/4"),     // reserved, broadcast
-	netip.MustParsePrefix("::/96"),           // IPv4-compatible, unspecified, loopback
-	netip.MustParsePrefix("::ffff:0:0:0/96"), // IPv4-translated
-	netip.MustParsePrefix("64:ff9b::/96"),    // NAT64
-	netip.MustParsePrefix("64:ff9b:1::/48"),  // local-use NAT64
-	netip.MustParsePrefix("100::/64"),        // discard
-	netip.MustParsePrefix("2001::/32"),       // Teredo
+	netip.MustParsePrefix("2001::/23"),       // IETF protocol assignments (Teredo, benchmarking, ORCHID)
 	netip.MustParsePrefix("2001:db8::/32"),   // documentation
 	netip.MustParsePrefix("2002::/16"),       // 6to4
-	netip.MustParsePrefix("fec0::/10"),       // deprecated site-local
+	netip.MustParsePrefix("3fff::/20"),       // documentation
 }
+
+// globalUnicastIPv6 is the only IPv6 block allocated for global unicast.
+var globalUnicastIPv6 = netip.MustParsePrefix("2000::/3")
 
 // isPublicImageAddr reports whether addr is a public unicast address. It
 // refuses loopback, private, link-local (including cloud metadata),
@@ -156,6 +179,11 @@ var nonPublicImagePrefixes = []netip.Prefix{
 func isPublicImageAddr(addr netip.Addr) bool {
 	addr = addr.Unmap()
 	if !addr.IsValid() || !addr.IsGlobalUnicast() || addr.IsPrivate() {
+		return false
+	}
+	// Outside 2000::/3: IPv4-compatible, IPv4-translated, NAT64, discard,
+	// site-local and unallocated space.
+	if addr.Is6() && !globalUnicastIPv6.Contains(addr) {
 		return false
 	}
 	for _, prefix := range nonPublicImagePrefixes {
@@ -205,17 +233,23 @@ func (f *imageFetcher) dialContext(ctx context.Context, network, address string)
 	dialer := &net.Dialer{Timeout: imageFetchDialTimeout}
 	if strings.ToLower(address) != f.policy.gatewayHost {
 		dialer.Control = func(_, dialed string, _ syscall.RawConn) error {
-			addrPort, err := netip.ParseAddrPort(dialed)
-			if err != nil {
-				return fmt.Errorf("%w: address %q", errImageURLBlocked, dialed)
-			}
-			if !f.policy.allowAddr(addrPort.Addr()) {
-				return fmt.Errorf("%w: address %s", errImageURLBlocked, addrPort.Addr())
-			}
-			return nil
+			return f.policy.checkDialedAddr(dialed)
 		}
 	}
 	return dialer.DialContext(ctx, network, address)
+}
+
+// checkDialedAddr applies the address part of the policy to the ip:port
+// about to be connected, for any host other than the gateway.
+func (p imageFetchPolicy) checkDialedAddr(dialed string) error {
+	addrPort, err := netip.ParseAddrPort(dialed)
+	if err != nil {
+		return fmt.Errorf("%w: address %q", errImageURLBlocked, dialed)
+	}
+	if !p.allowAddr(addrPort.Addr()) {
+		return fmt.Errorf("%w: address %s", errImageURLBlocked, addrPort.Addr())
+	}
+	return nil
 }
 
 // fetch downloads rawURL under the policy and returns its body.

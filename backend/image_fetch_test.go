@@ -11,6 +11,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -24,6 +25,7 @@ func TestIsPublicImageAddr(t *testing.T) {
 		"::", "::1", "fe80::1", "fc00::1", "fd12:3456::1", "fec0::1", "ff02::1",
 		"::ffff:127.0.0.1", "::ffff:169.254.169.254", "::ffff:10.0.0.1", "::ffff:0.0.0.0",
 		"::127.0.0.1", "64:ff9b::a9fe:a9fe", "2002:7f00:1::1", "2001::1", "2001:db8::1",
+		"192.88.99.1", "2001:2::1", "2001:20::1", "3fff::1", "4000::1", "5f00::1", "100::1",
 	}
 	for _, s := range blocked {
 		require.False(t, isPublicImageAddr(netip.MustParseAddr(s)), s)
@@ -71,6 +73,15 @@ func TestImageFetchBlockedURLs(t *testing.T) {
 		"https://gateway.example/ipfs/../api/v0/id",
 		"https://gateway.example/ipfs/%2e%2e/api/v0/id",
 		"https://gateway.example/ipns/example.com",
+		"https://gateway.example/ipfs/%252e%252e/api/v0/id",
+		"https://gateway.example/ipfs/..%5C..%5Capi/v0/id",
+		"https://gateway.example/ipfs/bafy;/a.png",
+		"http://gateway.example:443/ipfs/bafy",
+		// non-ASCII hosts, which net/http dials in their IDNA form
+		"https://ｇateway.example/api/v0/id",
+		"https://gateway。example/api/v0/id",
+		"https://gate\u00adway.example/api/v0/id",
+		"http://ｌｏｃａｌｈｏｓｔ/a.png",
 	} {
 		_, err := f.fetch(context.Background(), rawURL)
 		require.ErrorIs(t, err, errImageURLBlocked, rawURL)
@@ -79,7 +90,7 @@ func TestImageFetchBlockedURLs(t *testing.T) {
 
 func TestImageFetchTrustedGateway(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		require.Equal(t, "/ipfs/bafy/a.png", r.URL.Path)
+		assert.Equal(t, "/ipfs/bafy/a.png", r.URL.Path)
 		_, _ = w.Write([]byte("image-bytes"))
 	}))
 	defer srv.Close()
@@ -128,6 +139,11 @@ func TestImageFetchRedirects(t *testing.T) {
 			http.Redirect(w, r, gatewayURL+"/api/v0/id", http.StatusFound)
 		case "/ipfs/loop":
 			http.Redirect(w, r, gatewayURL+"/ipfs/loop", http.StatusFound)
+		case "/ipfs/chain/1", "/ipfs/chain/2", "/ipfs/chain/3", "/ipfs/chain/4":
+			next := r.URL.Path[len(r.URL.Path)-1] - '0' + 1
+			http.Redirect(w, r, fmt.Sprintf("%s/ipfs/chain/%d", gatewayURL, next), http.StatusFound)
+		case "/ipfs/chain/5":
+			_, _ = w.Write([]byte("image-bytes"))
 		case "/ipfs/to-image":
 			http.Redirect(w, r, gatewayURL+"/ipfs/image", http.StatusFound)
 		case "/ipfs/image":
@@ -153,6 +169,26 @@ func TestImageFetchRedirects(t *testing.T) {
 	data, err := f.fetch(context.Background(), gateway.URL+"/ipfs/to-image")
 	require.NoError(t, err)
 	require.Equal(t, "image-bytes", string(data))
+
+	// Three redirects are followed, a fourth is refused.
+	data, err = f.fetch(context.Background(), gateway.URL+"/ipfs/chain/2")
+	require.NoError(t, err)
+	require.Equal(t, "image-bytes", string(data))
+	_, err = f.fetch(context.Background(), gateway.URL+"/ipfs/chain/1")
+	require.ErrorIs(t, err, errImageURLBlocked)
+}
+
+func TestImageFetchCheckDialedAddr(t *testing.T) {
+	policy := mustImageFetchPolicy(t, "https://gateway.example")
+	for _, dialed := range []string{"8.8.8.8:443", "[2606:4700:4700::1111]:80"} {
+		require.NoError(t, policy.checkDialedAddr(dialed), dialed)
+	}
+	for _, dialed := range []string{
+		"127.0.0.1:80", "169.254.169.254:80", "[::1]:443", "[::ffff:127.0.0.1]:80",
+		"[fe80::1%eth0]:80", "[64:ff9b::a9fe:a9fe]:80", "not-an-address", "example.com:80",
+	} {
+		require.ErrorIs(t, policy.checkDialedAddr(dialed), errImageURLBlocked, dialed)
+	}
 }
 
 func TestImageFetchLimits(t *testing.T) {
