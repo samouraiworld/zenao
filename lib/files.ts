@@ -12,9 +12,11 @@ const filesErrorResponseSchema = z.object({
 
 export type FilesPostResponse = z.infer<typeof filesPostResponseSchema>;
 
-const uploadEndpoint = `${
+// Drop a trailing slash: the backend redirects "//files", and a CORS
+// preflight cannot follow a redirect.
+const uploadEndpoint = `${(
   process.env.NEXT_PUBLIC_ZENAO_BACKEND_ENDPOINT || "http://localhost:4242"
-}/files`;
+).replace(/\/+$/, "")}/files`;
 
 export const uploadFile = async (
   file: File,

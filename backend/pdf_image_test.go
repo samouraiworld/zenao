@@ -10,7 +10,9 @@ import (
 	"image/png"
 	"net/http"
 	"net/http/httptest"
+	"sync/atomic"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/require"
 )
@@ -78,6 +80,33 @@ func TestTicketImageCacheExpiry(t *testing.T) {
 	require.True(t, gatewayEntry.expires.IsZero(), "IPFS gateway files never change")
 	require.True(t, otherCached)
 	require.False(t, otherEntry.expires.IsZero(), "other URLs can change: they expire")
+}
+
+func TestTicketImageFetchSlotsBoundDownloads(t *testing.T) {
+	var hits atomic.Int32
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		hits.Add(1)
+	}))
+	defer srv.Close()
+
+	oldWait := ticketImageSlotWait
+	ticketImageSlotWait = 10 * time.Millisecond
+	defer func() { ticketImageSlotWait = oldWait }()
+
+	// Every fetch slot is taken: a new image is not downloaded at all, so its
+	// bytes are not held in memory while it waits.
+	for range maxTicketImageFetches {
+		ticketImageFetchSlots <- struct{}{}
+	}
+	defer func() {
+		for range maxTicketImageFetches {
+			<-ticketImageFetchSlots
+		}
+	}()
+
+	_, err := ticketImage(srv.URL + "/images/busy.png")
+	require.ErrorIs(t, err, errTicketImageBusy)
+	require.Zero(t, hits.Load())
 }
 
 func TestCoverJPEG(t *testing.T) {

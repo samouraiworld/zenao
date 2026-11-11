@@ -184,10 +184,10 @@ func TestUploadFileDailyQuota(t *testing.T) {
 	}}
 	h := newUploadFileHandler(zap.NewNop(), &stubAuth{user: &zeni.AuthUser{ID: "user-1"}}, store, false)
 	now := time.Unix(0, 0)
-	h.quota = newUploadQuota(int64(2*len(pngHeader)), time.Hour)
+	h.quota = newUploadQuota(int64(3*len(pngHeader)), time.Hour)
 	h.quota.now = func() time.Time { return now }
 
-	// A failed upload does not use the quota.
+	// A failed upload still uses the quota: kubo can keep what it received.
 	code, _ := serveUpload(h, uploadRequest(t, "file", pngHeader))
 	require.Equal(t, http.StatusInternalServerError, code)
 
@@ -209,4 +209,27 @@ func TestUploadFileDailyQuota(t *testing.T) {
 	now = now.Add(time.Hour)
 	code, _ = serveUpload(h, uploadRequest(t, "file", pngHeader))
 	require.Equal(t, http.StatusOK, code)
+}
+
+func TestUploadFileDailyTotalQuota(t *testing.T) {
+	store := &fakeFileStore{result: func(string, []byte) (string, error) { return "bafkreitest", nil }}
+	quota := newUploadQuota(int64(10*len(pngHeader)), time.Hour)
+	totalQuota := newUploadQuota(int64(2*len(pngHeader)), time.Hour)
+	handler := func(userID string) *uploadFileHandler {
+		h := newUploadFileHandler(zap.NewNop(), &stubAuth{user: &zeni.AuthUser{ID: userID}}, store, false)
+		h.quota, h.totalQuota = quota, totalQuota
+		return h
+	}
+
+	for _, id := range []string{"user-1", "user-2"} {
+		code, _ := serveUpload(handler(id), uploadRequest(t, "file", pngHeader))
+		require.Equal(t, http.StatusOK, code)
+	}
+
+	// All users together reached the daily total: a third user is refused
+	// and keeps its own quota, since nothing was stored.
+	code, body := serveUpload(handler("user-3"), uploadRequest(t, "file", pngHeader))
+	require.Equal(t, http.StatusServiceUnavailable, code)
+	require.Equal(t, "Daily Upload Capacity Reached", body["error"])
+	require.Zero(t, quota.usage["user-3"].bytes)
 }

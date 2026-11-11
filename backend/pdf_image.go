@@ -41,8 +41,9 @@ const (
 	// IPFS gateway stays cached: that content can change.
 	externalTicketImageTTL = 10 * time.Minute
 
-	// ticketImageSlotWait bounds the wait for the decode slot.
-	ticketImageSlotWait = 30 * time.Second
+	// maxTicketImageFetches bounds the images downloaded or decoded at once:
+	// each one holds up to maxTicketImageDownload bytes until its decode ends.
+	maxTicketImageFetches = 4
 )
 
 type ticketImageCacheEntry struct {
@@ -62,10 +63,30 @@ var (
 	// download and decode.
 	ticketImageGroup singleflight.Group
 
+	// ticketImageFetchSlots bounds the downloaded images held in memory: a
+	// fetch keeps its slot from the download to the end of the decode.
+	ticketImageFetchSlots = make(chan struct{}, maxTicketImageFetches)
+
 	// ticketImageDecodeSlot allows one decode at a time: a decode can use
 	// hundreds of MB, and many ticket emails can be built at once.
 	ticketImageDecodeSlot = make(chan struct{}, 1)
+
+	// ticketImageSlotWait bounds the wait for a fetch slot or the decode slot.
+	ticketImageSlotWait = 30 * time.Second
 )
+
+var errTicketImageBusy = errors.New("image processing is busy")
+
+// acquireTicketImageSlot takes a slot of slots, waiting at most
+// ticketImageSlotWait. The caller must release it with <-slots.
+func acquireTicketImageSlot(slots chan struct{}) error {
+	select {
+	case slots <- struct{}{}:
+		return nil
+	case <-time.After(ticketImageSlotWait):
+		return errTicketImageBusy
+	}
+}
 
 // ticketImage downloads the image at imageURL and returns it as a 1280x720
 // JPEG, cropped to fill the frame.
@@ -87,6 +108,11 @@ func ticketImage(imageURL string) ([]byte, error) {
 }
 
 func fetchTicketImage(imageURL string) ([]byte, error) {
+	if err := acquireTicketImageSlot(ticketImageFetchSlots); err != nil {
+		return nil, err
+	}
+	defer func() { <-ticketImageFetchSlots }()
+
 	resp, err := ticketImageClient.Get(imageURL)
 	if err != nil {
 		return nil, fmt.Errorf("failed to download image: %w", err)
@@ -125,10 +151,8 @@ func fetchTicketImage(imageURL string) ([]byte, error) {
 
 // decodeTicketImage runs coverJPEG in the single decode slot.
 func decodeTicketImage(data []byte) ([]byte, error) {
-	select {
-	case ticketImageDecodeSlot <- struct{}{}:
-	case <-time.After(ticketImageSlotWait):
-		return nil, errors.New("image processing is busy")
+	if err := acquireTicketImageSlot(ticketImageDecodeSlot); err != nil {
+		return nil, err
 	}
 	defer func() { <-ticketImageDecodeSlot }()
 

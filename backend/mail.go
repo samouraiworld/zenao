@@ -6,6 +6,8 @@ import (
 	"encoding/base64"
 	"fmt"
 	"html/template"
+	"net"
+	"net/url"
 	"os"
 	"strings"
 	"time"
@@ -114,8 +116,26 @@ func web2URL(uri string) string {
 	return res
 }
 
-const defaultIPFSGatewayURL = "https://ipfs.zenao.io"
+// defaultIPFSGatewayURL is the gateway of the local kubo node started by
+// dev.docker-compose.yml. Production and staging set ZENAO_IPFS_GATEWAY_URL in
+// backend.env.
+const defaultIPFSGatewayURL = "http://127.0.0.1:8080"
 
 // ipfsGatewayURL is the public IPFS gateway used to render ipfs:// URIs in
 // mails and PDFs. The start command sets it from its configuration.
 var ipfsGatewayURL = defaultIPFSGatewayURL
+
+// isLoopbackURL reports whether rawURL points to the local machine
+// (localhost or a loopback address).
+func isLoopbackURL(rawURL string) bool {
+	u, err := url.Parse(rawURL)
+	if err != nil {
+		return false
+	}
+	host := u.Hostname()
+	if host == "localhost" {
+		return true
+	}
+	ip := net.ParseIP(host)
+	return ip != nil && ip.IsLoopback()
+}

@@ -218,6 +218,10 @@ func execStart(ctx context.Context) (retErr error) {
 	))
 
 	ipfsGatewayURL = strings.TrimSuffix(conf.ipfsGatewayURL, "/")
+	if mailClient != nil && isLoopbackURL(ipfsGatewayURL) {
+		logger.Warn("mails are enabled but the IPFS gateway URL is local: mail images will not load for recipients; set ZENAO_IPFS_GATEWAY_URL",
+			zap.String("ipfs-gateway-url", ipfsGatewayURL))
+	}
 
 	fileStore, err := newFileStore(conf.fileStore, conf.ipfsAPIURL, conf.pinataJWT, conf.pinataGroup)
 	if err != nil {

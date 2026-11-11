@@ -27,7 +27,15 @@ const (
 
 	// dailyUploadQuota is the number of bytes one user can upload per day.
 	// Uploaded files are kept forever: this bounds what one account can store.
-	dailyUploadQuota = 100 << 20
+	dailyUploadQuota = 20 << 20
+
+	// dailyTotalUploadQuota is the number of bytes all users together can
+	// upload per day. It bounds how fast many accounts can fill the IPFS
+	// node's StorageMax (ipfs/zenao-config.sh).
+	dailyTotalUploadQuota = 1 << 30
+
+	// totalQuotaKey is the single key of the all-users quota.
+	totalQuotaKey = "all-users"
 )
 
 // uploadFileHandler stores a file on IPFS for an authenticated, non-banned
@@ -39,7 +47,8 @@ type uploadFileHandler struct {
 	store       FileStore
 	maintenance bool
 	limiter     *RateLimiter
-	quota       *uploadQuota
+	quota       *uploadQuota // per user
+	totalQuota  *uploadQuota // all users together
 }
 
 var _ http.Handler = (*uploadFileHandler)(nil)
@@ -51,8 +60,9 @@ func newUploadFileHandler(logger *zap.Logger, auth zeni.Auth, store FileStore, m
 		store:       store,
 		maintenance: maintenance,
 		// Per-user limit: one upload every 2 seconds on average, bursts of 10.
-		limiter: NewRateLimiter(0.5, 10, 10*time.Minute),
-		quota:   newUploadQuota(dailyUploadQuota, 24*time.Hour),
+		limiter:    NewRateLimiter(0.5, 10, 10*time.Minute),
+		quota:      newUploadQuota(dailyUploadQuota, 24*time.Hour),
+		totalQuota: newUploadQuota(dailyTotalUploadQuota, 24*time.Hour),
 	}
 }
 
@@ -116,14 +126,23 @@ func (h *uploadFileHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if !h.quota.reserve(user.ID, int64(len(data))) {
+	size := int64(len(data))
+	if !h.quota.reserve(user.ID, size) {
 		writeUploadError(w, http.StatusTooManyRequests, "Daily Upload Quota Exceeded")
 		return
 	}
+	if !h.totalQuota.reserve(totalQuotaKey, size) {
+		// Nothing reached the store yet: give the user's bytes back.
+		h.quota.release(user.ID, size)
+		h.logger.Error("upload-file: daily upload capacity reached", zap.String("user-id", user.ID))
+		writeUploadError(w, http.StatusServiceUnavailable, "Daily Upload Capacity Reached")
+		return
+	}
 
+	// The quotas keep the bytes even when the add fails: kubo can keep the
+	// blocks, and sometimes the pin, of an add whose client went away.
 	cid, err := h.store.Add(r.Context(), header.Filename, data)
 	if err != nil {
-		h.quota.release(user.ID, int64(len(data)))
 		if errors.Is(err, ErrStorageFull) {
 			h.logger.Error("upload-file: storage full", zap.String("user-id", user.ID))
 			writeUploadError(w, http.StatusInsufficientStorage, "Storage Full")
@@ -193,7 +212,7 @@ func (q *uploadQuota) reserve(userID string, n int64) bool {
 	return true
 }
 
-// release gives back n bytes reserved for userID, after a failed upload.
+// release gives back n bytes reserved for userID, when nothing was stored.
 func (q *uploadQuota) release(userID string, n int64) {
 	q.mu.Lock()
 	defer q.mu.Unlock()
