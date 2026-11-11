@@ -4,9 +4,9 @@ import (
 	"bytes"
 	"context"
 	"embed"
+	"errors"
 	"flag"
 	"fmt"
-	"io"
 	"net/http"
 	"os"
 	"time"
@@ -126,7 +126,11 @@ func GeneratePDFTicket(event *zeni.Event, ticketSecret string, DisplayName strin
 	if event.ImageURI != "" {
 		imageURL := web2URL(event.ImageURI)
 		if err := embedImageURL(pdf, imageURL, imgX, imgY, imgWidth, imgHeight); err != nil {
-			logger.Error("failed to embed image", zap.Error(err))
+			if errors.Is(err, errImageURLBlocked) {
+				logger.Warn("event image refused by fetch policy", zap.String("event-id", event.ID), zap.Error(err))
+			} else {
+				logger.Error("failed to embed image", zap.String("event-id", event.ID), zap.Error(err))
+			}
 			drawImagePlaceholder(pdf, imgX, imgY, imgWidth, imgHeight)
 		}
 	} else {
@@ -262,22 +266,13 @@ func drawImagePlaceholder(pdf *fpdf.Fpdf, x, y, width, height float64) {
 
 func embedImageURL(pdf *fpdf.Fpdf, imageURI string, x, y, width, height float64) error {
 	optimizedURL := fmt.Sprintf("%s?img-width=1280&img-height=720&img-quality=75&img-fit=cover", imageURI)
-	resp, err := http.Get(optimizedURL)
+	data, err := ticketImageFetcher.fetch(context.Background(), optimizedURL)
 	if err != nil {
-		return fmt.Errorf("failed to download image: %w", err)
-	}
-	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("failed to download image: %d", resp.StatusCode)
-	}
-	defer resp.Body.Close()
-
-	bodyStart, err := io.ReadAll(io.LimitReader(resp.Body, 512))
-	if err != nil {
-		return fmt.Errorf("failed to read image data: %w", err)
+		return err
 	}
 
 	var fileExt string
-	contentType := http.DetectContentType(bodyStart)
+	contentType := http.DetectContentType(data)
 	switch contentType {
 	case "image/jpeg":
 		fileExt = ".jpg"
@@ -296,13 +291,8 @@ func embedImageURL(pdf *fpdf.Fpdf, imageURI string, x, y, width, height float64)
 	defer os.Remove(imgFile.Name())
 	defer imgFile.Close()
 
-	_, err = imgFile.Write(bodyStart)
-	if err != nil {
+	if _, err := imgFile.Write(data); err != nil {
 		return fmt.Errorf("failed to write image data: %w", err)
-	}
-	_, err = io.Copy(imgFile, resp.Body)
-	if err != nil {
-		return fmt.Errorf("failed to copy image data: %w", err)
 	}
 
 	pdf.ImageOptions(imgFile.Name(), x, y, width, height, false, fpdf.ImageOptions{
