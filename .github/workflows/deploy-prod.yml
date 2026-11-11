@@ -99,10 +99,13 @@ jobs:
               sed -i 's|^ZENAO_PAID_EVENTS_ENABLED=.*|ZENAO_PAID_EVENTS_ENABLED=true|' backend.env || \
               echo 'ZENAO_PAID_EVENTS_ENABLED=true' >> backend.env
 
-            # Public IPFS gateway for the links in mails and ticket PDFs. Added
-            # only when missing: moving back to Pinata sets another value here.
-            grep -q '^ZENAO_IPFS_GATEWAY_URL=' backend.env 2>/dev/null || \
+            # Public IPFS gateway for the links in mails and ticket PDFs. Set
+            # only when missing or empty (the backend ignores an empty value):
+            # moving back to Pinata sets another value here.
+            grep -q '^ZENAO_IPFS_GATEWAY_URL=[^[:space:]]' backend.env 2>/dev/null || {
+              sed -i '/^ZENAO_IPFS_GATEWAY_URL=/d' backend.env 2>/dev/null || true
               echo 'ZENAO_IPFS_GATEWAY_URL=https://ipfs.zenao.io' >> backend.env
+            }
 
             docker compose -f prod.backend.docker-compose.yml up -d --wait otel-collector jaeger
             git restore prod.backend.docker-compose.yml
