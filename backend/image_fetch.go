@@ -41,9 +41,11 @@ var ticketImageFetcher = newImageFetcher(mustNewImageFetchPolicy("https://" + ga
 type imageFetchPolicy struct {
 	// gatewayScheme and gatewayHost (lower-case host:port) identify the IPFS
 	// gateway. It is trusted for /ipfs/ paths only, whatever address it
-	// resolves to: it can run on a private network.
-	gatewayScheme string
-	gatewayHost   string
+	// resolves to: it can run on a private network. gatewayHostname is the
+	// lower-case host name alone.
+	gatewayScheme   string
+	gatewayHost     string
+	gatewayHostname string
 	// allowAnyPort lifts the 80/443 port limit on other hosts (tests only).
 	allowAnyPort bool
 	// allowAddr reports whether an address can be dialed for a host other
@@ -63,9 +65,10 @@ func newImageFetchPolicy(gatewayURL string) (imageFetchPolicy, error) {
 		return imageFetchPolicy{}, fmt.Errorf("gateway URL host must be non-empty ASCII: %q", gatewayURL)
 	}
 	return imageFetchPolicy{
-		gatewayScheme: u.Scheme,
-		gatewayHost:   canonicalHostPort(u),
-		allowAddr:     isPublicImageAddr,
+		gatewayScheme:   u.Scheme,
+		gatewayHost:     canonicalHostPort(u),
+		gatewayHostname: strings.ToLower(u.Hostname()),
+		allowAddr:       isPublicImageAddr,
 	}, nil
 }
 
@@ -99,6 +102,10 @@ func (p imageFetchPolicy) checkURL(u *url.URL) error {
 	if u.Hostname() == "" {
 		return fmt.Errorf("%w: no host", errImageURLBlocked)
 	}
+	// Credentials would reach the host in an Authorization header.
+	if u.User != nil {
+		return fmt.Errorf("%w: credentials in URL", errImageURLBlocked)
+	}
 	// net/http dials the IDNA form of a non-ASCII host, which could differ
 	// from the host compared here and match the gateway at dial time only.
 	if !isASCII(u.Hostname()) {
@@ -120,6 +127,11 @@ func (p imageFetchPolicy) checkURL(u *url.URL) error {
 			return fmt.Errorf("%w: gateway query %q", errImageURLBlocked, u.RawQuery)
 		}
 		return nil
+	}
+	// The gateway host name on another scheme or port would skip the rules
+	// above.
+	if strings.ToLower(u.Hostname()) == p.gatewayHostname {
+		return fmt.Errorf("%w: gateway host on %s", errImageURLBlocked, hostPort)
 	}
 
 	if !p.allowAnyPort {

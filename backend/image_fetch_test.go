@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/netip"
+	"net/url"
 	"strings"
 	"testing"
 	"time"
@@ -90,6 +91,14 @@ func TestImageFetchBlockedURLs(t *testing.T) {
 		"https://gateway.example/ipfs/bafy?img-width=%0d%0a",
 		"https://gateway.example/ipfs/bafy?img-width=1%26format%3Dcar",
 		"https://gateway.example/ipfs/bafy?img-width",
+		"https://gateway.example/ipfs/bafy?img-width=",
+		// gateway host on another scheme or port, which would skip its rules
+		"http://gateway.example/api/v0/id",
+		"https://gateway.example:80/api/v0/id",
+		"http://GATEWAY.example/api/v0/id",
+		// credentials, which would reach the host in an Authorization header
+		"https://user:secret@gateway.example/ipfs/bafy",
+		"https://user@example.com/a.png",
 		"http://gateway.example:443/ipfs/bafy",
 		// non-ASCII hosts, which net/http dials in their IDNA form
 		"https://ｇateway.example/api/v0/id",
@@ -142,12 +151,16 @@ func TestImageFetchRedirects(t *testing.T) {
 		t.Error("blocked redirect target was reached")
 	}))
 	defer blockedTarget.Close()
+	// The gateway test server also listens on 127.0.0.1. Name the blocked
+	// target "localhost" so that the address check refuses it, not the
+	// gateway host rule.
+	blockedTargetURL := strings.Replace(blockedTarget.URL, "127.0.0.1", "localhost", 1)
 
 	var gatewayURL string
 	gateway := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case "/ipfs/to-loopback":
-			http.Redirect(w, r, blockedTarget.URL+"/a.png", http.StatusFound)
+			http.Redirect(w, r, blockedTargetURL+"/a.png", http.StatusFound)
 		case "/ipfs/to-metadata":
 			http.Redirect(w, r, "http://169.254.169.254/latest/meta-data/", http.StatusFound)
 		case "/ipfs/to-file":
@@ -264,6 +277,14 @@ func TestImageFetchTransportBounds(t *testing.T) {
 		require.NotNil(t, f.client.CheckRedirect)
 		require.Equal(t, int64(imageFetchMaxBytes), f.maxBytes)
 	}
+}
+
+// The URL that ticket PDFs request for an uploaded image must pass the
+// policy of the fetcher they use.
+func TestTicketImageURLPassesPolicy(t *testing.T) {
+	u, err := url.Parse(ticketImageURL(web2URL("ipfs://bafkreifqabflxtsqvaggg2kw4lyju3pckq4osun4vdlltsn7lal7ak5hli")))
+	require.NoError(t, err)
+	require.NoError(t, ticketImageFetcher.policy.checkURL(u))
 }
 
 func mustImageFetchPolicy(t *testing.T, gatewayURL string) imageFetchPolicy {

@@ -264,9 +264,17 @@ func drawImagePlaceholder(pdf *fpdf.Fpdf, x, y, width, height float64) {
 	pdf.Cell(0, 10, "Event Image")
 }
 
+// ticketImageQuery asks the gateway for a resized image. The image fetch
+// policy accepts only these parameters on the gateway.
+const ticketImageQuery = "img-width=1280&img-height=720&img-quality=75&img-fit=cover"
+
+// ticketImageURL returns the URL that ticket PDFs request for an image.
+func ticketImageURL(imageURI string) string {
+	return imageURI + "?" + ticketImageQuery
+}
+
 func embedImageURL(pdf *fpdf.Fpdf, imageURI string, x, y, width, height float64) error {
-	optimizedURL := fmt.Sprintf("%s?img-width=1280&img-height=720&img-quality=75&img-fit=cover", imageURI)
-	data, err := ticketImageFetcher.fetch(context.Background(), optimizedURL)
+	data, err := ticketImageFetcher.fetch(context.Background(), ticketImageURL(imageURI))
 	if err != nil {
 		return err
 	}
