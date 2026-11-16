@@ -116,6 +116,9 @@ func (p imageFetchPolicy) checkURL(u *url.URL) error {
 		if u.Scheme != p.gatewayScheme || !isGatewayContentPath(u.EscapedPath()) {
 			return fmt.Errorf("%w: gateway path %q", errImageURLBlocked, u.EscapedPath())
 		}
+		if !isGatewayQuery(u.RawQuery) {
+			return fmt.Errorf("%w: gateway query %q", errImageURLBlocked, u.RawQuery)
+		}
 		return nil
 	}
 
@@ -136,9 +139,7 @@ func isGatewayContentPath(p string) bool {
 		return false
 	}
 	for i := 0; i < len(p); i++ {
-		c := p[i]
-		if !(c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z' || c >= '0' && c <= '9' ||
-			c == '-' || c == '.' || c == '_' || c == '~' || c == '/') {
+		if c := p[i]; !isUnreserved(c) && c != '/' {
 			return false
 		}
 	}
@@ -148,6 +149,54 @@ func isGatewayContentPath(p string) bool {
 		}
 	}
 	return true
+}
+
+// gatewayQueryKeys are the only query parameters sent to the gateway: the
+// image transform that embedImageURL asks for.
+var gatewayQueryKeys = map[string]bool{
+	"img-width":   true,
+	"img-height":  true,
+	"img-quality": true,
+	"img-fit":     true,
+}
+
+// isGatewayQuery reports whether a raw query sent to the gateway holds only
+// image transform parameters, each at most once, with alphanumeric values.
+// The query goes on the wire as is, so no other parameter, escape or byte
+// reaches the gateway or a proxy in front of it.
+func isGatewayQuery(q string) bool {
+	if q == "" {
+		return true
+	}
+	seen := make(map[string]bool, len(gatewayQueryKeys))
+	for _, pair := range strings.Split(q, "&") {
+		key, value, ok := strings.Cut(pair, "=")
+		if !ok || !gatewayQueryKeys[key] || seen[key] || !isAlphanumeric(value) {
+			return false
+		}
+		seen[key] = true
+	}
+	return true
+}
+
+// isAlphanumeric reports whether s is a non-empty run of ASCII letters and
+// digits.
+func isAlphanumeric(s string) bool {
+	if s == "" {
+		return false
+	}
+	for i := 0; i < len(s); i++ {
+		if c := s[i]; !(c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z' || c >= '0' && c <= '9') {
+			return false
+		}
+	}
+	return true
+}
+
+// isUnreserved reports whether c is an RFC 3986 unreserved character.
+func isUnreserved(c byte) bool {
+	return c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z' || c >= '0' && c <= '9' ||
+		c == '-' || c == '.' || c == '_' || c == '~'
 }
 
 func isASCII(s string) bool {
@@ -202,14 +251,13 @@ func isPublicImageAddr(addr netip.Addr) bool {
 
 // imageFetcher downloads images under an imageFetchPolicy.
 type imageFetcher struct {
-	policy      imageFetchPolicy
-	client      *http.Client
-	dialTimeout time.Duration
-	maxBytes    int64
+	policy   imageFetchPolicy
+	client   *http.Client
+	maxBytes int64
 }
 
 func newImageFetcher(policy imageFetchPolicy) *imageFetcher {
-	f := &imageFetcher{policy: policy, dialTimeout: imageFetchDialTimeout, maxBytes: imageFetchMaxBytes}
+	f := &imageFetcher{policy: policy, maxBytes: imageFetchMaxBytes}
 	transport := &http.Transport{
 		// No proxy: the address check must apply to the image host itself.
 		Proxy:                 nil,
@@ -233,17 +281,21 @@ func newImageFetcher(policy imageFetchPolicy) *imageFetcher {
 	return f
 }
 
-// dialContext dials the gateway as is and checks every other address right
-// before connecting, after name resolution, so that a host name cannot
-// resolve to a refused address at fetch time.
 func (f *imageFetcher) dialContext(ctx context.Context, network, address string) (net.Conn, error) {
-	dialer := &net.Dialer{Timeout: f.dialTimeout}
+	return f.dialer(address).DialContext(ctx, network, address)
+}
+
+// dialer returns the dialer for address. The gateway is dialed as is. Every
+// other address is checked right before connecting, after name resolution,
+// so that a host name cannot resolve to a refused address at fetch time.
+func (f *imageFetcher) dialer(address string) *net.Dialer {
+	d := &net.Dialer{Timeout: imageFetchDialTimeout}
 	if strings.ToLower(address) != f.policy.gatewayHost {
-		dialer.Control = func(_, dialed string, _ syscall.RawConn) error {
+		d.Control = func(_, dialed string, _ syscall.RawConn) error {
 			return f.policy.checkDialedAddr(dialed)
 		}
 	}
-	return dialer.DialContext(ctx, network, address)
+	return d
 }
 
 // checkDialedAddr applies the address part of the policy to the ip:port

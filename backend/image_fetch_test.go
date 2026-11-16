@@ -80,6 +80,16 @@ func TestImageFetchBlockedURLs(t *testing.T) {
 		"https://gateway.example/ipfs%2Fapi%2Fv0%2Fid",
 		"https://gateway.example/%69pfs/bafy",
 		"https://gateway.example/ipfs/bafy%2Fa.png",
+		// gateway query that could change how a proxy splits the request line
+		"https://gateway.example/ipfs/bafy?a b /api/v0/id",
+		"https://gateway.example/ipfs/bafy?a\x80b",
+		// gateway query other than the image transform parameters
+		"https://gateway.example/ipfs/bafy?format=car",
+		"https://gateway.example/ipfs/bafy?img-width=1280&filename=a.png",
+		"https://gateway.example/ipfs/bafy?img-width=1280&img-width=720",
+		"https://gateway.example/ipfs/bafy?img-width=%0d%0a",
+		"https://gateway.example/ipfs/bafy?img-width=1%26format%3Dcar",
+		"https://gateway.example/ipfs/bafy?img-width",
 		"http://gateway.example:443/ipfs/bafy",
 		// non-ASCII hosts, which net/http dials in their IDNA form
 		"https://ｇateway.example/api/v0/id",
@@ -97,6 +107,7 @@ func TestImageFetchBlockedURLs(t *testing.T) {
 func TestImageFetchTrustedGateway(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		assert.Equal(t, "/ipfs/bafy/a.png", r.URL.Path)
+		assert.Equal(t, "img-width=1280&img-height=720&img-quality=75&img-fit=cover", r.URL.RawQuery)
 		_, _ = w.Write([]byte("image-bytes"))
 	}))
 	defer srv.Close()
@@ -104,7 +115,7 @@ func TestImageFetchTrustedGateway(t *testing.T) {
 	// The gateway listens on a loopback address, which is blocked for any
 	// other host: the trusted gateway must still be reachable.
 	f := newImageFetcher(mustImageFetchPolicy(t, srv.URL))
-	data, err := f.fetch(context.Background(), srv.URL+"/ipfs/bafy/a.png?img-width=1280")
+	data, err := f.fetch(context.Background(), srv.URL+"/ipfs/bafy/a.png?img-width=1280&img-height=720&img-quality=75&img-fit=cover")
 	require.NoError(t, err)
 	require.Equal(t, "image-bytes", string(data))
 }
@@ -145,6 +156,10 @@ func TestImageFetchRedirects(t *testing.T) {
 			http.Redirect(w, r, gatewayURL+"/api/v0/id", http.StatusFound)
 		case "/ipfs/to-escaped-gateway-api":
 			http.Redirect(w, r, gatewayURL+"/ipfs%2Fapi%2Fv0%2Fid", http.StatusFound)
+		case "/ipfs/to-gateway-bad-query":
+			http.Redirect(w, r, gatewayURL+"/ipfs/image?a b /api/v0/id", http.StatusFound)
+		case "/ipfs/to-gateway-other-param":
+			http.Redirect(w, r, gatewayURL+"/ipfs/image?format=car", http.StatusFound)
 		case "/ipfs/loop":
 			http.Redirect(w, r, gatewayURL+"/ipfs/loop", http.StatusFound)
 		case "/ipfs/chain/1", "/ipfs/chain/2", "/ipfs/chain/3", "/ipfs/chain/4":
@@ -169,7 +184,7 @@ func TestImageFetchRedirects(t *testing.T) {
 	policy.allowAnyPort = true
 	f := newImageFetcher(policy)
 
-	for _, path := range []string{"/ipfs/to-loopback", "/ipfs/to-metadata", "/ipfs/to-file", "/ipfs/to-gateway-api", "/ipfs/to-escaped-gateway-api", "/ipfs/loop"} {
+	for _, path := range []string{"/ipfs/to-loopback", "/ipfs/to-metadata", "/ipfs/to-file", "/ipfs/to-gateway-api", "/ipfs/to-escaped-gateway-api", "/ipfs/to-gateway-bad-query", "/ipfs/to-gateway-other-param", "/ipfs/loop"} {
 		_, err := f.fetch(context.Background(), gateway.URL+path)
 		require.ErrorIs(t, err, errImageURLBlocked, path)
 	}
@@ -230,13 +245,19 @@ func TestImageFetchLimits(t *testing.T) {
 }
 
 // The client settings that enforce the policy and bound each fetch are read
-// from the transport, so that a change to them fails a test.
+// back, so that removing or unwiring one of them fails a test.
 func TestImageFetchTransportBounds(t *testing.T) {
 	for _, f := range []*imageFetcher{ticketImageFetcher, newImageFetcher(mustImageFetchPolicy(t, "https://gateway.example"))} {
 		tr, ok := f.client.Transport.(*http.Transport)
 		require.True(t, ok)
 		require.Nil(t, tr.Proxy, "the address check must apply to the image host, not a proxy")
-		require.Equal(t, imageFetchDialTimeout, f.dialTimeout)
+		require.NotNil(t, tr.DialContext)
+		untrusted := f.dialer("example.com:443")
+		require.Equal(t, imageFetchDialTimeout, untrusted.Timeout)
+		require.NotNil(t, untrusted.Control, "every host but the gateway is checked at dial time")
+		gateway := f.dialer(f.policy.gatewayHost)
+		require.Equal(t, imageFetchDialTimeout, gateway.Timeout)
+		require.Nil(t, gateway.Control)
 		require.Equal(t, imageFetchTLSTimeout, tr.TLSHandshakeTimeout)
 		require.Equal(t, imageFetchHeaderTimeout, tr.ResponseHeaderTimeout)
 		require.Equal(t, imageFetchTotalTimeout, f.client.Timeout)
