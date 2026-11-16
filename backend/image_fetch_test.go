@@ -76,6 +76,10 @@ func TestImageFetchBlockedURLs(t *testing.T) {
 		"https://gateway.example/ipfs/%252e%252e/api/v0/id",
 		"https://gateway.example/ipfs/..%5C..%5Capi/v0/id",
 		"https://gateway.example/ipfs/bafy;/a.png",
+		// escaped gateway path, which the gateway reads before decoding
+		"https://gateway.example/ipfs%2Fapi%2Fv0%2Fid",
+		"https://gateway.example/%69pfs/bafy",
+		"https://gateway.example/ipfs/bafy%2Fa.png",
 		"http://gateway.example:443/ipfs/bafy",
 		// non-ASCII hosts, which net/http dials in their IDNA form
 		"https://ｇateway.example/api/v0/id",
@@ -139,6 +143,8 @@ func TestImageFetchRedirects(t *testing.T) {
 			http.Redirect(w, r, "file:///etc/passwd", http.StatusFound)
 		case "/ipfs/to-gateway-api":
 			http.Redirect(w, r, gatewayURL+"/api/v0/id", http.StatusFound)
+		case "/ipfs/to-escaped-gateway-api":
+			http.Redirect(w, r, gatewayURL+"/ipfs%2Fapi%2Fv0%2Fid", http.StatusFound)
 		case "/ipfs/loop":
 			http.Redirect(w, r, gatewayURL+"/ipfs/loop", http.StatusFound)
 		case "/ipfs/chain/1", "/ipfs/chain/2", "/ipfs/chain/3", "/ipfs/chain/4":
@@ -163,7 +169,7 @@ func TestImageFetchRedirects(t *testing.T) {
 	policy.allowAnyPort = true
 	f := newImageFetcher(policy)
 
-	for _, path := range []string{"/ipfs/to-loopback", "/ipfs/to-metadata", "/ipfs/to-file", "/ipfs/to-gateway-api", "/ipfs/loop"} {
+	for _, path := range []string{"/ipfs/to-loopback", "/ipfs/to-metadata", "/ipfs/to-file", "/ipfs/to-gateway-api", "/ipfs/to-escaped-gateway-api", "/ipfs/loop"} {
 		_, err := f.fetch(context.Background(), gateway.URL+path)
 		require.ErrorIs(t, err, errImageURLBlocked, path)
 	}
@@ -220,6 +226,22 @@ func TestImageFetchLimits(t *testing.T) {
 		_, err := f.fetch(context.Background(), srv.URL+path)
 		require.Error(t, err, path)
 		require.False(t, errors.Is(err, errImageURLBlocked), path)
+	}
+}
+
+// The client settings that enforce the policy and bound each fetch are read
+// from the transport, so that a change to them fails a test.
+func TestImageFetchTransportBounds(t *testing.T) {
+	for _, f := range []*imageFetcher{ticketImageFetcher, newImageFetcher(mustImageFetchPolicy(t, "https://gateway.example"))} {
+		tr, ok := f.client.Transport.(*http.Transport)
+		require.True(t, ok)
+		require.Nil(t, tr.Proxy, "the address check must apply to the image host, not a proxy")
+		require.Equal(t, imageFetchDialTimeout, f.dialTimeout)
+		require.Equal(t, imageFetchTLSTimeout, tr.TLSHandshakeTimeout)
+		require.Equal(t, imageFetchHeaderTimeout, tr.ResponseHeaderTimeout)
+		require.Equal(t, imageFetchTotalTimeout, f.client.Timeout)
+		require.NotNil(t, f.client.CheckRedirect)
+		require.Equal(t, int64(imageFetchMaxBytes), f.maxBytes)
 	}
 }
 

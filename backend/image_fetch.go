@@ -111,8 +111,10 @@ func (p imageFetchPolicy) checkURL(u *url.URL) error {
 
 	hostPort := canonicalHostPort(u)
 	if hostPort == p.gatewayHost {
-		if u.Scheme != p.gatewayScheme || !isGatewayContentPath(u.Path) {
-			return fmt.Errorf("%w: gateway path %q", errImageURLBlocked, u.Path)
+		// The escaped path is the one sent on the wire, on the first request
+		// and on every redirect, so it is the one checked.
+		if u.Scheme != p.gatewayScheme || !isGatewayContentPath(u.EscapedPath()) {
+			return fmt.Errorf("%w: gateway path %q", errImageURLBlocked, u.EscapedPath())
 		}
 		return nil
 	}
@@ -125,7 +127,7 @@ func (p imageFetchPolicy) checkURL(u *url.URL) error {
 	return nil
 }
 
-// isGatewayContentPath reports whether a decoded URL path stays under
+// isGatewayContentPath reports whether an escaped URL path stays under
 // /ipfs/. Only unreserved characters and slashes are accepted, so the path
 // sent is the path checked, and no dot segment, escape or backslash can be
 // resolved elsewhere by the gateway or a proxy in front of it.
@@ -200,13 +202,14 @@ func isPublicImageAddr(addr netip.Addr) bool {
 
 // imageFetcher downloads images under an imageFetchPolicy.
 type imageFetcher struct {
-	policy   imageFetchPolicy
-	client   *http.Client
-	maxBytes int64
+	policy      imageFetchPolicy
+	client      *http.Client
+	dialTimeout time.Duration
+	maxBytes    int64
 }
 
 func newImageFetcher(policy imageFetchPolicy) *imageFetcher {
-	f := &imageFetcher{policy: policy, maxBytes: imageFetchMaxBytes}
+	f := &imageFetcher{policy: policy, dialTimeout: imageFetchDialTimeout, maxBytes: imageFetchMaxBytes}
 	transport := &http.Transport{
 		// No proxy: the address check must apply to the image host itself.
 		Proxy:                 nil,
@@ -234,7 +237,7 @@ func newImageFetcher(policy imageFetchPolicy) *imageFetcher {
 // before connecting, after name resolution, so that a host name cannot
 // resolve to a refused address at fetch time.
 func (f *imageFetcher) dialContext(ctx context.Context, network, address string) (net.Conn, error) {
-	dialer := &net.Dialer{Timeout: imageFetchDialTimeout}
+	dialer := &net.Dialer{Timeout: f.dialTimeout}
 	if strings.ToLower(address) != f.policy.gatewayHost {
 		dialer.Control = func(_, dialed string, _ syscall.RawConn) error {
 			return f.policy.checkDialedAddr(dialed)
